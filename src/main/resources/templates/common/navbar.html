@@ -1,0 +1,23 @@
+<nav class="navbar navbar-dark bg-dark px-4"
+     th:fragment="navbar"
+     xmlns:th="http://www.thymeleaf.org"
+     xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <a class="navbar-brand fw-bold" th:href="@{/dashboard}">
+        LemoCoffee Admin
+    </a>
+
+    <div class="d-flex align-items-center gap-3">
+        <th:block sec:authorize="isAuthenticated()">
+            <div class="d-flex align-items-center gap-2 text-white fw-semibold">
+                <i class="fa-solid fa-user me-2"></i>
+                <span th:text="${#authentication.name}">Username</span>
+            </div>
+        </th:block>
+
+        <th:block sec:authorize="isAnonymous()">
+            <a th:href="@{/auth/login}" class="btn btn-warning fw-semibold">
+                Login
+            </a>
+        </th:block>
+    </div>
+</nav>

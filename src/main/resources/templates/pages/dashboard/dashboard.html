@@ -1,0 +1,60 @@
+<div class="dashboard-immersive" th:fragment="content">
+    <video id="dashboardVideo" class="dashboard-video-only" autoplay muted loop playsinline preload="auto">
+        <source th:src="@{/img/dash-board-video.mp4}" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    <div class="dashboard-video-filter"></div>
+
+    <div class="dashboard-overlay">
+        <section class="dashboard-intro-card">
+            <span class="dashboard-badge">KeyCoffee</span>
+            <h1 class="dashboard-title">Coffee crafted with care, served with heart.</h1>
+            <p class="dashboard-description">
+                KeyCoffee brings together quality ingredients, smooth service, and a cozy atmosphere.
+                Manage drinks, orders, tables, and daily operations in one place.
+            </p>
+            <div class="dashboard-meta">
+                <span><i class="fa-solid fa-mug-hot"></i> Signature Drinks</span>
+                <span><i class="fa-solid fa-seedling"></i> Fresh Ingredients</span>
+                <span><i class="fa-solid fa-users"></i> Friendly Service</span>
+            </div>
+        </section>
+
+        <section class="dashboard-feature-grid">
+            <article class="feature-card">
+                <i class="fa-solid fa-cup-straw feature-icon"></i>
+                <h3>Quality Menu</h3>
+                <p>Consistent taste from classic coffee to seasonal specials.</p>
+            </article>
+
+            <article class="feature-card">
+                <i class="fa-solid fa-boxes-stacked feature-icon"></i>
+                <h3>Stock Control</h3>
+                <p>Track ingredients and keep your inventory always ready.</p>
+            </article>
+
+            <article class="feature-card">
+                <i class="fa-solid fa-chart-line feature-icon"></i>
+                <h3>Daily Insights</h3>
+                <p>Follow sales and operations to make faster decisions.</p>
+            </article>
+        </section>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", () => {
+        const video = document.getElementById("dashboardVideo");
+        if (!video) {
+            return;
+        }
+
+        const playPromise = video.play();
+        if (playPromise && typeof playPromise.catch === "function") {
+            playPromise.catch(() => {
+                video.controls = true;
+            });
+        }
+    });
+</script>

@@ -1,0 +1,90 @@
+<nav class="col-md-2 col-lg-2 d-md-block sidebar"
+     th:fragment="sidebar"
+     xmlns:th="http://www.thymeleaf.org"
+     xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+    <div class="position-sticky pt-4">
+        <div class="sidebar-menu">
+            <div class="sidebar-title">MAIN</div>
+
+            <div class="sidebar-item"
+                 th:classappend="${activePage == 'dashboard'} ? ' active'">
+                <a class="sidebar-btn" th:href="@{/dashboard}">
+                    <i class="fa-solid fa-gauge-high"></i>
+                    Dashboard
+                </a>
+            </div>
+
+            <th:block sec:authorize="isAuthenticated()">
+                <div class="sidebar-item order-item"
+                     th:classappend="${activePage == 'order-management'} ? ' active'">
+                    <a class="sidebar-btn" th:href="@{/orders}">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        Order Management
+                    </a>
+                </div>
+
+                <div class="sidebar-item"
+                     th:classappend="${activePage == 'user-management'} ? ' active'">
+                    <a class="sidebar-btn" th:href="@{/user-management}">
+                        <i class="fa-solid fa-users"></i>
+                        User Management
+                    </a>
+                </div>
+
+                <div class="sidebar-item"
+                     th:classappend="${activePage == 'customer-management'} ? ' active'">
+                    <a class="sidebar-btn" th:href="@{/customers}">
+                        <i class="fa-solid fa-user-tag"></i>
+                        Customer Management
+                    </a>
+                </div>
+
+                <div class="sidebar-item"
+                     th:classappend="${activePage == 'table-management'} ? ' active'">
+                    <a class="sidebar-btn" th:href="@{/tables}">
+                        <i class="fa-solid fa-table"></i>
+                        Table Management
+                    </a>
+                </div>
+
+                <div class="sidebar-item"
+                     th:classappend="${activePage == 'warehouse-management'} ? ' active'">
+                    <a class="sidebar-btn" th:href="@{/ingredients}">
+                        <i class="fa-solid fa-boxes-stacked"></i>
+                        Ingredient Management
+                    </a>
+                </div>
+
+                <div class="sidebar-item"
+                     th:classappend="${activePage == 'drink-management'} ? ' active'">
+                    <a class="sidebar-btn" th:href="@{/drink-management}">
+                        <i class="fa-solid fa-mug-hot"></i>
+                        Menu Management
+                    </a>
+                </div>
+
+                <div class="sidebar-item"
+                     th:classappend="${activePage == 'statistics'} ? ' active'">
+                    <a class="sidebar-btn" th:href="@{/statistics}">
+                        <i class="fa-solid fa-chart-column"></i>
+                        Statistics
+                    </a>
+                </div>
+            </th:block>
+        </div>
+
+        <div class="sidebar-bottom" sec:authorize="isAuthenticated()">
+            <form th:action="@{/auth/logout}" method="post" class="m-0">
+                <input type="hidden"
+                       th:if="${_csrf != null}"
+                       th:name="${_csrf.parameterName}"
+                       th:value="${_csrf.token}">
+                <button type="submit" class="sidebar-logout-btn border-0 bg-transparent w-100 text-start">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Logout
+                </button>
+            </form>
+        </div>
+    </div>
+</nav>

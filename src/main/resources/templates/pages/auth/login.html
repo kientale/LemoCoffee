@@ -1,0 +1,112 @@
+<div class="login-page" th:fragment="content">
+    <section class="auth-shell">
+        <div class="auth-login-pane">
+            <div class="auth-brand">
+                <span class="auth-brand-mark">
+                    <i class="fa-solid fa-mug-hot"></i>
+                </span>
+                <div>
+                    <strong>LemoCoffee</strong>
+                    <span>Management Workspace</span>
+                </div>
+            </div>
+
+            <div class="auth-login-content">
+                <div class="auth-user-icon">
+                    <i class="fa-regular fa-user"></i>
+                </div>
+
+                <div class="auth-copy">
+                    <h1>Sign in</h1>
+                    <p>Access dashboard, orders, menu, and daily cafe operations.</p>
+                </div>
+
+                <div class="alert alert-danger auth-alert"
+                     th:if="${param.error != null and session.LOGIN_ERROR != null}"
+                     th:text="${session.LOGIN_ERROR}">
+                </div>
+
+                <div class="alert alert-success auth-alert"
+                     th:if="${param.logout != null}">
+                    You have logged out successfully.
+                </div>
+
+                <form method="post"
+                      th:action="@{/auth/login}"
+                      id="loginForm"
+                      class="auth-form">
+
+                    <div class="auth-field auth-field-icon">
+                        <label class="visually-hidden" for="username">Username</label>
+                        <span class="auth-field-leading">
+                            <i class="fa-regular fa-user"></i>
+                        </span>
+                        <input type="text"
+                               name="username"
+                               id="username"
+                               class="form-control auth-input"
+                               placeholder="Username">
+                    </div>
+                    <small id="usernameError" class="text-danger d-none"></small>
+
+                    <div class="auth-field auth-field-icon auth-password-field">
+                        <label class="visually-hidden" for="password">Password</label>
+                        <span class="auth-field-leading">
+                            <i class="fa-solid fa-lock"></i>
+                        </span>
+                        <input type="password"
+                               name="password"
+                               id="password"
+                               class="form-control auth-input auth-input-password"
+                               placeholder="Password">
+                        <button type="button"
+                                class="btn auth-toggle-btn"
+                                id="togglePassword"
+                                data-toggle-password
+                                data-target="#password"
+                                aria-controls="password"
+                                aria-label="Toggle password visibility">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                    <small id="passwordError" class="text-danger d-none"></small>
+
+                    <button type="submit" class="btn auth-submit-btn">
+                        Login
+                    </button>
+                </form>
+            </div>
+
+            <div class="auth-login-footer">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+
+        <div class="auth-visual-pane">
+            <div class="auth-visual-topbar">
+                <span class="auth-visual-chip">KeyCoffee</span>
+                <span class="auth-visual-chip">Dashboard Access</span>
+            </div>
+
+            <div class="auth-visual-backdrop"></div>
+
+            <div class="auth-visual-content">
+                <div class="auth-visual-text">
+                    <span class="auth-visual-kicker">Cafe operations, simplified</span>
+                    <h2>Welcome.</h2>
+                    <p>
+                        A focused workspace for orders, inventory, menu management,
+                        and the daily rhythm of LemoCoffee.
+                    </p>
+                </div>
+
+                <div class="auth-visual-meta">
+                    <span><i class="fa-solid fa-seedling"></i> Fresh ingredients</span>
+                    <span><i class="fa-solid fa-chart-line"></i> Daily insights</span>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
