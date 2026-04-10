@@ -1,0 +1,45 @@
+<th:block th:with="
+    rows=${param.type == 'day' ? dailyRevenueStats
+         : (param.type == 'month' ? monthlyRevenueStats
+         : yearlyRevenueStats)}
+">
+    <table class="table table-bordered table-hover align-middle mb-0 table-striped">
+        <thead class="table-light sticky-top text-center">
+        <tr style="height: 56px;">
+            <th style="width: 70px;">#</th>
+            <th class="text-start">Period</th>
+            <th>Completed Orders</th>
+            <th>Revenue</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:if="${rows == null or #lists.isEmpty(rows)}">
+            <td colspan="4" class="text-center text-muted py-4">
+                No completed orders in this range.
+            </td>
+        </tr>
+
+        <tr class="text-center"
+            th:each="item, loop : ${rows}">
+            <td>
+                <span class="statistics-rank-chip"
+                      th:classappend="${loop.index == 0} ? ' rank-gold'
+                                      : (${loop.index == 1} ? ' rank-silver'
+                                      : (${loop.index == 2} ? ' rank-bronze'
+                                      : ' rank-default'))"
+                      th:text="${loop.index + 1}">
+                </span>
+            </td>
+
+            <td class="text-start" th:text="${item.periodLabel}"></td>
+
+            <td th:text="${#numbers.formatInteger(item.totalOrders, 1, 'COMMA')}"></td>
+
+            <td class="fw-semibold statistics-money"
+                th:text="${#numbers.formatDecimal(item.totalRevenue, 1, 'COMMA', 0, 'POINT')}">
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</th:block>

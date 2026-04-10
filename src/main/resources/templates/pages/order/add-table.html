@@ -1,0 +1,84 @@
+<!-- ===== Modal: Table Picker ===== -->
+<div class="modal fade"
+     id="tablePickerModal"
+     tabindex="-1"
+     aria-labelledby="tablePickerModalLabel"
+     aria-hidden="true"
+     th:fragment="modal">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <!-- Picker Modal Header -->
+            <div class="modal-header">
+                <h5 class="modal-title" id="tablePickerModalLabel">
+                    <i class="fa-solid fa-chair me-2"></i> Select Table
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+
+            <!-- Picker Modal Body -->
+            <div class="modal-body">
+                <div class="picker-card">
+                    <!-- Search Toolbar -->
+                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                        <form id="tablePickerSearchForm"
+                              th:action="@{/order-management}"
+                              method="get"
+                              class="d-flex align-items-center gap-2 flex-wrap"
+                              role="search">
+
+                            <input type="hidden" name="view" value="create" />
+                            <input type="hidden" name="openTableModal" value="true" />
+                            <input type="hidden" name="tablePage" id="tablePageInput" value="1" />
+
+                            <span class="text-muted fw-semibold me-1">Search</span>
+
+                            <input type="text"
+                                   name="tableKeyword"
+                                   class="form-control"
+                                   placeholder="Enter keyword..."
+                                   th:value="${param.tableKeyword}"
+                                   style="width: 260px;"
+                                   autocomplete="off">
+
+                            <button type="submit" class="btn btn-primary fw-semibold">
+                                <i class="fa-solid fa-magnifying-glass me-1"></i> Search
+                            </button>
+
+                            <button type="button"
+                                    class="btn btn-outline-secondary"
+                                    id="btnResetTableSearch">
+                                Reset
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- AJAX Error -->
+                    <div id="tablePickerError" class="alert alert-danger d-none"></div>
+
+                    <!-- AJAX Loading -->
+                    <div id="tablePickerLoading" class="text-center text-muted py-4 d-none">
+                        <div class="spinner-border" role="status" aria-label="Loading"></div>
+                        <div class="mt-2">Loading tables...</div>
+                    </div>
+
+                    <!-- AJAX Fragment Container -->
+                    <div id="tablePickerContainer"
+                         th:data-endpoint="@{/order-management}"></div>
+
+                    <!-- Picker Modal Footer -->
+                    <div class="mt-4 d-flex justify-content-end gap-2">
+                        <button type="button"
+                                class="btn btn-outline-secondary"
+                                id="btnCloseTableModal">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

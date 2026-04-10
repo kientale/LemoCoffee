@@ -1,0 +1,385 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          th:fragment="content"
+          th:with="
+                pageNo=${page == null ? 1 : page},
+                kw=${param.keyword != null ? param.keyword[0] : ''},
+                prevDisabled=${pageNo <= 1},
+                nextDisabled=${pageNo >= totalPages}
+          ">
+
+    <link rel="stylesheet" th:href="@{/css/page/table-management.css(v=4)}">
+
+    <!-- ===== Table Management Page ===== -->
+    <div class="admin-page">
+        <div class="admin-content">
+            <h3 class="mb-3 fw-bold">Table Management</h3>
+
+            <!-- ===== Global Status Message ===== -->
+            <div th:if="${message != null and !#strings.isEmpty(message)}"
+                 class="alert alert-dismissible fade show"
+                 role="alert"
+                 th:classappend="${status != null and #strings.endsWith(status.name(), 'SUCCESS')} ? 'alert-success' : 'alert-warning'">
+                <span th:text="${message}">Message</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <!-- ===== Toolbar: Search + Add ===== -->
+            <div class="user-toolbar-wrap mb-3">
+                <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+                    <!-- Search Form -->
+                    <form id="tableSearchForm"
+                          th:action="@{/table-management}"
+                          method="get"
+                          class="d-flex align-items-center gap-2 flex-wrap">
+                        <span class="toolbar-label fw-semibold">Search</span>
+
+                        <input type="text"
+                               name="keyword"
+                               class="form-control"
+                               placeholder="Enter keyword..."
+                               th:value="${kw}"
+                               style="width: 260px;">
+
+                        <button type="submit" class="btn btn-primary fw-semibold">
+                            <i class="fa-solid fa-magnifying-glass me-1"></i> Search
+                        </button>
+
+                        <a th:href="@{/table-management}" class="btn btn-outline-light fw-semibold">
+                            Reset
+                        </a>
+                    </form>
+
+                    <!-- Add Table Button -->
+                    <button class="btn btn-warning fw-semibold"
+                            data-bs-toggle="modal"
+                            data-bs-target="#addTableModal">
+                        <i class="fa-solid fa-plus me-1"></i> Add New Table
+                    </button>
+                </div>
+            </div>
+
+            <!-- ===== Table Card List ===== -->
+            <div class="table-table-wrapper" id="userTableWrapper">
+                <div class="table-table-container">
+                    <div class="table-table-body">
+                        <div class="table-gallery">
+                            <th:block th:if="${tables != null and !#lists.isEmpty(tables)}">
+                                <div class="table-card"
+                                     th:each="t, loop : ${tables}">
+                                    <!-- Card Left: Index -->
+                                    <div class="table-no"
+                                         th:text="${(pageNo - 1) * 10 + loop.index + 1}">
+                                        1
+                                    </div>
+
+                                    <!-- Card Main Content -->
+                                    <div class="table-main">
+                                        <!-- Top: Table Name + Status -->
+                                        <div class="table-top">
+                                            <div class="table-name" th:text="${t.tableName}">Table Name</div>
+
+                                            <th:block th:switch="${t.status != null ? t.status.toString() : ''}">
+                                                <span th:case="'AVAILABLE'"
+                                                      class="table-status badge bg-success"
+                                                      th:text="${t.status}">
+                                                    AVAILABLE
+                                                </span>
+
+                                                <span th:case="'OCCUPIED'"
+                                                      class="table-status badge bg-danger"
+                                                      th:text="${t.status}">
+                                                    OCCUPIED
+                                                </span>
+
+                                                <span th:case="'RESERVED'"
+                                                      class="table-status badge bg-warning text-dark"
+                                                      th:text="${t.status}">
+                                                    RESERVED
+                                                </span>
+
+                                                <span th:case="'DELETED'"
+                                                      class="table-status badge bg-secondary text-decoration-line-through"
+                                                      th:text="${t.status}">
+                                                    DELETED
+                                                </span>
+
+                                                <span th:case="*"
+                                                      class="table-status badge bg-secondary"
+                                                      th:text="${t.status}">
+                                                    UNKNOWN
+                                                </span>
+                                            </th:block>
+                                        </div>
+
+                                        <!-- Bottom: Capacity + Actions -->
+                                        <div class="table-bottom">
+                                            <div class="table-capacity">
+                                                <i class="fa-solid fa-users me-2"></i>
+                                                <span th:text="|${t.capacity} seats|">4 seats</span>
+                                            </div>
+
+                                            <div class="dropdown text-center">
+                                                <button class="btn btn-outline-secondary btn-sm dropdown-toggle actions-toggle"
+                                                        data-bs-toggle="dropdown"
+                                                        type="button">
+                                                    Actions
+                                                </button>
+
+                                                <ul class="dropdown-menu dropdown-menu-end shadow-sm actions-menu">
+                                                    <li>
+                                                         <a class="dropdown-item text-dark"
+                                                            th:href="@{/table-management(
+                                                                 view='edit',
+                                                                 id=${t.id},
+                                                                 page=${pageNo},
+                                                                 keyword=${kw}
+                                                            )}">
+                                                            <i class="fa-regular fa-pen-to-square me-2 text-warning"></i>
+                                                            Edit Capacity
+                                                        </a>
+                                                    </li>
+
+                                                    <li><hr class="dropdown-divider"></li>
+
+                                                    <!-- Delete Table -->
+                                                    <li th:if="${t.status != null and t.status.toString() != 'DELETED'}">
+                                                        <button type="button"
+                                                                class="dropdown-item text-dark"
+                                                                onclick="openConfirmModal(this)"
+                                                                th:attr="data-confirm-title='Delete Table',
+                                                                         data-confirm-message='Delete this table?',
+                                                                         data-confirm-action='delete',
+                                                                         data-confirm-table-id=${t.id},
+                                                                         data-confirm-btn-class='btn-danger'">
+                                                            <i class="fa-solid fa-trash me-2 text-danger"></i>
+                                                            Delete Table
+                                                        </button>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </th:block>
+
+                            <div th:if="${tables == null or #lists.isEmpty(tables)}"
+                                 class="w-100 text-center py-4 text-muted">
+                                No Table Found
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ===== Pagination Footer ===== -->
+                    <div class="table-table-footer">
+                        <div class="d-flex align-items-center gap-3 justify-content-end w-100">
+                            <span th:if="${prevDisabled}"
+                                  class="btn btn-outline-secondary btn-sm disabled">
+                                Prev
+                            </span>
+
+                            <a th:unless="${prevDisabled}"
+                               class="btn btn-outline-secondary btn-sm"
+                               th:href="@{/table-management(page=${pageNo - 1}, keyword=${kw})}">
+                                Prev
+                            </a>
+
+                            <span class="fw-semibold small" th:text="|${pageNo} / ${totalPages}|">
+                                1 / 1
+                            </span>
+
+                            <span th:if="${nextDisabled}"
+                                  class="btn btn-outline-secondary btn-sm disabled">
+                                Next
+                            </span>
+
+                            <a th:unless="${nextDisabled}"
+                               class="btn btn-outline-secondary btn-sm"
+                               th:href="@{/table-management(page=${pageNo + 1}, keyword=${kw})}">
+                                Next
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Modal: Add Table ===== -->
+    <div class="modal fade" id="addTableModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-md modal-dialog-centered">
+            <div class="modal-content">
+                <!-- Add Modal Header -->
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Table</h5>
+                </div>
+
+                <!-- Add Modal Body -->
+                <div class="modal-body">
+                    <form th:action="@{/table-management}" method="post">
+                        <input type="hidden" name="action" value="create">
+                        <input type="hidden" name="page" th:value="${pageNo}">
+                        <input type="hidden" name="keyword" th:value="${kw}">
+
+                        <!-- Create Form Errors -->
+                        <div th:if="${showCreateModal and errors != null and !#lists.isEmpty(errors)}"
+                             class="alert alert-danger">
+                            <ul class="mb-0">
+                                <li th:each="e : ${errors}" th:text="${e}">Error</li>
+                            </ul>
+                        </div>
+
+                        <!-- Capacity Input -->
+                        <div class="mb-3">
+                            <label class="form-label">Capacity (number of seats)</label>
+                            <input type="number"
+                                   name="capacity"
+                                   class="form-control"
+                                   min="1"
+                                   max="20"
+                                   placeholder="Enter capacity"
+                                   th:value="${formData != null ? formData.capacity : ''}">
+                        </div>
+
+                        <!-- Add Modal Footer Actions -->
+                        <div class="mt-4 text-end">
+                            <a th:href="@{/table-management(page=${pageNo}, keyword=${kw})}"
+                               class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">Create</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Modal: Edit Table ===== -->
+    <div class="modal fade" id="editTableModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-md modal-dialog-centered">
+            <div class="modal-content">
+                <!-- Edit Modal Header -->
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Table</h5>
+                </div>
+
+                <!-- Edit Modal Body -->
+                <div class="modal-body">
+                    <form th:action="@{/table-management}" method="post">
+                        <input type="hidden" name="action" value="edit">
+                        <input type="hidden" name="id" th:value="${formData != null ? formData.id : ''}">
+                        <input type="hidden" name="page" th:value="${pageNo}">
+                        <input type="hidden" name="keyword" th:value="${kw}">
+
+                        <!-- Edit Form Errors -->
+                        <div th:if="${showEditModal and errors != null and !#lists.isEmpty(errors)}"
+                             class="alert alert-danger">
+                            <ul class="mb-0">
+                                <li th:each="e : ${errors}" th:text="${e}">Error</li>
+                            </ul>
+                        </div>
+
+                        <!-- Read-only Table Name -->
+                        <div class="mb-3">
+                            <label class="form-label">Table</label>
+                            <input type="text"
+                                   class="form-control"
+                                   th:value="${formData != null ? formData.tableName : ''}"
+                                   disabled>
+                        </div>
+
+                        <!-- Editable Capacity -->
+                        <div class="mb-3">
+                            <label class="form-label">Capacity (number of seats)</label>
+                            <input type="number"
+                                   name="capacity"
+                                   class="form-control"
+                                   min="1"
+                                   max="20"
+                                   th:value="${formData != null ? formData.capacity : ''}"
+                                   required>
+                        </div>
+
+                        <!-- Edit Modal Footer Actions -->
+                        <div class="mt-4 text-end">
+                            <a th:href="@{/table-management(page=${pageNo}, keyword=${kw})}"
+                               class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Modal: Confirm Action ===== -->
+    <div class="modal fade" id="confirmActionModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <!-- Confirm Header -->
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmModalTitle">Confirm Action</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <!-- Confirm Body -->
+                <div class="modal-body">
+                    <p id="confirmModalMessage" class="mb-0">Are you sure?</p>
+                </div>
+
+                <!-- Confirm Footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+
+                    <form id="confirmActionForm" method="post" th:action="@{/table-management}">
+                        <input type="hidden" name="action" id="confirmActionInput">
+                        <input type="hidden" name="id" id="confirmTableIdInput">
+
+                        <input type="hidden" name="page" th:value="${pageNo}">
+                        <input type="hidden" name="keyword" th:value="${kw}">
+
+                        <button type="submit" class="btn btn-danger" id="confirmActionBtn">Confirm</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Page Scripts ===== -->
+    <script th:src="@{/js/table-management.js(v=2)}" defer></script>
+
+    <script th:inline="javascript">
+        document.addEventListener("DOMContentLoaded", () => {
+            const alertEl = document.querySelector(".alert.alert-dismissible");
+            if (alertEl) {
+                setTimeout(() => {
+                    if (window.bootstrap?.Alert) {
+                        bootstrap.Alert.getOrCreateInstance(alertEl).close();
+                    } else {
+                        alertEl.remove();
+                    }
+                }, 5000);
+            }
+
+            const showCreateModal = /*[[${showCreateModal != null and showCreateModal}]]*/ false;
+            const showEditModal = /*[[${showEditModal != null and showEditModal}]]*/ false;
+
+            if (showCreateModal) {
+                const el = document.getElementById("addTableModal");
+                if (el && window.bootstrap) {
+                    bootstrap.Modal.getOrCreateInstance(el).show();
+                }
+            }
+
+            if (showEditModal) {
+                const el = document.getElementById("editTableModal");
+                if (el && window.bootstrap) {
+                    bootstrap.Modal.getOrCreateInstance(el).show();
+                }
+            }
+        });
+    </script>
+
+</th:block>

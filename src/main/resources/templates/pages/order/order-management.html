@@ -1,0 +1,392 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          th:fragment="content"
+          th:with="
+            pageNo=${page != null ? page : 1},
+            kw=${param.keyword != null ? param.keyword[0] : ''},
+            prevDisabled=${pageNo <= 1},
+            nextDisabled=${pageNo >= totalPages},
+            prevPage=${pageNo <= 1 ? 1 : pageNo - 1},
+            nextPage=${pageNo >= totalPages ? totalPages : pageNo + 1}
+          ">
+
+<link rel="stylesheet" th:href="@{/css/page/order/order-management.css(v=15)}">
+<link rel="stylesheet" th:href="@{/css/page/order/table-picker.css(v=1)}">
+<link rel="stylesheet" th:href="@{/css/page/order/drink-picker.css(v=3)}">
+
+<!-- ===== Order Management Page ===== -->
+<div class="admin-page">
+    <div class="admin-content">
+        <h3 class="mb-3 fw-bold">Order Management</h3>
+
+        <!-- ===== Global Status Message ===== -->
+        <div th:if="${message != null and !#strings.isEmpty(message)}"
+             class="alert alert-dismissible fade show"
+             th:classappend="${status != null and #strings.endsWith(status.name(), 'SUCCESS')} ? ' alert-success' : ' alert-warning'"
+             role="alert">
+            <span th:text="${message}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <!-- ===== Toolbar: Search + Add ===== -->
+        <div class="order-toolbar-wrap mb-3">
+            <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+                <!-- Search Form -->
+                <form id="orderSearchForm"
+                      th:action="@{/order-management}"
+                      method="get"
+                      class="d-flex align-items-center gap-2 flex-wrap">
+
+                    <span class="toolbar-label fw-semibold me-1">Search</span>
+
+                    <input type="text"
+                           name="keyword"
+                           class="form-control"
+                           placeholder="Enter table name..."
+                           th:value="${param.keyword}"
+                           style="width: 260px;">
+
+                    <button type="submit" class="btn btn-primary fw-semibold">
+                        <i class="fa-solid fa-magnifying-glass me-1"></i> Search
+                    </button>
+
+                    <a th:href="@{/order-management}" class="btn btn-outline-light fw-semibold">
+                        Reset
+                    </a>
+                </form>
+
+                <!-- Add Order Button -->
+                <button class="btn btn-warning fw-semibold"
+                        data-bs-toggle="modal"
+                        data-bs-target="#addOrderModal">
+                    <i class="fa-solid fa-plus me-1"></i> Add New Order
+                </button>
+            </div>
+        </div>
+
+        <!-- ===== Order Table ===== -->
+        <div class="order-table-container">
+            <div class="order-table-body">
+                <table class="table table-bordered table-hover align-middle mb-0 table-striped">
+
+                    <!-- Table Header -->
+                    <thead class="table-light sticky-top text-center">
+                    <tr style="height: 56px;">
+                        <th style="width: 70px;">#</th>
+                        <th class="text-start">Table Name</th>
+                        <th>Total Amount</th>
+                        <th>Status</th>
+                        <th>Created At</th>
+                        <th class="text-start">Note</th>
+                        <th style="width: 140px;">Action</th>
+                    </tr>
+                    </thead>
+
+                    <!-- Table Body -->
+                    <tbody>
+                    <tr th:if="${orders == null or #lists.isEmpty(orders)}">
+                        <td colspan="7" class="text-center py-4 text-muted">
+                            No orders found.
+                        </td>
+                    </tr>
+
+                    <tr class="text-center"
+                        th:each="o, loop : ${orders}">
+                        <td th:text="${(pageNo - 1) * 10 + loop.index + 1}"></td>
+
+                        <td class="text-start fw-semibold"
+                            th:text="${o.tableName == null or #strings.isEmpty(o.tableName) ? '-' : o.tableName}">
+                        </td>
+
+                        <td>
+                            <span class="fw-semibold text-success"
+                                  th:text="${#numbers.formatDecimal(o.totalAmount, 1, 'COMMA', 0, 'POINT') + ' ₫'}">
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="badge"
+                                  th:classappend="${o.status == 'COMPLETED'} ? ' bg-success'
+                                                  : (${o.status == 'PENDING'} ? ' bg-warning text-dark'
+                                                  : (${o.status == 'CANCELLED'} ? ' bg-danger' : ' bg-secondary'))"
+                                  th:text="${o.status}">
+                            </span>
+                        </td>
+
+                        <td th:text="${o.createdAt == null ? '-' : o.createdAtFormatted}"></td>
+
+                        <td class="text-start"
+                            th:text="${o.note == null or #strings.isEmpty(o.note) ? '-' : o.note}">
+                        </td>
+
+                        <td th:with="isTerminalOrder=${o.status == 'COMPLETED' or o.status == 'CANCELLED'}">
+                            <div class="dropdown text-center">
+                                <button class="btn btn-outline-secondary btn-sm dropdown-toggle actions-toggle"
+                                        data-bs-toggle="dropdown">
+                                    Actions
+                                </button>
+
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm actions-menu">
+                                    <!-- View Detail -->
+                                    <li>
+                                        <a class="dropdown-item text-dark"
+                                           th:href="@{/order-management(view='detail', id=${o.id}, page=${pageNo}, keyword=${kw})}">
+                                            <i class="fa-regular fa-eye me-2 text-primary"></i> View Detail
+                                        </a>
+                                    </li>
+
+                                    <th:block th:if="${!isTerminalOrder}">
+                                        <!-- Edit Order -->
+                                        <li>
+                                            <a class="dropdown-item text-dark"
+                                               th:href="@{/order-management(view='edit', id=${o.id}, page=${pageNo}, keyword=${kw})}">
+                                                <i class="fa-regular fa-pen-to-square me-2 text-warning"></i> Edit Order
+                                            </a>
+                                        </li>
+
+                                        <li><hr class="dropdown-divider"></li>
+
+                                        <!-- Check Out -->
+                                        <li>
+                                            <button class="dropdown-item text-dark btn-open-checkout"
+                                                    type="button"
+                                                    th:attr="data-order-id=${o.id},
+                                                             data-table-name=${o.tableName == null or #strings.isEmpty(o.tableName) ? '-' : o.tableName},
+                                                             data-total-amount=${o.totalAmount},
+                                                             data-customer-id=${o.customerId != null ? o.customerId : ''},
+                                                             data-customer-name=${o.customerName == null or #strings.isEmpty(o.customerName) ? '-' : o.customerName},
+                                                             data-customer-phone=${o.customerPhone != null ? o.customerPhone : ''},
+                                                             data-customer-points=${o.customerPoints != null ? o.customerPoints : 0}">
+                                                <i class="fa-solid fa-circle-check me-2 text-success"></i> Check Out
+                                            </button>
+                                        </li>
+
+                                        <!-- Cancel Order -->
+                                        <li>
+                                            <button class="dropdown-item text-dark btn-open-confirm"
+                                                    type="button"
+                                                    data-confirm-title="Cancel Order"
+                                                    data-confirm-message="Are you sure you want to cancel this order?"
+                                                    data-confirm-action="cancel"
+                                                    data-confirm-btn-class="btn-danger"
+                                                    th:attr="data-confirm-order-id=${o.id}">
+                                                <i class="fa-solid fa-ban me-2 text-danger"></i> Cancelled
+                                            </button>
+                                        </li>
+                                    </th:block>
+                                </ul>
+                            </div>
+
+                            <div class="d-none checkout-items-source"
+                                 th:id="'checkout-items-' + ${o.id}">
+                                <th:block th:if="${o.items != null and !#lists.isEmpty(o.items)}">
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2"
+                                            th:each="it : ${o.items}"
+                                            th:attr="data-drink-id=${it.drinkId},
+                                                     data-drink-name=${it.drinkName},
+                                                     data-unit-price=${it.unitPrice}">
+                                            <span>
+                                                <strong th:text="${it.quantity}"></strong> x
+                                                <span th:text="${it.drinkName}"></span>
+                                            </span>
+                                            <span class="fw-semibold text-success"
+                                                  th:text="${#numbers.formatDecimal(it.subtotal, 1, 'COMMA', 0, 'POINT') + ' ₫'}">
+                                            </span>
+                                        </li>
+                                    </ul>
+                                </th:block>
+
+                                <div class="text-muted"
+                                     th:if="${o.items == null or #lists.isEmpty(o.items)}">
+                                    No drinks in this order.
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- ===== Pagination Footer ===== -->
+            <div class="order-table-footer">
+                <div class="d-flex align-items-center gap-3 justify-content-end w-100">
+                    <a class="btn btn-outline-secondary btn-sm"
+                       th:classappend="${prevDisabled} ? ' disabled' : ''"
+                       th:href="@{/order-management(page=${prevPage}, keyword=${kw})}">
+                        Prev
+                    </a>
+
+                    <span class="fw-semibold small"
+                          th:text="${pageNo + ' / ' + totalPages}"></span>
+
+                    <a class="btn btn-outline-secondary btn-sm"
+                       th:classappend="${nextDisabled} ? ' disabled' : ''"
+                       th:href="@{/order-management(page=${nextPage}, keyword=${kw})}">
+                        Next
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== Modals ===== -->
+<!-- Giả sử mỗi file modal đã được chuyển sang Thymeleaf fragment tên 'modal' -->
+<div th:replace="~{pages/order/add-order :: modal}"></div>
+<div th:replace="~{pages/order/add-table :: modal}"></div>
+<div th:replace="~{pages/order/add-customer :: modal}"></div>
+<div th:replace="~{pages/order/add-drink :: modal}"></div>
+<div th:replace="~{pages/order/edit-order :: modal}"></div>
+<div th:replace="~{pages/order/order-detail :: modal}"></div>
+<div th:replace="~{pages/order/check-out :: modal}"></div>
+
+<!-- ===== Modal: Confirm Action ===== -->
+<div class="modal fade" id="confirmActionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <!-- Confirm Header -->
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmModalTitle">Confirm Action</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <!-- Confirm Body -->
+            <div class="modal-body">
+                <p id="confirmModalMessage" class="mb-0">Are you sure?</p>
+            </div>
+
+            <!-- Confirm Footer -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+
+                <form id="confirmActionForm"
+                      method="post"
+                      th:action="@{/order-management}">
+                    <input type="hidden" name="action" id="confirmActionInput">
+                    <input type="hidden"
+                           th:if="${_csrf != null}"
+                           th:name="${_csrf.parameterName}"
+                           th:value="${_csrf.token}">
+                    <input type="hidden" name="id" id="confirmOrderIdInput">
+                    <input type="hidden" name="page" th:value="${pageNo}">
+                    <input type="hidden" name="keyword" th:value="${kw}">
+                    <button type="submit" class="btn btn-danger" id="confirmActionBtn">Confirm</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== Page Scripts ===== -->
+<script th:inline="javascript">
+    window.CTX = /*[[@{/}]]*/ "";
+    window.ORDER_ENDPOINT = /*[[@{/order-management}]]*/ "";
+    window.ORDER_MODAL_FLAGS = {
+        showCreateModal: /*[[${showCreateModal}]]*/ false,
+        showEditModal: /*[[${showEditModal}]]*/ false,
+        showDetailModal: /*[[${showDetailModal}]]*/ false
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const parseFileNameFromContentDisposition = (headerValue) => {
+            if (!headerValue) return "";
+
+            const utf8Match = headerValue.match(/filename\*=UTF-8''([^;]+)/i);
+            if (utf8Match && utf8Match[1]) {
+                try {
+                    return decodeURIComponent(utf8Match[1]).replace(/["']/g, "").trim();
+                } catch (_) {
+                    return utf8Match[1].replace(/["']/g, "").trim();
+                }
+            }
+
+            const asciiMatch = headerValue.match(/filename="?([^";]+)"?/i);
+            if (asciiMatch && asciiMatch[1]) {
+                return asciiMatch[1].trim();
+            }
+
+            return "";
+        };
+
+        const autoDownloadInvoice = async (orderId) => {
+            const invoiceUrl = window.CTX
+                + "order-management?action=download-invoice&id="
+                + encodeURIComponent(orderId)
+                + "&ts="
+                + Date.now();
+
+            try {
+                const response = await fetch(invoiceUrl, {
+                    method: "GET",
+                    credentials: "same-origin",
+                    cache: "no-store"
+                });
+
+                if (!response.ok) {
+                    throw new Error("Invoice download failed (" + response.status + ")");
+                }
+
+                const blob = await response.blob();
+                if (!blob || blob.size <= 0) {
+                    throw new Error("Invoice file is empty.");
+                }
+
+                const fileName = parseFileNameFromContentDisposition(response.headers.get("Content-Disposition"))
+                    || ("invoice-order-" + orderId + ".txt");
+
+                const objectUrl = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = objectUrl;
+                link.download = fileName;
+                link.style.display = "none";
+
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+
+                setTimeout(() => URL.revokeObjectURL(objectUrl), 2000);
+            } catch (error) {
+                console.error(error);
+                window.location.assign(invoiceUrl);
+            }
+        };
+
+        const alertEl = document.querySelector(".alert.alert-dismissible");
+        if (alertEl) {
+            setTimeout(() => {
+                if (window.bootstrap?.Alert) {
+                    bootstrap.Alert.getOrCreateInstance(alertEl).close();
+                } else {
+                    alertEl.remove();
+                }
+            }, 5000);
+        }
+
+        const invoiceOrderId = Number(/*[[${param.invoiceOrderId}]]*/ 0);
+        if (Number.isFinite(invoiceOrderId) && invoiceOrderId > 0) {
+            autoDownloadInvoice(invoiceOrderId);
+
+            const currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.delete("invoiceOrderId");
+            const query = currentUrl.searchParams.toString();
+            const normalizedUrl = query ? (currentUrl.pathname + "?" + query) : currentUrl.pathname;
+            window.history.replaceState({}, document.title, normalizedUrl);
+        }
+    });
+</script>
+
+<script th:src="@{/js/order/order-management.js(v=9)}" defer></script>
+<script th:src="@{/js/order/drink-selection-manager.js(v=2)}" defer></script>
+<script th:src="@{/js/order/table-selection-manager.js}" defer></script>
+<script th:src="@{/js/order/customer-selection-manager.js(v=2)}" defer></script>
+<script th:src="@{/js/order/add-order.js(v=3)}" defer></script>
+<script th:src="@{/js/order/edit-order.js(v=3)}" defer></script>
+<script th:src="@{/js/order/detail-order.js(v=1)}" defer></script>
+<script th:src="@{/js/order/add-drink.js(v=7)}" defer></script>
+<script th:src="@{/js/order/add-customer.js(v=12)}" defer></script>
+<script th:src="@{/js/order/add-table.js(v=3)}" defer></script>
+<script th:src="@{/js/order/drink-picker.js(v=4)}" defer></script>
+<script th:src="@{/js/order/customer-picker.js(v=2)}" defer></script>
+<script th:src="@{/js/order/table-picker.js(v=2)}" defer></script>
+
+</th:block>

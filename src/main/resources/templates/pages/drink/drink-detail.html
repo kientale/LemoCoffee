@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="content">
+
+    <!-- ===== Modal: Drink Detail ===== -->
+    <div class="modal fade" id="drinkDetailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-scrollable">
+            <div class="modal-content">
+
+                <!-- Detail Modal Header -->
+                <div class="modal-header">
+                    <h5 class="modal-title">Drink Detail</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <!-- Detail Modal Body -->
+                <div class="modal-body">
+
+                    <div th:if="${detailDrink == null}" class="alert alert-warning mb-0">
+                        Drink not found or no data to display.
+                    </div>
+
+                    <div th:if="${detailDrink != null}"
+                         th:with="detailStatus=${detailDrink.status == null ? '' : detailDrink.status.name()}"
+                         class="detail-card">
+
+                        <!-- Drink Information Table -->
+                        <table class="table table-bordered mb-0">
+                            <tr>
+                                <th style="width: 180px;">Drink Name</th>
+                                <td th:text="${detailDrink.name}">Drink Name</td>
+                            </tr>
+
+                            <tr>
+                                <th>Price</th>
+                                <td th:text="|${#numbers.formatDecimal(detailDrink.price, 0, 'COMMA', 0, 'POINT')} đ|">
+                                    0 đ
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Status</th>
+                                <td>
+                                    <span class="badge"
+                                          th:classappend="${detailStatus == 'AVAILABLE'}
+                                                          ? ' bg-success'
+                                                          : (${detailStatus == 'UNAVAILABLE'}
+                                                             ? ' bg-warning text-dark'
+                                                             : ' bg-secondary')"
+                                          th:text="${detailStatus}">
+                                        STATUS
+                                    </span>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Description</th>
+                                <td th:text="${detailDrink.description == null or #strings.isEmpty(detailDrink.description) ? 'No description' : detailDrink.description}">
+                                    No description
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Image</th>
+                                <td>
+                                    <img th:if="${detailDrink.image != null and !#strings.isEmpty(detailDrink.image)}"
+                                         th:src="@{__${#strings.startsWith(detailDrink.image, '/') ? detailDrink.image : '/' + detailDrink.image}__}"
+                                         th:alt="${detailDrink.name}"
+                                         style="width: 110px; height: 110px; object-fit: cover;"
+                                         class="rounded border">
+
+                                    <span th:if="${detailDrink.image == null or #strings.isEmpty(detailDrink.image)}"
+                                          class="text-muted">
+                                        No image
+                                    </span>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>Ingredients</th>
+                                <td>
+
+                                    <span th:if="${detailDrinkIngredients == null or #lists.isEmpty(detailDrinkIngredients)}"
+                                          class="text-muted">
+                                        No ingredients
+                                    </span>
+
+                                    <div th:if="${detailDrinkIngredients != null and !#lists.isEmpty(detailDrinkIngredients)}"
+                                         class="table-responsive">
+                                        <table class="table table-bordered table-sm align-middle mb-0">
+                                            <thead class="table-light text-center">
+                                            <tr>
+                                                <th style="width: 60px;">#</th>
+                                                <th class="text-start">Name</th>
+                                                <th style="width: 140px;">Quantity</th>
+                                                <th style="width: 120px;">Unit</th>
+                                            </tr>
+                                            </thead>
+
+                                            <tbody>
+                                            <tr th:each="di, loop : ${detailDrinkIngredients}" class="text-center">
+                                                <td th:text="${loop.index + 1}">1</td>
+                                                <td class="text-start" th:text="${di.ingredientName}">Ingredient</td>
+                                                <td th:text="${di.quantity}">1</td>
+                                                <td>
+                                                    <span class="badge bg-info text-dark" th:text="${di.unit}">Unit</span>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Detail Actions -->
+                        <div class="detail-actions">
+
+                            <!-- Status Action -->
+                            <div>
+                                <button th:if="${detailStatus == 'AVAILABLE'}"
+                                        type="button"
+                                        class="btn btn-warning px-3"
+                                        data-confirm-title="Mark as Unavailable"
+                                        data-confirm-message="Are you sure you want to mark this drink as UNAVAILABLE?"
+                                        data-confirm-action="unavailable"
+                                        data-confirm-btn-class="btn-warning"
+                                        th:data-drink-id="${detailDrink.id}"
+                                        th:data-form-action="@{/drink-management}">
+                                    <i class="fa-solid fa-eye-slash me-1"></i> Unavailable
+                                </button>
+
+                                <button th:if="${detailStatus == 'UNAVAILABLE'}"
+                                        type="button"
+                                        class="btn btn-success px-3"
+                                        data-confirm-title="Mark as Available"
+                                        data-confirm-message="Are you sure you want to mark this drink as AVAILABLE?"
+                                        data-confirm-action="available"
+                                        data-confirm-btn-class="btn-success"
+                                        th:data-drink-id="${detailDrink.id}"
+                                        th:data-form-action="@{/drink-management}">
+                                    <i class="fa-solid fa-eye me-1"></i> Available
+                                </button>
+                            </div>
+
+                            <!-- Main Actions -->
+                            <div class="actions-right">
+                                <a th:href="@{/drink-management(view='edit', id=${detailDrink.id}, page=${pageNo}, keyword=${kw})}"
+                                   class="btn btn-warning px-3">
+                                    <i class="fa-regular fa-pen-to-square me-1"></i> Edit Drink
+                                </a>
+
+                                <button type="button"
+                                        class="btn btn-danger px-3"
+                                        data-confirm-title="Delete Drink"
+                                        data-confirm-message="This drink will be permanently deleted. This action cannot be undone."
+                                        data-confirm-action="delete"
+                                        data-confirm-btn-class="btn-danger"
+                                        th:data-drink-id="${detailDrink.id}"
+                                        th:data-form-action="@{/drink-management}">
+                                    <i class="fa-solid fa-trash me-1"></i> Delete
+                                </button>
+
+                                <a th:href="@{/drink-management(page=${pageNo}, keyword=${kw})}"
+                                   class="btn btn-outline-secondary">
+                                    Cancel
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</th:block>
+</html>

@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="">
+<th:block
+        th:fragment="content"
+        th:with="
+            pageNo=${page == null ? 1 : page},
+            kw=${param.keyword != null ? param.keyword[0] : ''},
+            fd=${param.field != null ? param.field[0] : ''},
+            fdVal=${(param.field == null or #strings.isEmpty(param.field[0])) ? 'name' : param.field[0]}
+        ">
+
+    <link rel="stylesheet" th:href="@{/css/page/user-management.css(v=3)}">
+
+    <div class="admin-page">
+        <div class="admin-content">
+            <h3 class="mb-3 fw-bold">User Management</h3>
+
+            <!-- ===== Global Status Message ===== -->
+            <div th:if="${message != null and !#strings.isEmpty(message)}"
+                 class="alert alert-dismissible fade show"
+                 th:classappend="${status != null and #strings.endsWith(status.name(), 'SUCCESS')} ? ' alert-success' : ' alert-warning'"
+                 role="alert">
+                <span th:text="${message}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <!-- ===== Toolbar: Search + Add ===== -->
+            <div class="user-toolbar-wrap mb-3">
+                <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+
+                    <!-- Search Form -->
+                    <form id="userSearchForm"
+                          th:action="@{/user-management}"
+                          method="get"
+                          class="d-flex align-items-center gap-2 flex-wrap">
+                        <span class="toolbar-label fw-semibold">Search</span>
+
+                        <input type="text"
+                               name="keyword"
+                               class="form-control"
+                               placeholder="Enter keyword..."
+                               th:value="${kw}"
+                               style="width: 260px;">
+
+                        <span class="toolbar-label fw-semibold mx-1">By</span>
+
+                        <select name="field" class="form-select" style="width: 200px;">
+                            <option value="name" th:selected="${fdVal == 'name'}">Full Name</option>
+                            <option value="username" th:selected="${fdVal == 'username'}">Username</option>
+                        </select>
+
+                        <button type="submit" class="btn btn-primary fw-semibold">
+                            <i class="fa-solid fa-magnifying-glass me-1"></i> Search
+                        </button>
+
+                        <a th:href="@{/user-management}" class="btn btn-outline-light fw-semibold">
+                            Reset
+                        </a>
+                    </form>
+
+                    <!-- Add User Button -->
+                    <button class="btn btn-warning fw-semibold"
+                            data-bs-toggle="modal"
+                            data-bs-target="#addUserModal">
+                        <i class="fa-solid fa-plus me-1"></i> Add New User
+                    </button>
+                </div>
+            </div>
+
+            <!-- ===== User Table ===== -->
+            <div class="user-table-container">
+                <div class="user-table-body">
+                    <table class="table table-bordered table-hover align-middle mb-0 table-striped">
+
+                        <!-- Table Header -->
+                        <thead class="table-light sticky-top text-center">
+                        <tr style="height: 56px;">
+                            <th style="width: 70px;">#</th>
+                            <th class="text-start">Full Name</th>
+                            <th>Username</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th style="width: 150px;">Action</th>
+                        </tr>
+                        </thead>
+
+                        <!-- Table Body -->
+                        <tbody>
+                        <tr th:if="${users == null or #lists.isEmpty(users)}">
+                            <td colspan="6" class="text-center py-4 text-muted">
+                                No User Found
+                            </td>
+                        </tr>
+
+                        <tr th:each="u, loop : ${users}"
+                            th:with="
+                                roleText=${#strings.toString(u.role)},
+                                statusText=${#strings.toString(u.status)},
+                                isActive=${statusText == 'ACTIVE'}
+                            "
+                            class="text-center">
+
+                            <td th:text="${(pageNo - 1) * 12 + loop.index + 1}"></td>
+
+                            <td class="text-start fw-semibold">
+                                <span th:text="${u.fullName}"></span>
+                            </td>
+
+                            <td th:text="${u.username}"></td>
+
+                            <td>
+                                <span class="badge"
+                                      th:classappend="${roleText == 'ADMIN'} ? ' bg-primary' : ' bg-secondary'"
+                                      th:text="${roleText}">
+                                </span>
+                            </td>
+
+                            <td>
+                                <span class="badge"
+                                      th:classappend="${statusText == 'ACTIVE'} ? ' bg-success' : ' bg-danger text-white'"
+                                      th:text="${statusText}">
+                                </span>
+                            </td>
+
+                            <td>
+                                <div class="dropdown text-center">
+                                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle actions-toggle"
+                                            data-bs-toggle="dropdown">
+                                        Actions
+                                    </button>
+
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm actions-menu">
+                                        <li>
+                                            <a class="dropdown-item text-dark"
+                                               th:href="@{/user-management(view='detail', id=${u.accountId}, page=${pageNo}, keyword=${kw}, field=${fd})}">
+                                                <i class="fa-regular fa-eye me-2 text-primary"></i> View Detail
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a class="dropdown-item text-dark"
+                                               th:href="@{/user-management(view='edit', id=${u.accountId}, page=${pageNo}, keyword=${kw}, field=${fd})}">
+                                                <i class="fa-regular fa-pen-to-square me-2 text-warning"></i> Edit User
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <button class="dropdown-item text-dark"
+                                                    type="button"
+                                                    onclick="openConfirmModal(this)"
+                                                    th:attr="data-confirm-title='Reset Password',
+                                                             data-confirm-message='Are you sure you want to reset password for this user?',
+                                                             data-confirm-action='reset-password',
+                                                             data-confirm-user-id=${u.accountId},
+                                                             data-confirm-btn-class='btn-warning'">
+                                                <i class="fa-solid fa-key me-2 text-warning"></i> Reset Password
+                                            </button>
+                                        </li>
+
+                                        <li>
+                                            <button class="dropdown-item text-dark"
+                                                    type="button"
+                                                    onclick="openConfirmModal(this)"
+                                                    th:attr="data-confirm-title=${isActive ? 'Lock Account' : 'Activate Account'},
+                                                             data-confirm-message=${isActive ? 'Are you sure you want to lock this account?' : 'Are you sure you want to activate this account?'},
+                                                             data-confirm-action=${isActive ? 'lock' : 'unlock'},
+                                                             data-confirm-user-id=${u.accountId},
+                                                             data-confirm-btn-class=${isActive ? 'btn-danger' : 'btn-success'}">
+                                                <i class="fa-solid me-2"
+                                                   th:classappend="${isActive} ? ' fa-lock text-danger' : ' fa-unlock text-success'"></i>
+                                                <span th:text="${isActive ? 'Lock Account' : 'Activate Account'}"></span>
+                                            </button>
+                                        </li>
+
+                                        <li>
+                                            <hr class="dropdown-divider">
+                                        </li>
+
+                                        <li>
+                                            <button class="dropdown-item text-dark"
+                                                    type="button"
+                                                    onclick="openConfirmModal(this)"
+                                                    th:attr="data-confirm-title='Delete User',
+                                                             data-confirm-message='This user will be permanently deleted. This action cannot be undone.',
+                                                             data-confirm-action='delete',
+                                                             data-confirm-user-id=${u.accountId},
+                                                             data-confirm-btn-class='btn-danger'">
+                                                <i class="fa-solid fa-trash me-2 text-danger"></i> Delete User
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- ===== Pagination Footer ===== -->
+                <div class="user-table-footer"
+                      th:with="
+                         prevDisabled=${pageNo <= 1},
+                         nextDisabled=${pageNo >= totalPages}
+                      ">
+                    <div class="d-flex align-items-center gap-3 justify-content-end w-100">
+                        <span th:if="${prevDisabled}"
+                              class="btn btn-outline-secondary btn-sm disabled">
+                            Prev
+                        </span>
+
+                        <a th:unless="${prevDisabled}"
+                           class="btn btn-outline-secondary btn-sm"
+                           th:href="@{/user-management(page=${pageNo - 1}, keyword=${kw}, field=${fd})}">
+                            Prev
+                        </a>
+
+                        <span class="fw-semibold small">
+                            <span th:text="${pageNo}"></span> / <span th:text="${totalPages}"></span>
+                        </span>
+
+                        <span th:if="${nextDisabled}"
+                              class="btn btn-outline-secondary btn-sm disabled">
+                            Next
+                        </span>
+
+                        <a th:unless="${nextDisabled}"
+                           class="btn btn-outline-secondary btn-sm"
+                           th:href="@{/user-management(page=${pageNo + 1}, keyword=${kw}, field=${fd})}">
+                            Next
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Modal: Add User ===== -->
+    <div class="modal fade" id="addUserModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-scrollable">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New User</h5>
+                </div>
+
+                <div class="modal-body">
+                    <form th:action="@{/user-management}" method="post">
+                        <input type="hidden" name="action" value="create"/>
+                        <input type="hidden" name="page" th:value="${pageNo}">
+                        <input type="hidden" name="keyword" th:value="${kw}">
+                        <input type="hidden" name="field" th:value="${fd}">
+
+                        <!-- Create Form Errors -->
+                        <div th:if="${showCreateModal != null and showCreateModal and errors != null and !#lists.isEmpty(errors)}"
+                             class="alert alert-danger">
+                            <ul class="mb-0">
+                                <li th:each="e : ${errors}" th:text="${e}"></li>
+                            </ul>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Username</label>
+                                <input name="username"
+                                       class="form-control"
+                                       th:value="${formData != null ? formData.username : ''}"
+                                       placeholder="Enter username">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Full Name</label>
+                                <input name="fullName"
+                                       class="form-control"
+                                       th:value="${formData != null ? formData.fullName : ''}"
+                                       placeholder="Enter full name">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Password</label>
+                                <div class="input-group">
+                                    <input type="password" id="addPassword" name="password" class="form-control"
+                                           placeholder="Enter password">
+                                    <button class="btn btn-outline-secondary" type="button"
+                                            onclick="togglePassword('addPassword', this)">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Confirm Password</label>
+                                <div class="input-group">
+                                    <input type="password" id="addConfirmPassword" name="confirmPassword"
+                                           class="form-control" placeholder="Confirm password">
+                                    <button class="btn btn-outline-secondary" type="button"
+                                            onclick="togglePassword('addConfirmPassword', this)">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Email</label>
+                                <input name="email"
+                                       class="form-control"
+                                       th:value="${formData != null ? formData.email : ''}"
+                                       placeholder="Enter email address">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Phone</label>
+                                <input name="phone"
+                                       class="form-control"
+                                       th:value="${formData != null ? formData.phone : ''}"
+                                       placeholder="Enter phone number">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Role</label>
+                                <select name="role" class="form-select">
+                                    <option value="">-- Select role --</option>
+                                    <option value="ADMIN"
+                                            th:selected="${formData != null and #strings.toString(formData.role) == 'ADMIN'}">
+                                        ADMIN
+                                    </option>
+                                    <option value="STAFF"
+                                            th:selected="${formData != null and #strings.toString(formData.role) == 'STAFF'}">
+                                        STAFF
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 text-end">
+                            <a th:href="@{/user-management(page=${pageNo}, keyword=${kw}, field=${fd})}"
+                               class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">Create</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Modal: Edit User ===== -->
+    <div class="modal fade" id="editUserModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-scrollable">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <form th:action="@{/user-management}" method="post">
+                        <input type="hidden" name="action" value="edit"/>
+                        <input type="hidden" name="accountId" th:value="${formData != null ? formData.accountId : ''}"/>
+                        <input type="hidden" name="page" th:value="${pageNo}">
+                        <input type="hidden" name="keyword" th:value="${kw}">
+                        <input type="hidden" name="field" th:value="${fd}">
+
+                        <!-- Edit Form Errors -->
+                        <div th:if="${showEditModal != null and showEditModal and errors != null and !#lists.isEmpty(errors)}"
+                             class="alert alert-danger">
+                            <ul class="mb-0">
+                                <li th:each="e : ${errors}" th:text="${e}"></li>
+                            </ul>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Username</label>
+                                <input name="username"
+                                       class="form-control"
+                                       th:value="${formData != null ? formData.username : ''}"
+                                       placeholder="Enter username">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Full Name</label>
+                                <input name="fullName"
+                                       class="form-control"
+                                       th:value="${formData != null ? formData.fullName : ''}"
+                                       placeholder="Enter full name">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Email</label>
+                                <input name="email"
+                                       class="form-control"
+                                       th:value="${formData != null ? formData.email : ''}"
+                                       placeholder="Enter email address">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Phone</label>
+                                <input name="phone"
+                                       class="form-control"
+                                       th:value="${formData != null ? formData.phone : ''}"
+                                       placeholder="Enter phone number">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Role</label>
+                                <select name="role" class="form-select">
+                                    <option value="ADMIN"
+                                            th:selected="${formData != null and #strings.toString(formData.role) == 'ADMIN'}">
+                                        ADMIN
+                                    </option>
+                                    <option value="STAFF"
+                                            th:selected="${formData != null and #strings.toString(formData.role) == 'STAFF'}">
+                                        STAFF
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Status</label>
+                                <select name="status" class="form-select">
+                                    <option value="ACTIVE"
+                                            th:selected="${formData != null and #strings.toString(formData.status) == 'ACTIVE'}">
+                                        ACTIVE
+                                    </option>
+                                    <option value="LOCKED"
+                                            th:selected="${formData != null and #strings.toString(formData.status) == 'LOCKED'}">
+                                        LOCKED
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 d-flex justify-content-end gap-2">
+                            <a th:href="@{/user-management(page=${pageNo}, keyword=${kw}, field=${fd})}"
+                               class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Modal: User Detail ===== -->
+    <div class="modal fade" id="userDetailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-scrollable">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">User Detail</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div th:if="${user == null}" class="alert alert-warning mb-0">
+                        User not found or no data to display.
+                    </div>
+
+                    <div th:if="${user != null}"
+                         class="detail-card"
+                         th:with="
+                            userStatus=${#strings.toString(user.status)}
+                         ">
+
+                        <table class="table table-bordered mb-0">
+                            <tr>
+                                <th>Username</th>
+                                <td th:text="${user.username}"></td>
+                            </tr>
+                            <tr>
+                                <th>Full Name</th>
+                                <td th:text="${user.fullName}"></td>
+                            </tr>
+                            <tr>
+                                <th>Email</th>
+                                <td th:text="${user.email}"></td>
+                            </tr>
+                            <tr>
+                                <th>Phone</th>
+                                <td th:text="${user.phone}"></td>
+                            </tr>
+                            <tr>
+                                <th>Status</th>
+                                <td>
+                                    <span class="badge"
+                                          th:classappend="${userStatus == 'ACTIVE'} ? ' bg-success' : ' bg-danger'"
+                                          th:text="${userStatus}">
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Created At</th>
+                                <td th:text="${createdAtFormatted != null ? createdAtFormatted : user.createdAt}"></td>
+                            </tr>
+                        </table>
+
+                        <div class="detail-actions">
+                            <button type="button"
+                                    class="btn px-3"
+                                    onclick="openConfirmModal(this)"
+                                    th:classappend="${userStatus == 'ACTIVE'} ? ' btn-danger' : ' btn-success'"
+                                    th:attr="data-confirm-title=${userStatus == 'ACTIVE' ? 'Lock Account' : 'Activate Account'},
+                                             data-confirm-message=${userStatus == 'ACTIVE' ? 'Are you sure you want to lock this account?' : 'Are you sure you want to activate this account?'},
+                                             data-confirm-action=${userStatus == 'ACTIVE' ? 'lock' : 'unlock'},
+                                             data-confirm-user-id=${user.accountId},
+                                             data-confirm-btn-class=${userStatus == 'ACTIVE' ? 'btn-danger' : 'btn-success'}">
+                                <i class="fa-solid me-1"
+                                   th:classappend="${userStatus == 'ACTIVE'} ? ' fa-lock' : ' fa-unlock'"></i>
+                                <span th:text="${userStatus == 'ACTIVE' ? 'Lock User' : 'Activate User'}"></span>
+                            </button>
+
+                            <div class="actions-right">
+                                <a th:href="@{/user-management(view='edit', id=${user.accountId}, page=${pageNo}, keyword=${kw}, field=${fd})}"
+                                   class="btn btn-warning px-3">
+                                    <i class="fa-regular fa-pen-to-square me-1"></i> Edit
+                                </a>
+
+                                <button type="button"
+                                        class="btn btn-reset-password px-3"
+                                        onclick="openConfirmModal(this)"
+                                        th:attr="data-confirm-title='Reset Password',
+                                                 data-confirm-message='Are you sure you want to reset password for this user?',
+                                                 data-confirm-action='reset-password',
+                                                 data-confirm-user-id=${user.accountId},
+                                                 data-confirm-btn-class='btn-warning'">
+                                    <i class="fa-solid fa-key me-1"></i> Reset Password
+                                </button>
+
+                                <button type="button"
+                                        class="btn btn-danger px-3"
+                                        onclick="openConfirmModal(this)"
+                                        th:attr="data-confirm-title='Delete User',
+                                                 data-confirm-message='This user will be permanently deleted. This action cannot be undone.',
+                                                 data-confirm-action='delete',
+                                                 data-confirm-user-id=${user.accountId},
+                                                 data-confirm-btn-class='btn-danger'">
+                                    <i class="fa-solid fa-trash me-1"></i> Delete
+                                </button>
+
+                                <a th:href="@{/user-management(page=${pageNo}, keyword=${kw}, field=${fd})}"
+                                   class="btn btn-outline-secondary">
+                                    Close
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Modal: Confirm Action ===== -->
+    <div class="modal fade" id="confirmActionModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmModalTitle">Confirm Action</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <p id="confirmModalMessage" class="mb-0">Are you sure?</p>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+
+                    <form id="confirmActionForm" method="post" th:action="@{/user-management}">
+                        <input type="hidden" name="action" id="confirmActionInput">
+                        <input type="hidden" name="id" id="confirmUserIdInput">
+
+                        <input type="hidden" name="page" th:value="${pageNo}">
+                        <input type="hidden" name="keyword" th:value="${kw}">
+                        <input type="hidden" name="field" th:value="${fd}">
+
+                        <button type="submit" class="btn btn-danger" id="confirmActionBtn">Confirm</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="pageLoadingOverlay" class="page-loading-overlay d-none">
+        <div class="page-loading-box">
+            <div class="spinner-border text-light" role="status" aria-hidden="true"></div>
+            <div class="mt-3 fw-semibold">Processing, please wait...</div>
+        </div>
+    </div>
+
+    <!-- ===== Page Scripts ===== -->
+    <script th:src="@{/js/user-management.js(v=2)}" defer></script>
+
+    <script th:inline="javascript">
+        document.addEventListener("DOMContentLoaded", () => {
+            const alertEl = document.querySelector(".alert.alert-dismissible");
+            if (alertEl) {
+                setTimeout(() => {
+                    if (window.bootstrap?.Alert) {
+                        bootstrap.Alert.getOrCreateInstance(alertEl).close();
+                    } else {
+                        alertEl.remove();
+                    }
+                }, 5000);
+            }
+
+            const showCreateModal = /*[[${showCreateModal != null and showCreateModal}]]*/ false;
+            const showEditModal = /*[[${showEditModal != null and showEditModal}]]*/ false;
+            const showDetailModal = /*[[${showDetailModal != null and showDetailModal}]]*/ false;
+
+            if (showCreateModal) {
+                const el = document.getElementById("addUserModal");
+                if (el && window.bootstrap) {
+                    bootstrap.Modal.getOrCreateInstance(el).show();
+                }
+            }
+
+            if (showEditModal) {
+                const el = document.getElementById("editUserModal");
+                if (el && window.bootstrap) {
+                    bootstrap.Modal.getOrCreateInstance(el).show();
+                }
+            }
+
+            if (showDetailModal) {
+                const el = document.getElementById("userDetailModal");
+                if (el && window.bootstrap) {
+                    bootstrap.Modal.getOrCreateInstance(el).show();
+                }
+            }
+        });
+    </script>
+
+</th:block>
+</html>

@@ -1,0 +1,518 @@
+@charset "UTF-8";
+
+.dropdown-item.disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+html, body {
+    height: 100%;
+}
+
+.admin-page {
+    min-height: 70vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.input-group button {
+    opacity: 0.6;
+}
+
+.input-group button:hover {
+    opacity: 1;
+}
+
+/* ===== SIMPLE GREEN TOOLBAR BACKGROUND ===== */
+.user-toolbar-wrap {
+    position: relative;
+    overflow: hidden;
+    padding: 18px 20px;
+    background:
+            radial-gradient(circle at top right, rgba(255, 255, 255, 0.12), transparent 28%),
+            linear-gradient(135deg, #0a3710 0%, #054328 100%);
+    box-shadow: 0 10px 24px rgba(8, 48, 22, 0.14);
+}
+
+.user-toolbar-wrap::before {
+    content: "";
+    position: absolute;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    top: -40px;
+    right: -20px;
+}
+
+.user-toolbar-wrap > div {
+    position: relative;
+    z-index: 1;
+}
+
+.user-toolbar-wrap .toolbar-label {
+    color: #fff;
+}
+
+.user-toolbar-wrap .form-control,
+.user-toolbar-wrap .form-select {
+    border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.user-toolbar-wrap .btn-outline-light {
+    border-color: rgba(255, 255, 255, 0.7);
+    color: #fff;
+}
+
+.user-toolbar-wrap .btn-outline-light:hover {
+    background-color: #fff;
+    color: #054328;
+    border-color: #fff;
+}
+
+@media (max-width: 992px) {
+    .user-toolbar-wrap {
+        padding: 16px;
+    }
+}
+
+/* ================= ADD DRINK MODAL ================= */
+/* nền ảnh + bo góc */
+#addDrinkModal .modal-content {
+    position: relative;
+    background: url("../../../img/modal-bg-drink.png") center/cover no-repeat;
+    border: 0;
+    overflow: hidden;
+    border-radius: 14px;
+}
+
+/* đưa content lên trên overlay */
+#addDrinkModal .modal-header, #addDrinkModal .modal-body, #addDrinkModal .modal-footer
+{
+    position: relative;
+    z-index: 1;
+}
+
+/* header rõ ràng hơn */
+#addDrinkModal .modal-header {
+    background: rgba(0, 0, 0, 0.35);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+#addDrinkModal .modal-title {
+    color: #fff;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+/* nút X dễ thấy trên nền tối */
+#addDrinkModal .btn-close {
+    filter: invert(1);
+    opacity: 0.85;
+}
+
+#addDrinkModal .btn-close:hover {
+    opacity: 1;
+}
+
+/* ✅ phần FORM: tạo card trắng trong body để dễ đọc */
+#addDrinkModal .modal-body form {
+    background: rgba(255, 255, 255, 0.93);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+/* label + input nhìn rõ */
+#addDrinkModal .modal-body label {
+    color: #111827;
+    font-weight: 600;
+}
+
+#addDrinkModal .form-control, #addDrinkModal .form-select {
+    border-color: rgba(17, 24, 39, 0.18);
+}
+
+#addDrinkModal .form-control:focus, #addDrinkModal .form-select:focus {
+    border-color: rgba(59, 130, 246, 0.6);
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.2);
+}
+
+/* footer nền nhẹ */
+#addDrinkModal .modal-footer {
+    background: rgba(0, 0, 0, 0.25);
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* ================= EDIT DRINK MODAL ================= */
+#editDrinkModal .modal-content {
+    position: relative;
+    background: url("../../../img/modal-bg-drink.png") center/cover no-repeat;
+    border: 0;
+    overflow: hidden;
+    border-radius: 14px;
+}
+
+#editDrinkModal .modal-header, #editDrinkModal .modal-body,
+#editDrinkModal .modal-footer {
+    position: relative;
+    z-index: 1;
+}
+
+#editDrinkModal .modal-header {
+    background: rgba(0, 0, 0, 0.35);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+#editDrinkModal .modal-title {
+    color: #fff;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+#editDrinkModal .btn-close {
+    filter: invert(1);
+    opacity: 0.85;
+}
+
+#editDrinkModal .btn-close:hover {
+    opacity: 1;
+}
+
+/* ✅ FORM card trắng giống Add */
+#editDrinkModal .modal-body form {
+    background: rgba(255, 255, 255, 0.93);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+#editDrinkModal .modal-body label {
+    color: #111827;
+    font-weight: 600;
+}
+
+#editDrinkModal .form-control, #editDrinkModal .form-select {
+    border-color: rgba(17, 24, 39, 0.18);
+}
+
+#editDrinkModal .form-control:focus, #editDrinkModal .form-select:focus
+{
+    border-color: rgba(59, 130, 246, 0.6);
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.2);
+}
+
+#editDrinkModal .modal-footer {
+    background: rgba(0, 0, 0, 0.25);
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* ================= DRINK DETAIL MODAL ================= */
+#drinkDetailModal .modal-content {
+    position: relative;
+    background: url("../../../img/modal-bg-drink.png") center/cover no-repeat;
+    border: 0;
+    overflow: hidden;
+    border-radius: 14px;
+}
+
+#drinkDetailModal .modal-header,
+#drinkDetailModal .modal-body,
+#drinkDetailModal .modal-footer {
+    position: relative;
+    z-index: 1;
+}
+
+#drinkDetailModal .modal-header {
+    background: rgba(0, 0, 0, 0.35);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+#drinkDetailModal .modal-title {
+    color: #fff;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+#drinkDetailModal .btn-close {
+    filter: invert(1);
+    opacity: 0.85;
+}
+
+#drinkDetailModal .btn-close:hover {
+    opacity: 1;
+}
+
+/* card trắng bên trong body giống add/edit */
+#drinkDetailModal .modal-body > .row,
+#drinkDetailModal .modal-body > .alert,
+#drinkDetailModal .modal-body > div:not(.modal-footer) {
+    background: rgba(255, 255, 255, 0.93);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+/* label rõ hơn */
+#drinkDetailModal .modal-body label,
+#drinkDetailModal .modal-body h6 {
+    color: #111827;
+    font-weight: 600;
+}
+
+/* ô hiển thị thông tin */
+#drinkDetailModal .form-control {
+    border-color: rgba(17, 24, 39, 0.18);
+    background-color: rgba(255, 255, 255, 0.92) !important;
+}
+
+#drinkDetailModal .modal-footer {
+    background: rgba(0, 0, 0, 0.25);
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.detail-card {
+    background: rgba(255, 255, 255, 0.93);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+.detail-actions {
+    margin-top: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.actions-right {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+/* ===== Realtime Validation ===== */
+.invalid-feedback {
+    display: block;
+    font-size: 0.875rem;
+}
+
+.is-valid {
+    border-color: #198754 !important;
+}
+
+.is-invalid {
+    border-color: #dc3545 !important;
+}
+
+.drink-table-container {
+    height: 690px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    background: #fff;
+}
+
+.drink-table-body {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.drink-table-footer {
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    border-top: 1px solid #dee2e6;
+    background: #f8f9fa;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.drink-table-footer .small {
+    font-size: 15.5px; /* hoặc 16px nếu muốn đều hẳn */
+    font-weight: 500;
+    color: #495057;
+}
+
+.drink-table-footer .btn {
+    font-size: 15px; /* đồng bộ chữ */
+    padding: 6px 14px; /* nút đỡ nhỏ */
+}
+
+.drink-table-footer .btn-sm {
+    font-size: 15px; /* override btn-sm */
+    padding: 6px 14px;
+}
+
+.drink-table-footer span.fw-semibold {
+    font-size: 15.5px;
+}
+
+/* Giữ chiều cao header */
+.drink-table-body thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #f8f9fa;
+}
+
+tr.self-row {
+    background: #fff3cd !important; /* vàng nhạt */
+    border-left: 4px solid #ffc107;
+}
+
+tr.self-row td:first-child {
+    font-weight: 700;
+}
+
+/* ===== ACTION DROPDOWN THEME ===== */
+.actions-toggle {
+    border-color: #cfd8dc;
+}
+
+.actions-toggle:hover {
+    border-color: #9fb6a3;
+}
+
+/* nền nhạt hơn #0a3710 */
+.actions-menu {
+    background: #124a18; /* nhạt hơn một chút so với #0a3710 */
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    padding: 8px;
+    min-width: 210px;
+}
+
+/* item */
+.actions-menu .dropdown-item {
+    color: rgba(255, 255, 255, 0.92) !important;
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+}
+
+/* icon trong item */
+.actions-menu .dropdown-item i {
+    width: 18px;
+    text-align: center;
+}
+
+/* hover */
+.actions-menu .dropdown-item:hover, .actions-menu .dropdown-item:focus {
+    background: rgba(255, 255, 255, 0.10);
+    color: #fff !important;
+}
+
+/* divider nhạt, dễ nhìn */
+.actions-menu .dropdown-divider {
+    margin: 8px 4px;
+    border-top: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+/* button trong dropdown (Reset/Lock/Delete) */
+.actions-menu button.dropdown-item {
+    width: 100%;
+    text-align: left;
+}
+
+/* Badge "You" nhìn cân hơn */
+.badge.you-badge {
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-weight: 700;
+}
+
+/* ================= SELECTED INGREDIENT TABLE (ADD DRINK MODAL) ================= */
+.selected-ingredient-table-container {
+    height: 250px; /* ✅ chỉnh theo ý: 280 / 320 / 360 */
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    background: #fff;
+}
+
+.selected-ingredient-table-body {
+    flex: 1;
+    overflow-y: auto; /* ✅ scroll trong body */
+}
+
+.selected-ingredient-table-body thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #f8f9fa; /* giữ nền header */
+}
+
+/* (Optional) giữ footer pagination luôn nằm dưới, không nhảy theo scroll */
+.selected-ingredient-pagination {
+    margin-top: 10px;
+}
+
+/* ================= ADD DRINK INGREDIENT MODAL ================= */
+/* nền ảnh + bo góc */
+#addDrinkIngredientModal .modal-content {
+    position: relative;
+    background: url("../../../img/modal-bg-drink.png") center/cover no-repeat;
+    border: 0;
+    overflow: hidden;
+    border-radius: 14px;
+}
+
+/* đưa content lên trên overlay */
+#addDrinkIngredientModal .modal-header, #addDrinkIngredientModal .modal-body,
+#addDrinkIngredientModal .modal-footer {
+    position: relative;
+    z-index: 1;
+}
+
+/* header rõ ràng hơn */
+#addDrinkIngredientModal .modal-header {
+    background: rgba(0, 0, 0, 0.35);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+#addDrinkIngredientModal .modal-title {
+    color: #fff;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+/* nút X dễ thấy trên nền tối */
+#addDrinkIngredientModal .btn-close {
+    filter: invert(1);
+    opacity: 0.85;
+}
+
+#addDrinkIngredientModal .btn-close:hover {
+    opacity: 1;
+}
+
+/* Card trắng chứa nội dung picker */
+#addDrinkIngredientModal .picker-card {
+    background: rgba(255, 255, 255, 0.93);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+/* footer nền nhẹ */
+#addDrinkIngredientModal .modal-footer {
+    background: rgba(0, 0, 0, 0.25);
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+}

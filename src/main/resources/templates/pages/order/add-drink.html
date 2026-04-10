@@ -1,0 +1,84 @@
+<!-- ===== Modal: Drink Picker ===== -->
+<div class="modal fade"
+     id="drinkPickerModal"
+     tabindex="-1"
+     aria-labelledby="drinkPickerModalLabel"
+     aria-hidden="true"
+     th:fragment="modal">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-scrollable">
+        <div class="modal-content">
+            <!-- Picker Modal Header -->
+            <div class="modal-header">
+                <h5 class="modal-title" id="drinkPickerModalLabel">
+                    <i class="fa-solid fa-mug-hot me-2"></i> Select Drinks
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+
+            <!-- Picker Modal Body -->
+            <div class="modal-body">
+                <div class="picker-card">
+                    <!-- Search Toolbar -->
+                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                        <form id="drinkPickerSearchForm"
+                              th:action="@{/order-management}"
+                              method="get"
+                              class="d-flex align-items-center gap-2 flex-wrap"
+                              role="search">
+
+                            <input type="hidden" name="view" value="create" />
+                            <input type="hidden" name="openDrinkModal" value="true" />
+                            <input type="hidden" name="drinkPage" id="drinkPageInput" value="1" />
+
+                            <span class="text-muted fw-semibold me-1">Search</span>
+
+                            <input type="text"
+                                   name="drinkKeyword"
+                                   class="form-control"
+                                   placeholder="Enter keyword..."
+                                   th:value="${param.drinkKeyword}"
+                                   style="width: 260px;"
+                                   autocomplete="off">
+
+                            <button type="submit" class="btn btn-primary fw-semibold">
+                                <i class="fa-solid fa-magnifying-glass me-1"></i> Search
+                            </button>
+
+                            <button type="button"
+                                    class="btn btn-outline-secondary"
+                                    id="btnResetDrinkSearch">
+                                Reset
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- AJAX Error -->
+                    <div id="drinkPickerError" class="alert alert-danger d-none"></div>
+
+                    <!-- AJAX Loading -->
+                    <div id="drinkPickerLoading" class="text-center text-muted py-4 d-none">
+                        <div class="spinner-border" role="status" aria-label="Loading"></div>
+                        <div class="mt-2">Loading drinks...</div>
+                    </div>
+
+                    <!-- AJAX Fragment Container -->
+                    <div id="drinkPickerContainer"
+                         th:data-endpoint="@{/order-management}"></div>
+
+                    <!-- Picker Modal Footer -->
+                    <div class="mt-4 d-flex justify-content-end gap-2">
+                        <button type="button"
+                                class="btn btn-outline-secondary"
+                                id="btnCloseDrinkModal">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

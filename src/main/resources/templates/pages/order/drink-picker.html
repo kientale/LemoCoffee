@@ -1,0 +1,78 @@
+<!-- ===== Drink Picker Fragment ===== -->
+<div class="drink-table-container"
+     id="drinkPickerFragment"
+     th:fragment="drinkPickerFragment"
+     th:with="
+        drinkPageNo=${drinkPage == null ? 1 : drinkPage},
+        safeTotalPages=${drinkTotalPages == null or drinkTotalPages < 1 ? 1 : drinkTotalPages}
+     ">
+    <div class="drink-table-body">
+        <div th:if="${drinks == null or #lists.isEmpty(drinks)}"
+             class="d-flex flex-column align-items-center justify-content-center text-muted"
+             style="height: 400px;">
+            <i class="fa-solid fa-mug-saucer fs-1 mb-3"></i>
+            <div>No drinks found</div>
+        </div>
+
+        <div th:if="${drinks != null and !#lists.isEmpty(drinks)}"
+             class="drink-card-grid">
+            <article th:each="d : ${drinks}"
+                     th:with="picked=${selectedDrinkIds != null and selectedDrinkIds.contains(d.id)}"
+                     class="drink-card"
+                     th:classappend="${picked} ? ' drink-card--selected' : ''">
+
+                <div class="drink-card-media">
+                    <img th:if="${d.image != null and !#strings.isEmpty(d.image)}"
+                         th:src="@{/{img}(img=${d.image})}"
+                         th:alt="${d.name}"
+                         loading="lazy" />
+
+                    <div th:if="${d.image == null or #strings.isEmpty(d.image)}"
+                         class="drink-card-placeholder">
+                        <i class="fa-solid fa-mug-hot"></i>
+                    </div>
+                </div>
+
+                <div class="drink-card-info">
+                    <div class="drink-card-name" th:text="${d.name}"></div>
+
+                    <div class="drink-card-price"
+                         th:text="${#numbers.formatDecimal(d.price, 1, 'COMMA', 0, 'POINT') + ' ₫'}">
+                    </div>
+
+                    <button type="button"
+                            class="btn btn-sm btn-pick-drink"
+                            th:classappend="${picked} ? ' btn-outline-secondary' : ' btn-success'"
+                            th:attr="data-id=${d.id},
+                                     data-name=${d.name},
+                                     data-price=${d.price}"
+                            th:disabled="${picked}"
+                            th:text="${picked} ? 'Added' : 'Add to Order'">
+                    </button>
+                </div>
+            </article>
+        </div>
+    </div>
+
+    <!-- ===== Picker Pagination ===== -->
+    <div class="drink-table-footer">
+        <div class="d-flex align-items-center gap-3 justify-content-end w-100">
+            <button type="button"
+                    class="btn btn-outline-secondary btn-sm btn-drink-page"
+                    th:attr="data-drink-page=${drinkPageNo - 1}"
+                    th:disabled="${drinkPageNo <= 1}">
+                Prev
+            </button>
+
+            <span class="fw-semibold small"
+                  th:text="${drinkPageNo + ' / ' + safeTotalPages}"></span>
+
+            <button type="button"
+                    class="btn btn-outline-secondary btn-sm btn-drink-page"
+                    th:attr="data-drink-page=${drinkPageNo + 1}"
+                    th:disabled="${drinkPageNo >= safeTotalPages}">
+                Next
+            </button>
+        </div>
+    </div>
+</div>

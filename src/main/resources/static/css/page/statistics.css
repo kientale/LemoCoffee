@@ -1,0 +1,445 @@
+@charset "UTF-8";
+
+:root {
+    --stats-green-900: #0b3523;
+    --stats-green-800: #0f4f34;
+    --stats-green-700: #187a4f;
+    --stats-green-600: #24a866;
+    --stats-green-soft: #eaf8f1;
+    --stats-blue-700: #1d4ed8;
+    --stats-blue-soft: #e9f0ff;
+    --stats-red-700: #b91c1c;
+    --stats-red-soft: #ffeef0;
+    --stats-gold-700: #8b5e24;
+    --stats-gold-500: #dca349;
+    --stats-gold-soft: #fff7e9;
+    --stats-border: #dce9e1;
+    --stats-text: #183326;
+    --stats-muted: #5c6f65;
+    --stats-shadow: 0 14px 30px rgba(9, 24, 18, 0.12);
+}
+
+html,
+body {
+    height: 100%;
+}
+
+.admin-page {
+    min-height: 72vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-content > h3 {
+    color: #1f3d2f;
+    letter-spacing: 0.01em;
+}
+
+.statistics-toolbar-wrap {
+    position: relative;
+    overflow: hidden;
+    padding: 18px 20px;
+    border-radius: 16px;
+    border: 1px solid rgba(167, 255, 213, 0.24);
+    background:
+            radial-gradient(circle at 88% -8%, rgba(246, 188, 90, 0.2), transparent 36%),
+            radial-gradient(circle at 4% 2%, rgba(36, 168, 102, 0.34), transparent 30%),
+            linear-gradient(135deg, var(--stats-green-900), var(--stats-green-800));
+    box-shadow: 0 18px 34px rgba(6, 38, 25, 0.24);
+}
+
+.statistics-toolbar-wrap > div {
+    position: relative;
+    z-index: 1;
+}
+
+.statistics-toolbar-title {
+    color: #f7fff9;
+    font-size: 19px;
+    font-weight: 800;
+}
+
+.statistics-toolbar-subtitle {
+    color: rgba(232, 255, 243, 0.9);
+    font-size: 13px;
+}
+
+.statistics-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(188px, 1fr));
+    gap: 10px;
+}
+
+.statistics-kpi-item {
+    border-radius: 13px;
+    border: 1px solid rgba(255, 255, 255, 0.38);
+    padding: 11px 12px;
+    min-height: 88px;
+    box-shadow: 0 10px 20px rgba(9, 23, 17, 0.14);
+}
+
+.statistics-kpi-item--today {
+    background: linear-gradient(135deg, #fff4f4, #ffdfe2);
+    border-color: #efb7bd;
+}
+
+.statistics-kpi-item--month {
+    background: linear-gradient(135deg, #f4f8ff, #e0e9ff);
+    border-color: #bfceff;
+}
+
+.statistics-kpi-item--year {
+    background: linear-gradient(135deg, #ebf9f1, #d4f2e1);
+    border-color: #aadfc2;
+}
+
+.statistics-kpi-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.statistics-kpi-title {
+    color: #4e5f54;
+    font-weight: 800;
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+}
+
+.statistics-kpi-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 12px;
+    background: linear-gradient(135deg, var(--stats-gold-500), var(--stats-gold-700));
+}
+
+.statistics-kpi-item--today .statistics-kpi-icon {
+    background: linear-gradient(135deg, #e44a4a, var(--stats-red-700));
+}
+
+.statistics-kpi-item--month .statistics-kpi-icon {
+    background: linear-gradient(135deg, #3b82f6, var(--stats-blue-700));
+}
+
+.statistics-kpi-item--year .statistics-kpi-icon {
+    background: linear-gradient(135deg, var(--stats-green-600), var(--stats-green-700));
+}
+
+.statistics-kpi-value {
+    margin-top: 6px;
+    color: #193729;
+    font-weight: 800;
+    font-size: 18px;
+    line-height: 1.2;
+}
+
+.statistics-main-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    border: 1px solid var(--stats-border);
+    border-radius: 16px;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fcfa 100%);
+    box-shadow: var(--stats-shadow);
+}
+
+.statistics-main-body {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+
+.statistics-panels-row {
+    flex: 1;
+    min-height: 0;
+}
+
+.statistics-panels-row > [class*="col-"] {
+    display: flex;
+}
+
+.statistics-section-card {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    border: 1px solid var(--stats-border);
+    border-radius: 14px;
+    background: #fff;
+    overflow: hidden;
+    box-shadow: 0 10px 22px rgba(17, 24, 39, 0.06);
+}
+
+.statistics-section-card--loyal {
+    background: linear-gradient(180deg, #fff 0%, #f6f9ff 100%);
+}
+
+.statistics-section-card--drink {
+    background: linear-gradient(180deg, #fff 0%, #fff6f7 100%);
+}
+
+.statistics-section-card--revenue {
+    background: linear-gradient(180deg, #fff 0%, #f4faf7 100%);
+}
+
+.statistics-section-head {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--stats-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    color: #2f3e36;
+    background: linear-gradient(90deg, rgba(220, 163, 73, 0.2), rgba(255, 255, 255, 0.96) 42%);
+}
+
+.statistics-section-head--blue {
+    background: linear-gradient(90deg, rgba(59, 130, 246, 0.19), rgba(255, 255, 255, 0.96) 42%);
+}
+
+.statistics-section-head--red {
+    background: linear-gradient(90deg, rgba(239, 68, 68, 0.18), rgba(255, 255, 255, 0.96) 42%);
+}
+
+.statistics-section-head--green {
+    background: linear-gradient(90deg, rgba(36, 168, 102, 0.2), rgba(255, 255, 255, 0.96) 42%);
+}
+
+.statistics-section-title-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.statistics-section-title-wrap i {
+    color: var(--stats-gold-700);
+}
+
+.statistics-section-head--blue .statistics-section-title-wrap i {
+    color: var(--stats-blue-700);
+}
+
+.statistics-section-head--red .statistics-section-title-wrap i {
+    color: var(--stats-red-700);
+}
+
+.statistics-section-head--green .statistics-section-title-wrap i {
+    color: var(--stats-green-700);
+}
+
+.statistics-section-chip {
+    border: 1px solid #dcb97d;
+    border-radius: 999px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--stats-gold-700);
+    background: #fff9ef;
+}
+
+.statistics-section-head--blue .statistics-section-chip {
+    border-color: #b8cbff;
+    color: var(--stats-blue-700);
+    background: #f2f6ff;
+}
+
+.statistics-section-head--red .statistics-section-chip {
+    border-color: #f4b9c0;
+    color: var(--stats-red-700);
+    background: #fff3f5;
+}
+
+.statistics-section-head--green .statistics-section-chip {
+    border-color: #a8ddc0;
+    color: var(--stats-green-700);
+    background: #edf9f2;
+}
+
+.statistics-table-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    background: #fff;
+}
+
+.statistics-revenue-table-wrap {
+    height: 330px;
+}
+
+.statistics-table-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+.statistics-table-body thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: linear-gradient(180deg, #fff8ee, #fbeed9);
+    color: #4a351f;
+    border-color: #e9d9bf;
+}
+
+.statistics-section-card--loyal .statistics-table-body thead th {
+    background: linear-gradient(180deg, #edf3ff, #dbe7ff);
+    color: #1e3a8a;
+    border-color: #c5d5fb;
+}
+
+.statistics-section-card--drink .statistics-table-body thead th {
+    background: linear-gradient(180deg, #fff1f3, #ffe1e5);
+    color: #8f1e2d;
+    border-color: #f3c1c9;
+}
+
+.statistics-section-card--revenue .statistics-table-body thead th {
+    background: linear-gradient(180deg, #ecf9f2, #d8efdf);
+    color: #065f46;
+    border-color: #bedecb;
+}
+
+.statistics-table-body td {
+    border-color: #e9efe9;
+}
+
+.statistics-table-body tbody tr:nth-child(odd) {
+    background: #fff;
+}
+
+.statistics-table-body tbody tr:nth-child(even) {
+    background: #fbfdfc;
+}
+
+.statistics-table-body tbody tr:hover {
+    background: #eefaf4 !important;
+}
+
+.statistics-section-card--loyal .statistics-table-body tbody tr:hover {
+    background: #edf3ff !important;
+}
+
+.statistics-section-card--drink .statistics-table-body tbody tr:hover {
+    background: #fff1f3 !important;
+}
+
+.statistics-rank-chip {
+    min-width: 30px;
+    height: 30px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 12px;
+    border: 1px solid #dae4de;
+    color: #607267;
+    background: #fff;
+}
+
+.statistics-rank-chip.rank-gold {
+    background: linear-gradient(135deg, #f6d174, #dda73c);
+    color: #5a3a10;
+    border-color: #d49a2e;
+}
+
+.statistics-rank-chip.rank-silver {
+    background: linear-gradient(135deg, #eceef1, #cdd4dc);
+    color: #3d4b5e;
+    border-color: #b8c0cb;
+}
+
+.statistics-rank-chip.rank-bronze {
+    background: linear-gradient(135deg, #ebc2a0, #cf8b55);
+    color: #5f3314;
+    border-color: #bf7844;
+}
+
+.statistics-pill-point {
+    background: linear-gradient(135deg, #fae099, #e7bd5e);
+    color: #5e4118;
+    border: 1px solid #e5c372;
+    font-weight: 700;
+}
+
+.statistics-money {
+    color: var(--stats-green-700) !important;
+}
+
+.statistics-tabs {
+    padding: 0 14px;
+    margin-top: 10px;
+    border-bottom-color: #d4e4db;
+}
+
+.statistics-tabs .nav-link {
+    color: var(--stats-muted);
+    border: 1px solid transparent;
+    border-bottom: 0;
+    font-weight: 700;
+    border-radius: 9px 9px 0 0;
+}
+
+.statistics-tabs .nav-link:hover {
+    color: #315343;
+    background: #edf8f2;
+    border-color: #cfe3d8 #cfe3d8 transparent;
+}
+
+.statistics-tabs .nav-link.active {
+    color: #185637;
+    background: linear-gradient(180deg, #ddf4e7 0%, #ffffff 100%);
+    border-color: #c7e1d3 #c7e1d3 #ffffff;
+}
+
+.statistics-section-head--green .text-muted {
+    color: #3f6555 !important;
+}
+
+@media (max-width: 1200px) {
+    .statistics-kpi-grid {
+        width: 100%;
+        grid-template-columns: repeat(3, minmax(158px, 1fr));
+    }
+}
+
+@media (max-width: 992px) {
+    .statistics-toolbar-wrap {
+        padding: 16px;
+    }
+
+    .statistics-kpi-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .statistics-table-container,
+    .statistics-revenue-table-wrap {
+        height: 380px;
+    }
+
+    .statistics-main-container,
+    .statistics-main-body,
+    .statistics-panels-row,
+    .statistics-section-card,
+    .statistics-table-container,
+    .statistics-table-body {
+        min-height: auto;
+    }
+}

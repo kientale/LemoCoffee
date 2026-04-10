@@ -1,0 +1,179 @@
+<th:block xmlns:th="http://www.thymeleaf.org" th:fragment="content">
+
+<link rel="stylesheet" th:href="@{/css/page/statistics.css(v=7)}">
+
+<div class="admin-page">
+    <div class="admin-content">
+        <h3 class="mb-3 fw-bold">Statistics</h3>
+
+        <div class="statistics-toolbar-wrap mb-3">
+            <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+                <div class="toolbar-label fw-semibold">
+                    <div class="statistics-toolbar-title">Revenue Overview</div>
+                    <div class="statistics-toolbar-subtitle">Daily - Monthly - Yearly Performance</div>
+                </div>
+
+                <div class="statistics-kpi-grid">
+                    <div class="statistics-kpi-item statistics-kpi-item--today">
+                        <div class="statistics-kpi-head">
+                            <div class="statistics-kpi-title">Today</div>
+                            <span class="statistics-kpi-icon"><i class="fa-solid fa-sun"></i></span>
+                        </div>
+                        <div class="statistics-kpi-value"
+                             th:text="${#numbers.formatDecimal((revenueToday == null ? 0 : revenueToday), 1, 'COMMA', 0, 'POINT') + ' VND'}">
+                        </div>
+                    </div>
+
+                    <div class="statistics-kpi-item statistics-kpi-item--month">
+                        <div class="statistics-kpi-head">
+                            <div class="statistics-kpi-title">This Month</div>
+                            <span class="statistics-kpi-icon"><i class="fa-solid fa-calendar-days"></i></span>
+                        </div>
+                        <div class="statistics-kpi-value"
+                             th:text="${#numbers.formatDecimal((revenueThisMonth == null ? 0 : revenueThisMonth), 1, 'COMMA', 0, 'POINT') + ' VND'}">
+                        </div>
+                    </div>
+
+                    <div class="statistics-kpi-item statistics-kpi-item--year">
+                        <div class="statistics-kpi-head">
+                            <div class="statistics-kpi-title">This Year</div>
+                            <span class="statistics-kpi-icon"><i class="fa-solid fa-trophy"></i></span>
+                        </div>
+                        <div class="statistics-kpi-value"
+                             th:text="${#numbers.formatDecimal((revenueThisYear == null ? 0 : revenueThisYear), 1, 'COMMA', 0, 'POINT') + ' VND'}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="statistics-main-container">
+            <div class="statistics-main-body">
+                <div class="row g-3 statistics-panels-row">
+                    <div class="col-12 col-xl-6">
+                        <div class="statistics-section-card statistics-section-card--loyal">
+                            <div class="statistics-section-head statistics-section-head--blue">
+                                <div class="statistics-section-title-wrap">
+                                    <i class="fa-solid fa-medal"></i>
+                                    <span class="fw-bold">Top 10 Loyal Customers</span>
+                                </div>
+                                <span class="statistics-section-chip"
+                                      th:text="${topCustomers == null ? 0 : #lists.size(topCustomers)} + ' records'">
+                                </span>
+                            </div>
+
+                            <div class="statistics-table-container">
+                                <div class="statistics-table-body">
+                                    <table class="table table-bordered table-hover align-middle mb-0 table-striped">
+                                        <thead class="table-light sticky-top text-center">
+                                        <tr style="height: 56px;">
+                                            <th style="width: 70px;">#</th>
+                                            <th class="text-start">Customer</th>
+                                            <th>Phone</th>
+                                            <th>Points</th>
+                                            <th>Orders</th>
+                                            <th>Total Spend</th>
+                                        </tr>
+                                        </thead>
+
+                                        <tbody>
+                                        <tr th:if="${topCustomers == null or #lists.isEmpty(topCustomers)}">
+                                            <td colspan="6" class="text-center text-muted py-4">No completed orders yet.</td>
+                                        </tr>
+
+                                        <tr class="text-center"
+                                            th:each="item, loop : ${topCustomers}">
+                                            <td>
+                                                <span class="statistics-rank-chip"
+                                                      th:classappend="${loop.index == 0} ? ' rank-gold'
+                                                                      : (${loop.index == 1} ? ' rank-silver'
+                                                                      : (${loop.index == 2} ? ' rank-bronze'
+                                                                      : ' rank-default'))"
+                                                      th:text="${loop.index + 1}">
+                                                </span>
+                                            </td>
+
+                                            <td class="text-start fw-semibold" th:text="${item.customerName}"></td>
+                                            <td th:text="${item.customerPhone}"></td>
+
+                                            <td>
+                                                <span class="badge statistics-pill-point px-3 py-2"
+                                                      th:text="${#numbers.formatDecimal(item.currentPoints, 1, 'COMMA', 0, 'POINT')}">
+                                                </span>
+                                            </td>
+
+                                            <td th:text="${#numbers.formatDecimal(item.totalOrders, 1, 'COMMA', 0, 'POINT')}"></td>
+
+                                            <td class="fw-semibold statistics-money"
+                                                th:text="${#numbers.formatDecimal(item.totalSpent, 1, 'COMMA', 0, 'POINT')}">
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-xl-6">
+                        <div class="statistics-section-card statistics-section-card--drink">
+                            <div class="statistics-section-head statistics-section-head--red">
+                                <div class="statistics-section-title-wrap">
+                                    <i class="fa-solid fa-mug-saucer"></i>
+                                    <span class="fw-bold">Top 10 Best-selling Drinks</span>
+                                </div>
+                                <span class="statistics-section-chip"
+                                      th:text="${topDrinks == null ? 0 : #lists.size(topDrinks)} + ' records'">
+                                </span>
+                            </div>
+
+                            <div class="statistics-table-container">
+                                <div class="statistics-table-body">
+                                    <table class="table table-bordered table-hover align-middle mb-0 table-striped">
+                                        <thead class="table-light sticky-top text-center">
+                                        <tr style="height: 56px;">
+                                            <th style="width: 70px;">#</th>
+                                            <th class="text-start">Drink</th>
+                                            <th>Quantity Sold</th>
+                                            <th>Revenue</th>
+                                        </tr>
+                                        </thead>
+
+                                        <tbody>
+                                        <tr th:if="${topDrinks == null or #lists.isEmpty(topDrinks)}">
+                                            <td colspan="4" class="text-center text-muted py-4">No completed orders yet.</td>
+                                        </tr>
+
+                                        <tr class="text-center"
+                                            th:each="item, loop : ${topDrinks}">
+                                            <td>
+                                                <span class="statistics-rank-chip"
+                                                      th:classappend="${loop.index == 0} ? ' rank-gold'
+                                                                      : (${loop.index == 1} ? ' rank-silver'
+                                                                      : (${loop.index == 2} ? ' rank-bronze'
+                                                                      : ' rank-default'))"
+                                                      th:text="${loop.index + 1}">
+                                                </span>
+                                            </td>
+
+                                            <td class="text-start fw-semibold" th:text="${item.drinkName}"></td>
+
+                                            <td th:text="${#numbers.formatDecimal(item.totalQuantity, 1, 'COMMA', 0, 'POINT')}"></td>
+
+                                            <td class="fw-semibold statistics-money"
+                                                th:text="${#numbers.formatDecimal(item.totalRevenue, 1, 'COMMA', 0, 'POINT')}">
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</th:block>

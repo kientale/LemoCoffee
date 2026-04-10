@@ -1,0 +1,554 @@
+@charset "UTF-8";
+
+.dropdown-item.disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.btn-reset-password {
+    border-color: #f5b301;
+    color: #212529;
+    background-color: #fff;
+}
+
+.btn-reset-password:hover {
+    background-color: #f5b301;
+    color: #000;
+}
+
+html, body {
+    height: 100%;
+}
+
+.admin-page {
+    min-height: 70vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.input-group button {
+    opacity: 0.6;
+}
+
+.input-group button:hover {
+    opacity: 1;
+}
+
+/* ===== SIMPLE GREEN TOOLBAR BACKGROUND ===== */
+.user-toolbar-wrap {
+    position: relative;
+    overflow: hidden;
+    padding: 18px 20px;
+    background:
+            radial-gradient(circle at top right, rgba(255, 255, 255, 0.12), transparent 28%),
+            linear-gradient(135deg, #0a3710 0%, #054328 100%);
+    box-shadow: 0 10px 24px rgba(8, 48, 22, 0.14);
+}
+
+.user-toolbar-wrap::before {
+    content: "";
+    position: absolute;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    top: -40px;
+    right: -20px;
+}
+
+.user-toolbar-wrap > div {
+    position: relative;
+    z-index: 1;
+}
+
+.user-toolbar-wrap .toolbar-label {
+    color: #fff;
+}
+
+.user-toolbar-wrap .form-control,
+.user-toolbar-wrap .form-select {
+    border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.user-toolbar-wrap .btn-outline-light {
+    border-color: rgba(255, 255, 255, 0.7);
+    color: #fff;
+}
+
+.user-toolbar-wrap .btn-outline-light:hover {
+    background-color: #fff;
+    color: #054328;
+    border-color: #fff;
+}
+
+@media (max-width: 992px) {
+    .user-toolbar-wrap {
+        padding: 16px;
+    }
+}
+
+/* ================= ADD TABLE MODAL ================= */
+/* nền ảnh + bo góc */
+#addTableModal .modal-content {
+    position: relative;
+    background: url("../../img/modal-bg-table.png") center/cover no-repeat;
+    border: 0;
+    overflow: hidden;
+    border-radius: 14px;
+}
+
+/* đưa content lên trên overlay */
+#addTableModal .modal-header, #addTableModal .modal-body, #addTableModal .modal-footer
+{
+    position: relative;
+    z-index: 1;
+}
+
+/* header rõ ràng hơn */
+#addTableModal .modal-header {
+    background: rgba(0, 0, 0, 0.35);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+#addTableModal .modal-title {
+    color: #fff;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+/* nút X dễ thấy trên nền tối */
+#addTableModal .btn-close {
+    filter: invert(1);
+    opacity: 0.85;
+}
+
+#addTableModal .btn-close:hover {
+    opacity: 1;
+}
+
+/* ✅ phần FORM: tạo card trắng trong body để dễ đọc */
+#addTableModal .modal-body form {
+    background: rgba(255, 255, 255, 0.93);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+/* label + input nhìn rõ */
+#addTableModal .modal-body label {
+    color: #111827;
+    font-weight: 600;
+}
+
+#addTableModal .form-control, #addTableModal .form-select {
+    border-color: rgba(17, 24, 39, 0.18);
+}
+
+#addTableModal .form-control:focus, #addTableModal .form-select:focus {
+    border-color: rgba(59, 130, 246, 0.6);
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.2);
+}
+
+/* footer nền nhẹ */
+#addTableModal .modal-footer {
+    background: rgba(0, 0, 0, 0.25);
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* ================= EDIT TABLE MODAL ================= */
+#editTableModal .modal-content {
+    position: relative;
+    background: url("../../img/modal-bg-table.png") center/cover no-repeat;
+    border: 0;
+    overflow: hidden;
+    border-radius: 14px;
+}
+
+#editTableModal .modal-header, #editTableModal .modal-body,
+#editTableModal .modal-footer {
+    position: relative;
+    z-index: 1;
+}
+
+#editTableModal .modal-header {
+    background: rgba(0, 0, 0, 0.35);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+#editTableModal .modal-title {
+    color: #fff;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+#editTableModal .btn-close {
+    filter: invert(1);
+    opacity: 0.85;
+}
+
+#editTableModal .btn-close:hover {
+    opacity: 1;
+}
+
+/* ✅ FORM card trắng giống Add */
+#editTableModal .modal-body form {
+    background: rgba(255, 255, 255, 0.93);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+#editTableModal .modal-body label {
+    color: #111827;
+    font-weight: 600;
+}
+
+#editTableModal .form-control, #editTableModal .form-select {
+    border-color: rgba(17, 24, 39, 0.18);
+}
+
+#editTableModal .form-control:focus, #editTableModal .form-select:focus
+{
+    border-color: rgba(59, 130, 246, 0.6);
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.2);
+}
+
+#editTableModal .modal-footer {
+    background: rgba(0, 0, 0, 0.25);
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* ===== Realtime Validation ===== */
+.invalid-feedback {
+    display: block;
+    font-size: 0.875rem;
+}
+
+.is-valid {
+    border-color: #198754 !important;
+}
+
+.is-invalid {
+    border-color: #dc3545 !important;
+}
+
+.table-table-body {
+    position: relative;
+    z-index: 1;
+}
+
+.table-table-body::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: url("../../img/tb-bg-tb.png") center/cover no-repeat;
+    opacity: 0.18;
+    filter: blur(1px);
+    z-index: 0;
+    pointer-events: none;
+}
+
+.table-gallery {
+    position: relative;
+    z-index: 1;
+}
+
+.table-table-container {
+    height: 690px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    background: #fff;
+}
+
+/* ✅ quan trọng: để dropdown không bị cắt/đè */
+.table-table-body {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: visible;
+    position: relative;
+    padding: 14px;
+}
+
+/* ===== Gallery Grid ===== */
+.table-gallery {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    padding: 18px;
+    align-content: start;
+}
+
+@media ( max-width : 1200px) {
+    .table-gallery {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media ( max-width : 640px) {
+    .table-gallery {
+        grid-template-columns: 1fr;
+        padding: 14px;
+        gap: 14px;
+    }
+}
+
+/* ===== Card Base ===== */
+.table-card {
+    position: relative; /* needed for z-index stacking */
+    display: flex;
+    gap: 14px;
+    border-radius: 16px;
+    padding: 18px 20px;
+    min-height: 180px;
+    background: #fff;
+    border: 1px solid rgba(17, 24, 39, .10);
+    box-shadow: 0 10px 26px rgba(17, 24, 39, .10);
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s
+    ease;
+}
+
+.table-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(17, 24, 39, .16);
+    box-shadow: 0 22px 50px rgba(17, 24, 39, .16);
+    z-index: 5;
+}
+
+/* Card đang mở dropdown -> nổi lên trên card khác */
+.table-card.dropdown-open {
+    z-index: 60;
+}
+
+/* Dropdown menu nổi */
+.actions-menu {
+    z-index: 2000 !important;
+}
+
+/* ===== Left number ===== */
+.table-no {
+    width: 46px;
+    height: 46px;
+    flex: 0 0 auto;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    color: #111827;
+    background: rgba(17, 24, 39, .06);
+    border: 1px solid rgba(17, 24, 39, .10);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .85);
+}
+
+/* ===== Main layout ===== */
+.table-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* Top row: name + badge */
+.table-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.table-name {
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: .2px;
+    color: #111827;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Status badge (use Bootstrap badge classes + our polish) */
+.table-status.badge {
+    font-size: 12px;
+    font-weight: 900;
+    padding: 7px 12px;
+    border-radius: 999px;
+    white-space: nowrap;
+    border: 1px solid rgba(17, 24, 39, .10);
+    box-shadow: 0 6px 14px rgba(17, 24, 39, .10);
+}
+
+/* Bottom row: capacity + actions */
+.table-bottom {
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.table-capacity {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 850;
+    color: #374151;
+    white-space: nowrap;
+}
+
+/* ===== Actions button polish (keep your existing action markup) ===== */
+.actions-toggle {
+    border-color: rgba(17, 24, 39, .22);
+    color: #111827;
+    background: #fff;
+    border-radius: 12px;
+}
+
+.actions-toggle:hover {
+    border-color: rgba(17, 24, 39, .38);
+    background: rgba(17, 24, 39, .05);
+}
+
+/* default */
+.table-card {
+    --accent: #198754;
+    border-left: 10px solid var(--accent);
+}
+
+/* AVAILABLE */
+.status-available {
+    --accent: #198754;
+    background: #fff;
+}
+
+/* OCCUPIED */
+.status-occupied {
+    --accent: #dc3545;
+    background: #fff;
+}
+
+/* RESERVED */
+.status-reserved {
+    --accent: #ffc107;
+    background: #fff;
+}
+
+/* DELETED */
+.status-deleted {
+    --accent: #6c757d;
+    opacity: 1;
+    background: #fff;
+}
+
+/* Optional: capacity chip (looks more "POS") */
+.table-capacity {
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(17, 24, 39, .04);
+}
+
+/* Optional: tighten icons inside capacity */
+.table-capacity i {
+    opacity: .85;
+}
+
+.table-table-footer {
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    border-top: 1px solid #dee2e6;
+    background: #f8f9fa;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.table-table-footer .small {
+    font-size: 15.5px; /* hoặc 16px nếu muốn đều hẳn */
+    font-weight: 500;
+    color: #495057;
+}
+
+.table-table-footer .btn {
+    font-size: 15px; /* đồng bộ chữ */
+    padding: 6px 14px; /* nút đỡ nhỏ */
+}
+
+.table-table-footer .btn-sm {
+    font-size: 15px; /* override btn-sm */
+    padding: 6px 14px;
+}
+
+.table-table-footer span.fw-semibold {
+    font-size: 15.5px;
+}
+
+/* ===== ACTION DROPDOWN THEME ===== */
+.actions-toggle {
+    border-color: #cfd8dc;
+}
+
+.actions-toggle:hover {
+    border-color: #9fb6a3;
+}
+
+/* nền nhạt hơn #0a3710 */
+.actions-menu {
+    background: #124a18; /* nhạt hơn một chút so với #0a3710 */
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    padding: 8px;
+    min-width: 210px;
+}
+
+/* item */
+.actions-menu .dropdown-item {
+    color: rgba(255, 255, 255, 0.92) !important;
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+}
+
+/* icon trong item */
+.actions-menu .dropdown-item i {
+    width: 18px;
+    text-align: center;
+}
+
+/* hover */
+.actions-menu .dropdown-item:hover, .actions-menu .dropdown-item:focus {
+    background: rgba(255, 255, 255, 0.10);
+    color: #fff !important;
+}
+
+/* divider nhạt, dễ nhìn */
+.actions-menu .dropdown-divider {
+    margin: 8px 4px;
+    border-top: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+/* button trong dropdown (Reset/Lock/Delete) */
+.actions-menu button.dropdown-item {
+    width: 100%;
+    text-align: left;
+}
+
+/* Badge "You" nhìn cân hơn */
+.badge.you-badge {
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-weight: 700;
+}

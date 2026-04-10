@@ -1,0 +1,147 @@
+@charset "UTF-8";
+
+.drink-table-container {
+    height: 640px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #d7e1db;
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 10px 26px rgba(13, 67, 33, 0.08);
+    overflow: hidden;
+}
+
+.drink-table-body {
+    flex: 1;
+    overflow: auto;
+    padding: 16px;
+    background: #f6faf7;
+}
+
+.drink-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 16px;
+}
+
+.drink-card {
+    border: 1px solid #dbe8df;
+    border-radius: 14px;
+    background: #ffffff;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.drink-card:hover {
+    transform: translateY(-2px);
+    border-color: #b8d0bc;
+    box-shadow: 0 10px 20px rgba(10, 55, 16, 0.12);
+}
+
+.drink-card--selected {
+    border-color: #2f8f49;
+    box-shadow: 0 0 0 2px rgba(47, 143, 73, 0.2);
+}
+
+.drink-card-media {
+    height: 128px;
+    background: #ecf3ee;
+    border-bottom: 1px solid #e2ebe4;
+}
+
+.drink-card-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.drink-card-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.9rem;
+    color: #7b8f82;
+}
+
+.drink-card-info {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+}
+
+.drink-card-name {
+    color: #1c2f22;
+    font-weight: 700;
+    line-height: 1.35;
+    min-height: 2.7em;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.drink-card-price {
+    color: #157347;
+    font-weight: 700;
+}
+
+.drink-card .btn-pick-drink {
+    margin-top: auto;
+    width: 100%;
+    font-weight: 600;
+}
+
+.drink-table-footer {
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    border-top: 1px solid #d7e1db;
+    background: #f7faf8;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.drink-table-footer .small {
+    font-size: 15.5px;
+    font-weight: 500;
+    color: #495057;
+}
+
+.drink-table-footer .btn {
+    font-size: 15px;
+    padding: 6px 14px;
+}
+
+.drink-table-footer .btn-sm {
+    font-size: 15px;
+    padding: 6px 14px;
+}
+
+.drink-table-footer span.fw-semibold {
+    font-size: 15.5px;
+}
+
+@media (max-width: 768px) {
+    .drink-table-body {
+        padding: 12px;
+    }
+
+    .drink-card-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 12px;
+    }
+
+    .drink-card-media {
+        height: 112px;
+    }
+}

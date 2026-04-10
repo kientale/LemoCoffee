@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="content">
+
+    <!-- ===== Modal: Ingredient Picker ===== -->
+    <div class="modal fade"
+         id="addDrinkIngredientModal"
+         tabindex="-1"
+         aria-labelledby="addDrinkIngredientModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-scrollable">
+            <div class="modal-content">
+
+                <!-- Picker Modal Header -->
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addDrinkIngredientModalLabel">
+                        <i class="fa-solid fa-boxes-stacked me-2"></i> Select Ingredients
+                    </h5>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                </div>
+
+                <!-- Picker Modal Body -->
+                <div class="modal-body">
+                    <div class="picker-card">
+
+                        <!-- Search Toolbar -->
+                        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                            <form id="ingredientPickerSearchForm"
+                                  th:action="@{/drink-management}"
+                                  method="get"
+                                  class="d-flex align-items-center gap-2 flex-wrap"
+                                  role="search">
+
+                                <input type="hidden" name="view" value="create"/>
+                                <input type="hidden" name="openIngModal" value="true"/>
+                                <input type="hidden" name="ingPage" id="ingPageInput" value="1"/>
+
+                                <span class="text-muted fw-semibold me-1">Search</span>
+
+                                <input type="text"
+                                       name="ingKeyword"
+                                       class="form-control"
+                                       placeholder="Enter keyword..."
+                                       th:value="${param.ingKeyword}"
+                                       style="width: 260px;"
+                                       autocomplete="off">
+
+                                <span class="text-muted fw-semibold mx-1">By</span>
+
+                                <select name="ingField" class="form-select" style="width: 200px;">
+                                    <option value="name"
+                                            th:selected="${param.ingField == null or #strings.isEmpty(param.ingField) or param.ingField == 'name'}">
+                                        Ingredient Name
+                                    </option>
+                                    <option value="unit"
+                                            th:selected="${param.ingField == 'unit'}">
+                                        Unit
+                                    </option>
+                                </select>
+
+                                <button type="submit" class="btn btn-primary fw-semibold">
+                                    <i class="fa-solid fa-magnifying-glass me-1"></i> Search
+                                </button>
+
+                                <button type="button" class="btn btn-outline-secondary" id="btnResetIngSearch">
+                                    Reset
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- AJAX Error -->
+                        <div id="ingredientPickerError" class="alert alert-danger d-none"></div>
+
+                        <!-- AJAX Loading -->
+                        <div id="ingredientPickerLoading" class="text-center text-muted py-4 d-none">
+                            <div class="spinner-border" role="status" aria-label="Loading"></div>
+                            <div class="mt-2">Loading ingredients...</div>
+                        </div>
+
+                        <!-- AJAX Fragment Container -->
+                        <div id="ingredientPickerContainer"
+                             th:attr="data-endpoint=@{/drink-management}"></div>
+
+                        <!-- Picker Modal Footer -->
+                        <div class="mt-4 d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-outline-secondary" id="btnCloseIngModal">
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</th:block>
+</html>

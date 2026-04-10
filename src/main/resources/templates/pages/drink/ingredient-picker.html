@@ -1,0 +1,89 @@
+<div xmlns:th="http://www.thymeleaf.org"
+     th:fragment="content"
+     th:with="
+         ingPageNo=${ingPage == null ? 1 : ingPage},
+         safeTotalPages=${ingTotalPages == null or ingTotalPages < 1 ? 1 : ingTotalPages}
+     "
+     class="ingredient-table-container"
+     id="ingredientPickerFragment">
+        <div class="ingredient-table-body">
+
+            <div th:if="${ingredients == null or #lists.isEmpty(ingredients)}"
+                 class="d-flex flex-column align-items-center justify-content-center text-muted"
+                 style="height: 400px;">
+                <i class="fa-solid fa-box-open fs-1 mb-3"></i>
+                <div>No ingredients found</div>
+            </div>
+
+            <table th:if="${ingredients != null and !#lists.isEmpty(ingredients)}"
+                   class="table table-bordered table-hover align-middle mb-0 table-striped">
+
+                <!-- Picker Header -->
+                <thead class="table-light sticky-top text-center">
+                <tr style="height: 56px;">
+                    <th style="width: 70px;">#</th>
+                    <th class="text-start">Name</th>
+                    <th>Unit</th>
+                    <th style="width: 140px;">Action</th>
+                </tr>
+                </thead>
+
+                <!-- Picker Body -->
+                <tbody>
+                <tr th:each="i, loop : ${ingredients}"
+                    th:with="picked=${selectedIngIds != null and #lists.contains(selectedIngIds, i.id)}"
+                    class="text-center"
+                    th:classappend="${picked} ? ' self-row' : ''">
+
+                    <td th:text="${(ingPageNo - 1) * 10 + loop.index + 1}">1</td>
+
+                    <td class="text-start fw-semibold" th:text="${i.name}">Ingredient Name</td>
+
+                    <td>
+                        <span class="badge bg-info text-dark" th:text="${i.unit}">Unit</span>
+                    </td>
+
+                    <td>
+                        <button type="button"
+                                class="btn btn-sm btn-pick-ingredient"
+                                th:classappend="${picked} ? ' btn-outline-secondary' : ' btn-success'"
+                                th:attr="
+                                    data-id=${i.id},
+                                    data-name=${i.name},
+                                    data-unit=${i.unit},
+                                    data-stock=${i.quantity}
+                                "
+                                th:disabled="${picked}"
+                                th:text="${picked} ? 'Added' : 'Add to Drink'">
+                            Add to Drink
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ===== Picker Pagination ===== -->
+        <div class="ingredient-table-footer">
+            <div class="d-flex align-items-center gap-3 justify-content-end w-100">
+                <button type="button"
+                        class="btn btn-outline-secondary btn-sm btn-ing-page"
+                        th:attr="data-ing-page=${ingPageNo - 1}"
+                        th:disabled="${ingPageNo <= 1}">
+                    Prev
+                </button>
+
+                <span class="fw-semibold small"
+                      th:text="|${ingPageNo} / ${safeTotalPages}|">
+                    1 / 1
+                </span>
+
+                <button type="button"
+                        class="btn btn-outline-secondary btn-sm btn-ing-page"
+                        th:attr="data-ing-page=${ingPageNo + 1}"
+                        th:disabled="${ingPageNo >= safeTotalPages}">
+                    Next
+                </button>
+            </div>
+        </div>
+</div>

@@ -1,0 +1,679 @@
+@charset "UTF-8";
+
+.dropdown-item.disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+html, body {
+    height: 100%;
+}
+
+.admin-page {
+    min-height: 70vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.input-group button {
+    opacity: 0.6;
+}
+
+.input-group button:hover {
+    opacity: 1;
+}
+
+/* ===== SIMPLE GREEN TOOLBAR BACKGROUND ===== */
+.order-toolbar-wrap {
+    position: relative;
+    overflow: hidden;
+    padding: 18px 20px;
+    background:
+            radial-gradient(circle at top right, rgba(255, 255, 255, 0.12), transparent 28%),
+            linear-gradient(135deg, #0a3710 0%, #054328 100%);
+    box-shadow: 0 10px 24px rgba(8, 48, 22, 0.14);
+}
+
+.order-toolbar-wrap::before {
+    content: "";
+    position: absolute;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    top: -40px;
+    right: -20px;
+}
+
+.order-toolbar-wrap > div {
+    position: relative;
+    z-index: 1;
+}
+
+.order-toolbar-wrap .toolbar-label {
+    color: #fff;
+}
+
+.order-toolbar-wrap .form-control,
+.order-toolbar-wrap .form-select {
+    border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.order-toolbar-wrap .btn-outline-light {
+    border-color: rgba(255, 255, 255, 0.7);
+    color: #fff;
+}
+
+.order-toolbar-wrap .btn-outline-light:hover {
+    background-color: #fff;
+    color: #054328;
+    border-color: #fff;
+}
+
+@media (max-width: 992px) {
+    .order-toolbar-wrap {
+        padding: 16px;
+    }
+}
+
+/* ================= ADD DRINK MODAL ================= */
+/* nền ảnh + bo góc */
+#addOrderModal .modal-content,
+#editOrderModal .modal-content,
+#checkOutModal .modal-content,
+#orderCreateCustomerModal .modal-content,
+#orderDetailModal .modal-content {
+    position: relative;
+    background: url("../../../img/modal-bg-table.png") center/cover no-repeat;
+    border: 2px solid rgba(255, 255, 255, 0.28);
+    overflow: hidden;
+    border-radius: 14px;
+    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.28);
+}
+
+/* đưa content lên trên overlay */
+#addOrderModal .modal-header, #addOrderModal .modal-body, #addOrderModal .modal-footer,
+#editOrderModal .modal-header, #editOrderModal .modal-body, #editOrderModal .modal-footer,
+#checkOutModal .modal-header, #checkOutModal .modal-body, #checkOutModal .modal-footer,
+#orderCreateCustomerModal .modal-header, #orderCreateCustomerModal .modal-body, #orderCreateCustomerModal .modal-footer,
+#orderDetailModal .modal-header, #orderDetailModal .modal-body, #orderDetailModal .modal-footer
+{
+    position: relative;
+    z-index: 1;
+}
+
+/* header rõ ràng hơn */
+#addOrderModal .modal-header,
+#editOrderModal .modal-header,
+#checkOutModal .modal-header,
+#orderCreateCustomerModal .modal-header,
+#orderDetailModal .modal-header {
+    background: rgba(0, 0, 0, 0.35);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+#addOrderModal .modal-title,
+#editOrderModal .modal-title,
+#checkOutModal .modal-title,
+#orderCreateCustomerModal .modal-title,
+#orderDetailModal .modal-title {
+    color: #fff;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+/* nút X dễ thấy trên nền tối */
+#addOrderModal .btn-close,
+#editOrderModal .btn-close,
+#checkOutModal .btn-close,
+#orderCreateCustomerModal .btn-close,
+#orderDetailModal .btn-close {
+    filter: invert(1);
+    opacity: 0.85;
+}
+
+#addOrderModal .btn-close:hover,
+#editOrderModal .btn-close:hover,
+#checkOutModal .btn-close:hover,
+#orderCreateCustomerModal .btn-close:hover,
+#orderDetailModal .btn-close:hover {
+    opacity: 1;
+}
+
+/* ✅ phần FORM: tạo card trắng trong body để dễ đọc */
+#addOrderModal .modal-body form,
+#editOrderModal .modal-body form,
+#orderCreateCustomerModal .modal-body form {
+    background: rgba(255, 255, 255, 0.93);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+/* label + input nhìn rõ */
+#addOrderModal .modal-body label,
+#editOrderModal .modal-body label,
+#orderCreateCustomerModal .modal-body label {
+    color: #111827;
+    font-weight: 600;
+}
+
+#addOrderModal .form-control, #addOrderModal .form-select,
+#editOrderModal .form-control, #editOrderModal .form-select,
+#orderCreateCustomerModal .form-control, #orderCreateCustomerModal .form-select {
+    border-color: rgba(17, 24, 39, 0.18);
+}
+
+#addOrderModal .form-control:focus, #addOrderModal .form-select:focus,
+#editOrderModal .form-control:focus, #editOrderModal .form-select:focus,
+#orderCreateCustomerModal .form-control:focus, #orderCreateCustomerModal .form-select:focus {
+    border-color: rgba(59, 130, 246, 0.6);
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.2);
+}
+
+/* footer nền nhẹ */
+#addOrderModal .modal-footer,
+#editOrderModal .modal-footer,
+#checkOutModal .modal-footer,
+#orderCreateCustomerModal .modal-footer,
+#orderDetailModal .modal-footer {
+    background: rgba(0, 0, 0, 0.25);
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.detail-card {
+    background: rgba(255, 255, 255, 0.93);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+.detail-actions {
+    margin-top: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.actions-right {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+#orderDetailModal .order-detail-items-table th,
+#orderDetailModal .order-detail-items-table td {
+    vertical-align: middle;
+}
+
+/* ===== Realtime Validation ===== */
+.invalid-feedback {
+    display: block;
+    font-size: 0.875rem;
+}
+
+.is-valid {
+    border-color: #198754 !important;
+}
+
+.is-invalid {
+    border-color: #dc3545 !important;
+}
+
+.order-table-container {
+    height: 690px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    background: #fff;
+}
+
+.order-table-body {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.order-table-footer {
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 16px;
+    border-top: 1px solid #dee2e6;
+    background: #f8f9fa;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.order-table-footer .btn {
+    font-size: 15px; /* đồng bộ chữ */
+    padding: 6px 14px; /* nút đỡ nhỏ */
+}
+
+.order-table-footer .btn-sm {
+    font-size: 15px; /* override btn-sm */
+    padding: 6px 14px;
+}
+
+.order-table-footer span.fw-semibold {
+    font-size: 15.5px;
+}
+
+/* Giữ chiều cao header */
+.order-table-body thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #f8f9fa;
+}
+
+tr.self-row {
+    background: #fff3cd !important; /* vàng nhạt */
+    border-left: 4px solid #ffc107;
+}
+
+tr.self-row td:first-child {
+    font-weight: 700;
+}
+
+/* ===== ACTION DROPDOWN THEME ===== */
+.actions-toggle {
+    border-color: #cfd8dc;
+}
+
+.actions-toggle:hover {
+    border-color: #9fb6a3;
+}
+
+/* nền nhạt hơn #0a3710 */
+.actions-menu {
+    background: #124a18; /* nhạt hơn một chút so với #0a3710 */
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    padding: 8px;
+    min-width: 210px;
+}
+
+/* item */
+.actions-menu .dropdown-item {
+    color: rgba(255, 255, 255, 0.92) !important;
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+}
+
+/* icon trong item */
+.actions-menu .dropdown-item i {
+    width: 18px;
+    text-align: center;
+}
+
+/* hover */
+.actions-menu .dropdown-item:hover, .actions-menu .dropdown-item:focus {
+    background: rgba(255, 255, 255, 0.10);
+    color: #fff !important;
+}
+
+/* divider nhạt, dễ nhìn */
+.actions-menu .dropdown-divider {
+    margin: 8px 4px;
+    border-top: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+/* button trong dropdown (Reset/Lock/Delete) */
+.actions-menu button.dropdown-item {
+    width: 100%;
+    text-align: left;
+}
+
+/* Badge "You" nhìn cân hơn */
+.badge.you-badge {
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-weight: 700;
+}
+
+/* ================= ADD DRINK INGREDIENT MODAL ================= */
+/* nền ảnh + bo góc */
+#tablePickerModal .modal-content,
+#customerPickerModal .modal-content {
+    position: relative;
+    background: url("../../../img/modal-bg-customer.png") center/cover no-repeat;
+    border: 0;
+    overflow: hidden;
+    border-radius: 14px;
+}
+
+/* đưa content lên trên overlay */
+#tablePickerModal .modal-header, #tablePickerModal .modal-body,
+#tablePickerModal .modal-footer {
+    position: relative;
+    z-index: 1;
+}
+#customerPickerModal .modal-header, #customerPickerModal .modal-body,
+#customerPickerModal .modal-footer {
+    position: relative;
+    z-index: 1;
+}
+
+/* header rõ ràng hơn */
+#tablePickerModal .modal-header,
+#customerPickerModal .modal-header {
+    background: rgba(0, 0, 0, 0.35);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+#tablePickerModal .modal-title,
+#customerPickerModal .modal-title {
+    color: #fff;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+/* nút X dễ thấy trên nền tối */
+#tablePickerModal .btn-close,
+#customerPickerModal .btn-close {
+    filter: invert(1);
+    opacity: 0.85;
+}
+
+#tablePickerModal .btn-close:hover,
+#customerPickerModal .btn-close:hover {
+    opacity: 1;
+}
+
+/* ✅ Card trắng chứa nội dung picker */
+#tablePickerModal .picker-card,
+#customerPickerModal .picker-card {
+    background: rgba(255, 255, 255, 0.93);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+/* footer nền nhẹ */
+#tablePickerModal .modal-footer,
+#customerPickerModal .modal-footer {
+    background: rgba(0, 0, 0, 0.25);
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* ================= DRINK PICKER MODAL ================= */
+#drinkPickerModal .modal-content {
+    position: relative;
+    background: url("../../../img/modal-bg-customer.png") center/cover no-repeat;
+    border: 0;
+    overflow: hidden;
+    border-radius: 14px;
+}
+
+#drinkPickerModal .modal-header,
+#drinkPickerModal .modal-body,
+#drinkPickerModal .modal-footer {
+    position: relative;
+    z-index: 1;
+}
+
+#drinkPickerModal .modal-header {
+    background: rgba(0, 0, 0, 0.35);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+#drinkPickerModal .modal-title {
+    color: #fff;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+#drinkPickerModal .btn-close {
+    filter: invert(1);
+    opacity: 0.85;
+}
+
+#drinkPickerModal .btn-close:hover {
+    opacity: 1;
+}
+
+#drinkPickerModal .picker-card {
+    background: rgba(255, 255, 255, 0.93);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+#drinkPickerModal .modal-footer {
+    background: rgba(0, 0, 0, 0.25);
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* ================= SELECTED DRINK TABLE (ADD ORDER MODAL) ================= */
+.selected-drink-table-container {
+    height: 250px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    background: #fff;
+}
+
+.selected-drink-table-body {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.selected-drink-table-body thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #f8f9fa;
+}
+
+.qty-stepper {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px;
+    border: 1px solid #d6dde5;
+    border-radius: 999px;
+    background: #fff;
+}
+
+.qty-stepper .qty-btn {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+}
+
+.qty-stepper .qty-btn i {
+    font-size: 12px;
+}
+
+.qty-stepper .qty-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.selected-drink-qty {
+    width: 62px;
+    min-width: 62px;
+    height: 34px;
+    padding: 0 6px;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+.selected-drink-qty::-webkit-outer-spin-button,
+.selected-drink-qty::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.selected-drink-qty[type="number"] {
+    -moz-appearance: textfield;
+}
+
+@media (max-width: 768px) {
+    .qty-stepper .qty-btn {
+        width: 38px;
+        height: 38px;
+    }
+
+    .selected-drink-qty {
+        width: 68px;
+        min-width: 68px;
+        height: 38px;
+        font-size: 0.95rem;
+    }
+}
+
+/* ================= CHECKOUT MODAL ================= */
+#checkOutModal .checkout-form-card {
+    background: rgba(255, 255, 255, 0.96);
+    border-radius: 14px;
+    padding: 18px;
+    box-shadow: 0 12px 32px rgba(17, 24, 39, 0.2);
+}
+
+#checkOutModal .checkout-thanks {
+    font-weight: 700;
+    color: #0f5132;
+    background: linear-gradient(90deg, #e8f9f0, #f5fff9);
+    border: 1px solid #cbeed9;
+    border-radius: 10px;
+    padding: 10px 12px;
+}
+
+#checkOutModal .checkout-qr-box {
+    width: 156px;
+    height: 156px;
+    border: 1px solid #d9e2ec;
+    border-radius: 12px;
+    background: linear-gradient(160deg, #ffffff, #f3f6fb);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 0 0 1px #ffffff, 0 8px 18px rgba(17, 24, 39, 0.08);
+}
+
+#checkOutModal .checkout-left-panel {
+    padding-top: 6px;
+}
+
+#checkOutModal .checkout-section {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #fff;
+    padding: 12px;
+}
+
+#checkOutModal .checkout-section-title {
+    font-weight: 700;
+    color: #1f2937;
+}
+
+#checkOutModal .checkout-info-grid {
+    display: grid;
+    gap: 8px;
+}
+
+#checkOutModal .checkout-info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+#checkOutModal .checkout-info-label {
+    color: #6b7280;
+    font-weight: 600;
+}
+
+#checkOutModal .checkout-info-value {
+    color: #111827;
+    font-weight: 600;
+    text-align: right;
+}
+
+#checkOutModal .checkout-items-wrap {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 12px;
+    max-height: 240px;
+    overflow-y: auto;
+    background: #fff;
+}
+
+#checkOutModal .loyalty-box {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 12px;
+    background: #fff;
+}
+
+#checkOutModal .loyalty-box .form-check-label {
+    color: #1f2937;
+}
+
+#checkOutModal .checkout-total-panel {
+    border: 1px solid #dbe5e1;
+    border-radius: 12px;
+    padding: 12px;
+    background: linear-gradient(180deg, #f8fffb, #f2f8f5);
+}
+
+#checkOutModal .checkout-final-row {
+    margin-top: 6px;
+    padding-top: 8px;
+    border-top: 1px dashed #cddad4;
+}
+
+#checkOutModal .checkout-action-row form {
+    margin: 0;
+}
+
+@media (max-width: 767px) {
+    #checkOutModal .checkout-form-card {
+        padding: 14px;
+    }
+
+    #checkOutModal .checkout-left-panel {
+        margin-bottom: 4px;
+    }
+
+    #checkOutModal .checkout-info-item {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    #checkOutModal .checkout-info-value {
+        text-align: left;
+    }
+
+    #checkOutModal .checkout-action-row {
+        width: 100%;
+    }
+
+    #checkOutModal .checkout-action-row form,
+    #checkOutModal .checkout-action-row button {
+        flex: 1;
+    }
+}

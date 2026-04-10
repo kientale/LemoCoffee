@@ -1,0 +1,194 @@
+<!-- ===== Modal: Check Out ===== -->
+<div class="modal fade"
+     id="checkOutModal"
+     tabindex="-1"
+     aria-hidden="true"
+     th:fragment="modal">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <!-- Check Out Header -->
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fa-solid fa-receipt me-2"></i>Checkout
+                </h5>
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+
+            <!-- Check Out Body -->
+            <div class="modal-body">
+                <div class="checkout-form-card">
+                    <div class="checkout-thanks text-center mb-3">Thank you for choosing KeyCoffee.</div>
+
+                    <div class="row g-4 align-items-start checkout-main-layout">
+                        <div class="col-md-4 text-center checkout-left-panel">
+                            <div class="checkout-qr-box mx-auto">
+                                <svg viewBox="0 0 156 156" width="132" height="132" role="img" aria-label="QR placeholder">
+                                    <rect width="156" height="156" rx="14" fill="#ffffff"/>
+                                    <rect x="10" y="10" width="136" height="136" rx="10" fill="#f8fafc"/>
+                                    <g fill="#111827">
+                                        <rect x="18" y="18" width="36" height="36" rx="4"/>
+                                        <rect x="24" y="24" width="24" height="24" rx="2" fill="#ffffff"/>
+                                        <rect x="30" y="30" width="12" height="12" rx="2"/>
+
+                                        <rect x="102" y="18" width="36" height="36" rx="4"/>
+                                        <rect x="108" y="24" width="24" height="24" rx="2" fill="#ffffff"/>
+                                        <rect x="114" y="30" width="12" height="12" rx="2"/>
+
+                                        <rect x="18" y="102" width="36" height="36" rx="4"/>
+                                        <rect x="24" y="108" width="24" height="24" rx="2" fill="#ffffff"/>
+                                        <rect x="30" y="114" width="12" height="12" rx="2"/>
+
+                                        <rect x="68" y="66" width="8" height="8" rx="1"/>
+                                        <rect x="80" y="66" width="8" height="8" rx="1"/>
+                                        <rect x="92" y="66" width="8" height="8" rx="1"/>
+                                        <rect x="104" y="66" width="8" height="8" rx="1"/>
+                                        <rect x="62" y="78" width="8" height="8" rx="1"/>
+                                        <rect x="74" y="78" width="8" height="8" rx="1"/>
+                                        <rect x="86" y="78" width="8" height="8" rx="1"/>
+                                        <rect x="98" y="78" width="8" height="8" rx="1"/>
+                                        <rect x="68" y="90" width="8" height="8" rx="1"/>
+                                        <rect x="80" y="90" width="8" height="8" rx="1"/>
+                                        <rect x="92" y="90" width="8" height="8" rx="1"/>
+                                        <rect x="104" y="90" width="8" height="8" rx="1"/>
+                                        <rect x="62" y="102" width="8" height="8" rx="1"/>
+                                        <rect x="74" y="102" width="8" height="8" rx="1"/>
+                                        <rect x="86" y="102" width="8" height="8" rx="1"/>
+                                        <rect x="98" y="102" width="8" height="8" rx="1"/>
+                                        <rect x="62" y="114" width="8" height="8" rx="1"/>
+                                        <rect x="86" y="114" width="8" height="8" rx="1"/>
+                                        <rect x="110" y="114" width="8" height="8" rx="1"/>
+                                    </g>
+                                </svg>
+                            </div>
+                            <div class="text-muted small mt-2">Scan to Pay (Demo QR)</div>
+                        </div>
+
+                        <div class="col-md-8">
+                            <!-- Order Details -->
+                            <div class="checkout-section mb-3">
+                                <div class="checkout-section-title">Order Details</div>
+                                <div class="checkout-info-grid">
+                                    <div class="checkout-info-item">
+                                        <span class="checkout-info-label">Table</span>
+                                        <span class="checkout-info-value" id="checkoutTableName">-</span>
+                                    </div>
+
+                                    <div class="checkout-info-item">
+                                        <span class="checkout-info-label">Customer</span>
+                                        <span class="checkout-info-value">
+                                            <span id="checkoutCustomerName">-</span>
+                                            <span class="text-muted ms-1" id="checkoutCustomerPhone"></span>
+                                        </span>
+                                    </div>
+
+                                    <div class="checkout-info-item">
+                                        <span class="checkout-info-label">Current Points</span>
+                                        <span class="badge bg-warning text-dark" id="checkoutCustomerPoints">0</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Selected Drinks -->
+                            <div class="checkout-items-wrap mb-3 checkout-section">
+                                <div class="checkout-section-title mb-2">Selected Drinks</div>
+                                <div id="checkoutItemsList" class="small"></div>
+                            </div>
+
+                            <!-- Loyalty Program -->
+                            <div class="loyalty-box mb-3" id="checkoutLoyaltyBox">
+                                <div class="checkout-section-title mb-2">Loyalty Program</div>
+
+                                <div class="d-flex flex-wrap gap-3 mb-2">
+                                    <div class="form-check">
+                                        <input class="form-check-input"
+                                               type="radio"
+                                               name="checkoutLoyaltyAction"
+                                               id="checkoutLoyaltyEarn"
+                                               value="earn"
+                                               checked>
+                                        <label class="form-check-label" for="checkoutLoyaltyEarn">
+                                            Earn points (1 point per 10,000 VND)
+                                        </label>
+                                    </div>
+
+                                    <div class="form-check">
+                                        <input class="form-check-input"
+                                               type="radio"
+                                               name="checkoutLoyaltyAction"
+                                               id="checkoutLoyaltyRedeem"
+                                               value="redeem">
+                                        <label class="form-check-label" for="checkoutLoyaltyRedeem">
+                                            Redeem points (10 points for 1 free drink)
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="d-none" id="checkoutRedeemWrap">
+                                    <label class="form-label mb-1">Select a Free Drink</label>
+                                    <select class="form-select form-select-sm" id="checkoutFreeDrinkSelect"></select>
+                                </div>
+
+                                <div class="small text-muted mt-2" id="checkoutLoyaltyNotice"></div>
+                                <div class="small text-danger mt-1">
+                                    Note: You can redeem only 1 free drink per checkout.
+                                </div>
+                            </div>
+
+                            <!-- Pricing Summary -->
+                            <div class="checkout-total-panel">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="fw-semibold text-muted">Original Total</span>
+                                    <span class="fw-semibold text-muted" id="checkoutOriginalAmount">0 VND</span>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="fw-semibold text-danger">Discount</span>
+                                    <span class="fw-semibold text-danger" id="checkoutDiscountAmount">0 VND</span>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center checkout-final-row">
+                                    <span class="fw-bold">Final Amount</span>
+                                    <span class="fw-bold text-success" id="checkoutTotalAmount">0 VND</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Check Out Footer Actions -->
+                    <div class="mt-4 d-flex justify-content-end align-items-center flex-wrap gap-2">
+                        <div class="d-flex gap-2 checkout-action-row">
+                            <button type="button"
+                                    class="btn btn-outline-secondary"
+                                    data-bs-dismiss="modal">
+                                Close
+                            </button>
+
+                            <form id="checkoutConfirmForm"
+                                  method="post"
+                                  th:action="@{/order-management}">
+                                <input type="hidden" name="action" value="check-out">
+                                <input type="hidden"
+                                       th:if="${_csrf != null}"
+                                       th:name="${_csrf.parameterName}"
+                                       th:value="${_csrf.token}">
+                                <input type="hidden" name="id" id="checkoutOrderIdInput">
+                                <input type="hidden" name="loyaltyAction" id="checkoutLoyaltyActionInput" value="earn">
+                                <input type="hidden" name="freeDrinkId" id="checkoutFreeDrinkIdInput" value="">
+                                <input type="hidden" name="page" th:value="${pageNo}">
+                                <input type="hidden" name="keyword" th:value="${kw}">
+                                <button type="submit"
+                                        class="btn btn-success"
+                                        id="checkoutSubmitBtn">
+                                    Check Out
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="content">
+
+    <!-- ===== Modal: Add Drink ===== -->
+    <div class="modal fade" id="addDrinkModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-scrollable">
+            <div class="modal-content">
+
+                <!-- Add Modal Header -->
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Drink</h5>
+                </div>
+
+                <!-- Add Modal Body -->
+                <div class="modal-body">
+                    <form th:action="@{/drink-management}"
+                          method="post"
+                          enctype="multipart/form-data"
+                          id="createDrinkForm">
+
+                        <input type="hidden" name="action" value="create"/>
+                        <input type="hidden" name="page" th:value="${pageNo}">
+                        <input type="hidden" name="keyword" th:value="${kw}">
+
+                        <!-- Selected Ingredients JSON -->
+                        <input type="hidden"
+                               name="selectedIngredientsJson"
+                               id="selectedIngredientsJson"
+                               th:value="${selectedIngredientsJson == null or #strings.isEmpty(selectedIngredientsJson) ? '[]' : selectedIngredientsJson}">
+
+                        <!-- Create Form Errors -->
+                        <div th:if="${errors != null and !#lists.isEmpty(errors)}" class="alert alert-danger">
+                            <ul class="mb-0">
+                                <li th:each="e : ${errors}" th:text="${e}">Error message</li>
+                            </ul>
+                        </div>
+
+                        <!-- Client-side Errors -->
+                        <div class="alert alert-danger d-none" id="createDrinkClientErrors">
+                            <ul class="mb-0" id="createDrinkClientErrorsList"></ul>
+                        </div>
+
+                        <!-- Drink Form Fields -->
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Drink Name</label>
+                                <input name="name"
+                                       class="form-control"
+                                       placeholder="Enter drink name"
+                                       th:value="${formData != null ? formData.name : ''}">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Price (VND)</label>
+                                <input type="number"
+                                       name="price"
+                                       class="form-control"
+                                       min="0"
+                                       step="1000"
+                                       placeholder="Enter price"
+                                       th:value="${formData != null ? formData.price : ''}">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Drink Image</label>
+                                <input type="file"
+                                       name="image"
+                                       class="form-control"
+                                       accept="image/*"
+                                       required>
+                                <small class="text-muted">Only 1 image is allowed (PNG, JPG, JPEG)</small>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label class="form-label">Description</label>
+                                <textarea name="description"
+                                          class="form-control"
+                                          rows="3"
+                                          placeholder="Short description of the drink"
+                                          th:text="${formData != null ? formData.description : ''}"></textarea>
+                            </div>
+
+                            <!-- Selected Ingredients Section -->
+                            <div class="mt-4">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="fw-bold mb-0">Ingredient</h6>
+
+                                    <div class="d-flex gap-2">
+                                        <button type="button" class="btn btn-success btn-sm" id="btnOpenIngModal">
+                                            <span class="btn-text">
+                                                <i class="fa-solid fa-plus me-1"></i> Add Ingredient
+                                            </span>
+                                            <span class="spinner-border spinner-border-sm d-none" id="ingOpenSpinner"></span>
+                                        </button>
+
+                                        <button type="button" class="btn btn-outline-danger btn-sm" id="btnClearIngredients">
+                                            <i class="fa-solid fa-broom me-1"></i> Clear
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="selected-ingredient-table-container">
+                                    <div class="selected-ingredient-table-body">
+                                        <table class="table table-bordered table-hover align-middle mb-0 table-striped">
+                                            <thead class="table-light text-center">
+                                            <tr style="height: 52px;">
+                                                <th style="width: 70px;">#</th>
+                                                <th class="text-start">Name</th>
+                                                <th style="width: 140px;">Quantity</th>
+                                                <th style="width: 130px;">Unit</th>
+                                                <th style="width: 120px;">Action</th>
+                                            </tr>
+                                            </thead>
+
+                                            <tbody id="selectedIngredientTbody">
+                                            <tr id="ingredientEmptyRow">
+                                                <td colspan="5" class="text-center text-muted py-4">
+                                                    No ingredient selected
+                                                </td>
+                                            </tr>
+                                            </tbody>
+
+                                            <template id="selectedIngredientRowTpl">
+                                                <tr class="text-center" data-id="">
+                                                    <td class="col-no"></td>
+                                                    <td class="text-start fw-semibold col-name"></td>
+                                                    <td>
+                                                        <input type="number"
+                                                               class="form-control form-control-sm text-center selected-qty"
+                                                               step="0.01"
+                                                               min="0.01"
+                                                               value="1"
+                                                               data-stock="">
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-info text-dark col-unit"></span>
+                                                    </td>
+                                                    <td>
+                                                        <button type="button"
+                                                                class="btn btn-outline-danger btn-sm btn-remove-selected"
+                                                                data-id="">
+                                                            <i class="fa-solid fa-trash"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- Selected Ingredient Pagination -->
+                                <div class="mt-3 d-flex justify-content-end align-items-center gap-2 d-none" id="selectedPager">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" id="btnSelPrev">Prev</button>
+                                    <span class="fw-semibold small" id="selPageInfo">1 / 1</span>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" id="btnSelNext">Next</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Add Modal Footer Actions -->
+                        <div class="mt-4 text-end">
+                            <a th:href="@{/drink-management(page=${pageNo}, keyword=${kw})}"
+                               class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">Create</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</th:block>
+</html>

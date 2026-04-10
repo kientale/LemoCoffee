@@ -1,0 +1,447 @@
+<th:block xmlns:th="http://www.thymeleaf.org"
+          th:fragment="content"
+          th:with="
+                pageNo=${page == null ? 1 : page},
+                kw=${param.keyword != null ? param.keyword[0] : ''},
+                fd=${param.field != null ? param.field[0] : ''},
+                fdVal=${param.field != null and !#lists.isEmpty(param.field) ? param.field[0] : 'name'},
+                prevDisabled=${pageNo <= 1},
+                nextDisabled=${pageNo >= totalPages}
+          ">
+
+    <link rel="stylesheet" th:href="@{/css/page/warehouse-management.css(v=2)}">
+
+    <!-- ===== Warehouse Management Page ===== -->
+    <div class="admin-page">
+        <div class="admin-content">
+            <h3 class="mb-3 fw-bold">Warehouse Management</h3>
+
+            <!-- ===== Global Status Message ===== -->
+            <div th:if="${message != null and !#strings.isEmpty(message)}"
+                 class="alert alert-dismissible fade show"
+                 role="alert"
+                 th:classappend="${status != null and #strings.endsWith(status.name(), 'SUCCESS')} ? ' alert-success' : ' alert-warning'">
+                <span th:text="${message}">Message</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <!-- ===== Toolbar: Search + Add ===== -->
+            <div class="user-toolbar-wrap mb-3">
+                <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+                    <!-- Search Form -->
+                    <form id="warehouseSearchForm"
+                          th:action="@{/warehouse-management}"
+                          method="get"
+                          class="d-flex align-items-center gap-2 flex-wrap">
+                        <span class="toolbar-label fw-semibold">Search</span>
+
+                        <input type="text"
+                               name="keyword"
+                               class="form-control"
+                               placeholder="Enter keyword..."
+                               th:value="${kw}"
+                               style="width: 260px;">
+
+                        <span class="toolbar-label fw-semibold mx-1">By</span>
+
+                        <select name="field" class="form-select" style="width: 200px;">
+                            <option value="name" th:selected="${fdVal == 'name'}">Ingredient Name</option>
+                            <option value="supplier" th:selected="${fdVal == 'supplier'}">Supplier</option>
+                            <option value="unit" th:selected="${fdVal == 'unit'}">Unit</option>
+                        </select>
+
+                        <button type="submit" class="btn btn-primary fw-semibold">
+                            <i class="fa-solid fa-magnifying-glass me-1"></i> Search
+                        </button>
+
+                        <a th:href="@{/warehouse-management}" class="btn btn-outline-light fw-semibold">
+                            Reset
+                        </a>
+                    </form>
+
+                    <!-- Add Ingredient Button -->
+                    <button class="btn btn-warning fw-semibold"
+                            data-bs-toggle="modal"
+                            data-bs-target="#addIngredientModal">
+                        <i class="fa-solid fa-plus me-1"></i> Add New Ingredient
+                    </button>
+                </div>
+            </div>
+
+            <!-- ===== Ingredient Table ===== -->
+            <div class="ingredient-table-container">
+                <div class="ingredient-table-body">
+                    <table class="table table-bordered table-hover align-middle mb-0 table-striped">
+                        <!-- Table Header -->
+                        <thead class="table-light sticky-top text-center">
+                        <tr style="height: 56px;">
+                            <th style="width: 70px;">#</th>
+                            <th class="text-start">Name</th>
+                            <th>Quantity</th>
+                            <th class="text-start">Description</th>
+                            <th>Unit</th>
+                            <th>Supplier</th>
+                            <th>Status</th>
+                            <th style="width: 140px;">Action</th>
+                        </tr>
+                        </thead>
+
+                        <!-- Table Body -->
+                        <tbody>
+                        <tr th:if="${ingredients == null or #lists.isEmpty(ingredients)}">
+                            <td colspan="8" class="text-center py-4 text-muted">
+                                No Ingredient Found
+                            </td>
+                        </tr>
+
+                        <tr class="text-center"
+                            th:each="i, loop : ${ingredients}">
+                            <td th:text="${(pageNo - 1) * 12 + loop.index + 1}">1</td>
+
+                            <td class="text-start fw-semibold" th:text="${i.name}">Ingredient Name</td>
+
+                            <td th:text="${i.quantity}">0</td>
+
+                            <td class="text-start text-muted" th:text="${i.description}">Description</td>
+
+                            <td>
+                                <span class="badge bg-info text-dark" th:text="${i.unit}">Unit</span>
+                            </td>
+
+                            <td>
+                                <span class="badge bg-secondary" th:text="${i.supplier}">Supplier</span>
+                            </td>
+
+                            <td>
+                                <span class="badge"
+                                      th:classappend="${i.status != null and i.status.toString() == 'ACTIVE'} ? 'bg-success' : 'bg-secondary'"
+                                      th:text="${i.status}">
+                                    ACTIVE
+                                </span>
+                            </td>
+
+                            <td>
+                                <div class="dropdown text-center">
+                                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle actions-toggle"
+                                            data-bs-toggle="dropdown"
+                                            type="button">
+                                        Actions
+                                    </button>
+
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm actions-menu">
+                                        <li>
+                                            <a class="dropdown-item text-dark"
+                                               th:href="@{/warehouse-management(
+                                                    view='edit',
+                                                    id=${i.id},
+                                                    page=${pageNo},
+                                                    keyword=${kw},
+                                                    field=${fd}
+                                               )}">
+                                                <i class="fa-regular fa-pen-to-square me-2 text-warning"></i>
+                                                Edit Ingredient
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <hr class="dropdown-divider">
+                                        </li>
+
+                                        <li>
+                                            <button class="dropdown-item text-dark"
+                                                    type="button"
+                                                    onclick="openConfirmModal(this)"
+                                                    th:attr="data-confirm-title='Delete Ingredient',
+                                                             data-confirm-message='This ingredient will be permanently deleted. This action cannot be undone.',
+                                                             data-confirm-action='delete',
+                                                             data-confirm-ingredient-id=${i.id},
+                                                             data-confirm-btn-class='btn-danger'">
+                                                <i class="fa-solid fa-trash me-2 text-danger"></i> Delete
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- ===== Pagination Footer ===== -->
+                <div class="ingredient-table-footer">
+                    <div class="d-flex align-items-center gap-3 justify-content-end w-100">
+                        <span th:if="${prevDisabled}"
+                              class="btn btn-outline-secondary btn-sm disabled">
+                            Prev
+                        </span>
+
+                        <a th:unless="${prevDisabled}"
+                           class="btn btn-outline-secondary btn-sm"
+                           th:href="@{/warehouse-management(page=${pageNo - 1}, keyword=${kw}, field=${fd})}">
+                            Prev
+                        </a>
+
+                        <span class="fw-semibold small" th:text="|${pageNo} / ${totalPages}|">
+                            1 / 1
+                        </span>
+
+                        <span th:if="${nextDisabled}"
+                              class="btn btn-outline-secondary btn-sm disabled">
+                            Next
+                        </span>
+
+                        <a th:unless="${nextDisabled}"
+                           class="btn btn-outline-secondary btn-sm"
+                           th:href="@{/warehouse-management(page=${pageNo + 1}, keyword=${kw}, field=${fd})}">
+                            Next
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Modal: Add Ingredient ===== -->
+    <div class="modal fade" id="addIngredientModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-scrollable">
+            <div class="modal-content">
+
+                <!-- Add Modal Header -->
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Ingredient</h5>
+                </div>
+
+                <!-- Add Modal Body -->
+                <div class="modal-body">
+                    <form th:action="@{/warehouse-management}" method="post">
+                        <input type="hidden" name="action" value="create">
+                        <input type="hidden" name="page" th:value="${pageNo}">
+                        <input type="hidden" name="keyword" th:value="${kw}">
+                        <input type="hidden" name="field" th:value="${fd}">
+
+                        <!-- Create Form Errors -->
+                        <div th:if="${showCreateModal and errors != null and !#lists.isEmpty(errors)}"
+                             class="alert alert-danger">
+                            <ul class="mb-0">
+                                <li th:each="e : ${errors}" th:text="${e}">Error</li>
+                            </ul>
+                        </div>
+
+                        <!-- Add Ingredient Form Fields -->
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Ingredient Name</label>
+                                <input name="name"
+                                       class="form-control"
+                                       placeholder="Enter ingredient name"
+                                       th:value="${formData != null ? formData.name : ''}">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Quantity</label>
+                                <input type="number"
+                                       step="0.01"
+                                       min="0"
+                                       name="quantity"
+                                       class="form-control"
+                                       placeholder="0.00"
+                                       th:value="${formData != null ? formData.quantity : ''}">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Unit</label>
+                                <input name="unit"
+                                       class="form-control"
+                                       placeholder="kg, g, ml, box..."
+                                       th:value="${formData != null ? formData.unit : ''}">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Supplier</label>
+                                <input name="supplier"
+                                       class="form-control"
+                                       placeholder="Supplier name"
+                                       th:value="${formData != null ? formData.supplier : ''}">
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label">Description</label>
+                                <textarea name="description"
+                                          class="form-control"
+                                          rows="3"
+                                          placeholder="Optional description..."
+                                          th:text="${formData != null ? formData.description : ''}"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Add Modal Footer Actions -->
+                        <div class="mt-4 text-end">
+                            <a th:href="@{/warehouse-management(page=${pageNo}, keyword=${kw}, field=${fd})}"
+                               class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">Create</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Modal: Edit Ingredient ===== -->
+    <div class="modal fade" id="editIngredientModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-scrollable">
+            <div class="modal-content">
+                <!-- Edit Modal Header -->
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Ingredient</h5>
+                </div>
+
+                <!-- Edit Modal Body -->
+                <div class="modal-body">
+                    <form th:action="@{/warehouse-management}" method="post">
+                        <input type="hidden" name="action" value="edit">
+                        <input type="hidden" name="id" th:value="${formData != null ? formData.id : ''}">
+                        <input type="hidden" name="page" th:value="${pageNo}">
+                        <input type="hidden" name="keyword" th:value="${kw}">
+                        <input type="hidden" name="field" th:value="${fd}">
+
+                        <!-- Edit Form Errors -->
+                        <div th:if="${showEditModal and errors != null and !#lists.isEmpty(errors)}"
+                             class="alert alert-danger">
+                            <ul class="mb-0">
+                                <li th:each="e : ${errors}" th:text="${e}">Error</li>
+                            </ul>
+                        </div>
+
+                        <!-- Edit Ingredient Form Fields -->
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Ingredient Name</label>
+                                <input name="name"
+                                       class="form-control"
+                                       placeholder="Enter ingredient name"
+                                       th:value="${formData != null ? formData.name : ''}">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Quantity</label>
+                                <input type="number"
+                                       step="0.01"
+                                       min="0"
+                                       name="quantity"
+                                       class="form-control"
+                                       placeholder="0.00"
+                                       th:value="${formData != null ? formData.quantity : ''}">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Unit</label>
+                                <input name="unit"
+                                       class="form-control"
+                                       placeholder="kg, g, ml, box..."
+                                       th:value="${formData != null ? formData.unit : ''}">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Supplier</label>
+                                <input name="supplier"
+                                       class="form-control"
+                                       placeholder="Supplier name"
+                                       th:value="${formData != null ? formData.supplier : ''}">
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label">Description</label>
+                                <textarea name="description"
+                                          class="form-control"
+                                          rows="3"
+                                          placeholder="Optional description..."
+                                          th:text="${formData != null ? formData.description : ''}"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Edit Modal Footer Actions -->
+                        <div class="mt-4 d-flex justify-content-end gap-2">
+                            <a th:href="@{/warehouse-management(page=${pageNo}, keyword=${kw}, field=${fd})}"
+                               class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Modal: Confirm Action ===== -->
+    <div class="modal fade" id="confirmActionModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <!-- Confirm Header -->
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmModalTitle">Confirm Action</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <!-- Confirm Body -->
+                <div class="modal-body">
+                    <p id="confirmModalMessage" class="mb-0">Are you sure?</p>
+                </div>
+
+                <!-- Confirm Footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+
+                    <form id="confirmActionForm" method="post" th:action="@{/warehouse-management}">
+                        <input type="hidden" name="action" id="confirmActionInput">
+                        <input type="hidden" name="id" id="confirmIngredientIdInput">
+
+                        <input type="hidden" name="page" th:value="${pageNo}">
+                        <input type="hidden" name="keyword" th:value="${kw}">
+                        <input type="hidden" name="field" th:value="${fd}">
+
+                        <button type="submit" class="btn btn-danger" id="confirmActionBtn">Confirm</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Page Scripts ===== -->
+    <script th:src="@{/js/warehouse-management.js(v=2)}" defer></script>
+
+    <script th:inline="javascript">
+        document.addEventListener("DOMContentLoaded", () => {
+            const alertEl = document.querySelector(".alert.alert-dismissible");
+            if (alertEl) {
+                setTimeout(() => {
+                    if (window.bootstrap?.Alert) {
+                        bootstrap.Alert.getOrCreateInstance(alertEl).close();
+                    } else {
+                        alertEl.remove();
+                    }
+                }, 5000);
+            }
+
+            const showCreateModal = /*[[${showCreateModal != null and showCreateModal}]]*/ false;
+            const showEditModal = /*[[${showEditModal != null and showEditModal}]]*/ false;
+
+            if (showCreateModal) {
+                const el = document.getElementById("addIngredientModal");
+                if (el && window.bootstrap) {
+                    bootstrap.Modal.getOrCreateInstance(el).show();
+                }
+            }
+
+            if (showEditModal) {
+                const el = document.getElementById("editIngredientModal");
+                if (el && window.bootstrap) {
+                    bootstrap.Modal.getOrCreateInstance(el).show();
+                }
+            }
+        });
+    </script>
+
+</th:block>

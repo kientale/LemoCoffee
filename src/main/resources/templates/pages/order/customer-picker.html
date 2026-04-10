@@ -1,0 +1,82 @@
+<!-- ===== Customer Picker Fragment ===== -->
+<div class="table-table-container"
+     id="customerPickerFragment"
+     th:fragment="customerPickerFragment"
+     th:with="
+        customerPageNo=${customerPage == null ? 1 : customerPage},
+        selectedCustomerIdValue=${selectedCustomerId != null ? selectedCustomerId : param.selectedCustomerId},
+        safeTotalPages=${customerTotalPages == null or customerTotalPages < 1 ? 1 : customerTotalPages}
+     ">
+    <div class="table-table-body">
+        <div th:if="${customers == null or #lists.isEmpty(customers)}"
+             class="d-flex flex-column align-items-center justify-content-center text-muted"
+             style="height: 400px;">
+            <i class="fa-solid fa-user-slash fs-1 mb-3"></i>
+            <div>No customer found</div>
+        </div>
+
+        <table th:if="${customers != null and !#lists.isEmpty(customers)}"
+               class="table table-bordered table-hover align-middle mb-0 table-striped">
+            <thead class="table-light sticky-top text-center">
+            <tr style="height: 56px;">
+                <th style="width: 70px;">#</th>
+                <th class="text-start">Customer Name</th>
+                <th style="width: 170px;">Phone</th>
+                <th style="width: 120px;">Points</th>
+                <th style="width: 150px;">Action</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr th:each="c, loop : ${customers}"
+                th:with="isSelected=${selectedCustomerIdValue == c.id}"
+                class="text-center"
+                th:classappend="${isSelected} ? ' self-row' : ''">
+                <td th:text="${(customerPageNo - 1) * 10 + loop.index + 1}"></td>
+
+                <td class="text-start fw-semibold" th:text="${c.fullName}"></td>
+
+                <td th:text="${c.phone == null or #strings.isEmpty(c.phone) ? '-' : c.phone}"></td>
+
+                <td>
+                        <span class="badge bg-info text-dark"
+                              th:text="${#numbers.formatInteger(c.points, 1, 'COMMA')}">
+                        </span>
+                </td>
+
+                <td>
+                    <button type="button"
+                            class="btn btn-sm btn-pick-customer"
+                            th:classappend="${isSelected} ? ' btn-outline-secondary' : ' btn-success'"
+                            th:attr="data-id=${c.id},data-name=${c.fullName}"
+                            th:disabled="${isSelected}"
+                            th:text="${isSelected} ? 'Selected' : 'Select Customer'">
+                    </button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ===== Picker Pagination ===== -->
+    <div class="table-table-footer">
+        <div class="d-flex align-items-center gap-3 justify-content-end w-100">
+            <button type="button"
+                    class="btn btn-outline-secondary btn-sm"
+                    th:attr="data-customer-page=${customerPageNo - 1}"
+                    th:disabled="${customerPageNo <= 1}">
+                Prev
+            </button>
+
+            <span class="fw-semibold small"
+                  th:text="${customerPageNo + ' / ' + safeTotalPages}"></span>
+
+            <button type="button"
+                    class="btn btn-outline-secondary btn-sm"
+                    th:attr="data-customer-page=${customerPageNo + 1}"
+                    th:disabled="${customerPageNo >= safeTotalPages}">
+                Next
+            </button>
+        </div>
+    </div>
+</div>

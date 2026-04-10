@@ -1,0 +1,92 @@
+<!-- ===== Table Picker Fragment ===== -->
+<div class="table-table-container"
+     id="tablePickerFragment"
+     th:fragment="tablePickerFragment"
+     th:with="
+        tablePageNo=${tablePage == null ? 1 : tablePage},
+        selectedTableIdValue=${selectedTableId != null ? selectedTableId : param.selectedTableId},
+        safeTotalPages=${tableTotalPages == null or tableTotalPages < 1 ? 1 : tableTotalPages}
+     ">
+    <div class="table-table-body">
+        <div th:if="${tables == null or #lists.isEmpty(tables)}"
+             class="d-flex flex-column align-items-center justify-content-center text-muted"
+             style="height: 400px;">
+            <i class="fa-solid fa-chair-empty fs-1 mb-3"></i>
+            <div>No table found</div>
+        </div>
+
+        <table th:if="${tables != null and !#lists.isEmpty(tables)}"
+               class="table table-bordered table-hover align-middle mb-0 table-striped">
+            <thead class="table-light sticky-top text-center">
+            <tr style="height: 56px;">
+                <th style="width: 70px;">#</th>
+                <th class="text-start">Table Name</th>
+                <th style="width: 120px;">Capacity</th>
+                <th style="width: 140px;">Status</th>
+                <th style="width: 150px;">Action</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr th:each="t, loop : ${tables}"
+                th:with="isSelected=${selectedTableIdValue == t.id}"
+                class="text-center"
+                th:classappend="${isSelected} ? ' self-row' : ''">
+
+                <td th:text="${(tablePageNo - 1) * 10 + loop.index + 1}"></td>
+
+                <td class="text-start fw-semibold"
+                    th:text="${t.tableName}"></td>
+
+                <td>
+                        <span class="badge bg-info text-dark"
+                              th:text="${t.capacity + ' seats'}"></span>
+                </td>
+
+                <td>
+                        <span class="badge"
+                              th:classappend="${t.status == 'AVAILABLE'} ? ' bg-success'
+                                              : (${t.status == 'OCCUPIED'} ? ' bg-danger'
+                                              : (${t.status == 'RESERVED'} ? ' bg-warning text-dark'
+                                              : (${t.status == 'DELETED'} ? ' bg-secondary text-decoration-line-through'
+                                              : ' bg-secondary')))"
+                              th:text="${t.status}">
+                        </span>
+                </td>
+
+                <td>
+                    <button type="button"
+                            class="btn btn-sm btn-pick-table"
+                            th:classappend="${isSelected} ? ' btn-outline-secondary' : ' btn-success'"
+                            th:attr="data-id=${t.id},data-name=${t.tableName}"
+                            th:disabled="${isSelected}"
+                            th:text="${isSelected} ? 'Selected' : 'Select Table'">
+                    </button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ===== Picker Pagination ===== -->
+    <div class="table-table-footer">
+        <div class="d-flex align-items-center gap-3 justify-content-end w-100">
+            <button type="button"
+                    class="btn btn-outline-secondary btn-sm btn-table-page"
+                    th:attr="data-table-page=${tablePageNo - 1}"
+                    th:disabled="${tablePageNo <= 1}">
+                Prev
+            </button>
+
+            <span class="fw-semibold small"
+                  th:text="${tablePageNo + ' / ' + safeTotalPages}"></span>
+
+            <button type="button"
+                    class="btn btn-outline-secondary btn-sm btn-table-page"
+                    th:attr="data-table-page=${tablePageNo + 1}"
+                    th:disabled="${tablePageNo >= safeTotalPages}">
+                Next
+            </button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,64 @@
+@charset "UTF-8";
+
+.table-table-container {
+    height: 600px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    background: #fff;
+}
+
+.table-table-body {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.table-table-footer {
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    border-top: 1px solid #dee2e6;
+    background: #f8f9fa;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.table-table-footer .small {
+    font-size: 15.5px; /* hoặc 16px nếu muốn đều hẳn */
+    font-weight: 500;
+    color: #495057;
+}
+
+.table-table-footer .btn {
+    font-size: 15px; /* đồng bộ chữ */
+    padding: 6px 14px; /* nút đỡ nhỏ */
+}
+
+.table-table-footer .btn-sm {
+    font-size: 15px; /* override btn-sm */
+    padding: 6px 14px;
+}
+
+.table-table-footer span.fw-semibold {
+    font-size: 15.5px;
+}
+
+/* Giữ chiều cao header */
+.table-table-body thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #f8f9fa;
+}
+
+tr.self-row {
+    background: #fff3cd !important; /* vàng nhạt */
+    border-left: 4px solid #ffc107;
+}
+
+tr.self-row td:first-child {
+    font-weight: 700;
+}

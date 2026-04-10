@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block
+        th:fragment="content"
+        th:with="
+            pageNo=${page == null ? 1 : page},
+            kw=${param.keyword},
+            prevDisabled=${pageNo <= 1},
+            nextDisabled=${pageNo >= totalPages},
+            prevPage=${pageNo <= 1 ? 1 : pageNo - 1},
+            nextPage=${pageNo >= totalPages ? totalPages : pageNo + 1}
+        ">
+
+    <link rel="stylesheet" th:href="@{/css/page/drink/drink-management.css(v=4)}">
+    <link rel="stylesheet" th:href="@{/css/page/drink/ingredient-picker.css}">
+
+    <!-- ===== Drink Management Page ===== -->
+    <div class="admin-page">
+        <div class="admin-content">
+            <h3 class="mb-3 fw-bold">Menu Management</h3>
+
+            <!-- ===== Global Status Message ===== -->
+            <div th:if="${message != null and !#strings.isEmpty(message)}"
+                 class="alert alert-dismissible fade show"
+                 th:classappend="${status != null and #strings.endsWith(status.name(), 'SUCCESS')} ? ' alert-success' : ' alert-warning'"
+                 role="alert">
+                <span th:text="${message}">Message</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <!-- ===== Toolbar: Search + Add ===== -->
+            <div class="user-toolbar-wrap mb-3">
+                <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+
+                    <!-- Search Form -->
+                    <form id="drinkSearchForm"
+                          th:action="@{/drink-management}"
+                          method="get"
+                          class="d-flex align-items-center gap-2 flex-wrap">
+                        <span class="toolbar-label fw-semibold">Search</span>
+
+                        <input type="text"
+                               name="keyword"
+                               class="form-control"
+                               placeholder="Enter keyword..."
+                               th:value="${param.keyword}"
+                               style="width: 260px;">
+
+                        <button type="submit" class="btn btn-primary fw-semibold">
+                            <i class="fa-solid fa-magnifying-glass me-1"></i> Search
+                        </button>
+
+                        <a th:href="@{/drink-management}" class="btn btn-outline-light fw-semibold">
+                            Reset
+                        </a>
+                    </form>
+
+                    <!-- Add Drink Button -->
+                    <button type="button"
+                            class="btn btn-warning fw-semibold"
+                            id="btnOpenCreateDrink"
+                            data-bs-toggle="modal"
+                            data-bs-target="#addDrinkModal">
+                        <i class="fa-solid fa-plus me-1"></i> Add New Drink
+                    </button>
+                </div>
+            </div>
+
+            <!-- ===== Drink Table ===== -->
+            <div class="drink-table-wrapper" id="drinkTableWrapper">
+                <div class="drink-table-container">
+                    <div class="drink-table-body">
+                        <table class="table table-bordered table-hover align-middle mb-0 table-striped">
+
+                            <!-- Table Header -->
+                            <thead class="table-light sticky-top text-center">
+                            <tr style="height: 56px;">
+                                <th style="width: 70px;">#</th>
+                                <th class="text-start">Name</th>
+                                <th style="width: 120px;">Price</th>
+                                <th class="text-start">Description</th>
+                                <th style="width: 110px;">Image</th>
+                                <th style="width: 140px;">Status</th>
+                                <th style="width: 140px;">Action</th>
+                            </tr>
+                            </thead>
+
+                            <!-- Table Body -->
+                            <tbody>
+                            <tr th:if="${drinks == null or #lists.isEmpty(drinks)}">
+                                <td colspan="7" class="text-center py-4 text-muted">
+                                    No Drink Found
+                                </td>
+                            </tr>
+
+                            <tr th:each="d, loop : ${drinks}"
+                                th:with="drinkStatus=${d.status == null ? '' : d.status.name()}"
+                                class="text-center">
+                                <td th:text="${(pageNo - 1) * 7 + loop.index + 1}">1</td>
+
+                                <td class="text-start fw-semibold" th:text="${d.name}">Drink Name</td>
+
+                                <td>
+                                    <span class="fw-semibold text-success"
+                                          th:text="|${#numbers.formatDecimal(d.price, 0, 'COMMA', 0, 'POINT')} đ|">
+                                        0 đ
+                                    </span>
+                                </td>
+
+                                <td class="text-start text-muted" th:text="${d.description}">
+                                    Description
+                                </td>
+
+                                <td>
+                                    <img th:if="${d.image != null and !#strings.isEmpty(d.image)}"
+                                         th:src="@{__${#strings.startsWith(d.image, '/') ? d.image : '/' + d.image}__}"
+                                         th:alt="${d.name}"
+                                         style="width: 60px; height: 60px; object-fit: cover;"
+                                         class="rounded border">
+
+                                    <span th:if="${d.image == null or #strings.isEmpty(d.image)}"
+                                          class="text-muted small">
+                                        No image
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="badge"
+                                          th:classappend="${drinkStatus == 'AVAILABLE'}
+                                                          ? ' bg-success'
+                                                          : (${drinkStatus == 'UNAVAILABLE'}
+                                                             ? ' bg-warning text-dark'
+                                                             : ' bg-secondary')"
+                                          th:text="${drinkStatus}">
+                                        STATUS
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <div class="dropdown text-center">
+                                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle actions-toggle"
+                                                data-bs-toggle="dropdown">
+                                            Actions
+                                        </button>
+
+                                        <ul class="dropdown-menu dropdown-menu-end shadow-sm actions-menu">
+                                            <li>
+                                                <a class="dropdown-item text-dark"
+                                                   th:href="@{/drink-management(view='detail', id=${d.id}, page=${pageNo}, keyword=${kw})}">
+                                                    <i class="fa-regular fa-eye me-2 text-primary"></i> View Detail
+                                                </a>
+                                            </li>
+
+                                            <li>
+                                                <a class="dropdown-item text-dark"
+                                                   th:href="@{/drink-management(view='edit', id=${d.id}, page=${pageNo}, keyword=${kw})}">
+                                                    <i class="fa-regular fa-pen-to-square me-2 text-warning"></i> Edit Drink
+                                                </a>
+                                            </li>
+
+                                            <!-- Status Toggle -->
+                                            <li th:if="${drinkStatus == 'AVAILABLE'}">
+                                                <button type="button"
+                                                        class="dropdown-item text-dark"
+                                                        data-confirm-title="Mark as Unavailable"
+                                                        data-confirm-message="Are you sure you want to mark this drink as UNAVAILABLE?"
+                                                        data-confirm-action="unavailable"
+                                                        data-confirm-btn-class="btn-warning"
+                                                        th:data-drink-id="${d.id}"
+                                                        th:data-form-action="@{/drink-management}">
+                                                    <i class="fa-solid fa-eye-slash me-2 text-warning"></i> Unavailable
+                                                </button>
+                                            </li>
+
+                                            <li th:if="${drinkStatus == 'UNAVAILABLE'}">
+                                                <button type="button"
+                                                        class="dropdown-item text-dark"
+                                                        data-confirm-title="Mark as Available"
+                                                        data-confirm-message="Are you sure you want to mark this drink as AVAILABLE?"
+                                                        data-confirm-action="available"
+                                                        data-confirm-btn-class="btn-success"
+                                                        th:data-drink-id="${d.id}"
+                                                        th:data-form-action="@{/drink-management}">
+                                                    <i class="fa-solid fa-eye me-2 text-success"></i> Available
+                                                </button>
+                                            </li>
+
+                                            <li>
+                                                <hr class="dropdown-divider">
+                                            </li>
+
+                                            <li>
+                                                <button type="button"
+                                                        class="dropdown-item text-dark"
+                                                        data-confirm-title="Delete Drink"
+                                                        data-confirm-message="This drink will be permanently deleted. This action cannot be undone."
+                                                        data-confirm-action="delete"
+                                                        data-confirm-btn-class="btn-danger"
+                                                        th:data-drink-id="${d.id}"
+                                                        th:data-form-action="@{/drink-management}">
+                                                    <i class="fa-solid fa-trash me-2 text-danger"></i> Delete Drink
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- ===== Pagination Footer ===== -->
+                    <div class="drink-table-footer">
+                        <div class="d-flex align-items-center gap-3 justify-content-end w-100">
+                            <a class="btn btn-outline-secondary btn-sm"
+                               th:classappend="${prevDisabled} ? ' disabled' : ''"
+                               th:href="@{/drink-management(page=${prevPage}, keyword=${kw})}">
+                                Prev
+                            </a>
+
+                            <span class="fw-semibold small" th:text="|${pageNo} / ${totalPages}|">1 / 1</span>
+
+                            <a class="btn btn-outline-secondary btn-sm"
+                               th:classappend="${nextDisabled} ? ' disabled' : ''"
+                               th:href="@{/drink-management(page=${nextPage}, keyword=${kw})}">
+                                Next
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Modals ===== -->
+    <th:block th:replace="~{pages/drink/add-drink :: content}"></th:block>
+    <th:block th:replace="~{pages/drink/add-ingredient :: content}"></th:block>
+    <th:block th:replace="~{pages/drink/edit-drink :: content}"></th:block>
+    <th:block th:replace="~{pages/drink/drink-detail :: content}"></th:block>
+
+    <!-- ===== Modal: Confirm Action ===== -->
+    <div class="modal fade" id="confirmActionModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+                <!-- Confirm Header -->
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmModalTitle">Confirm Action</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <!-- Confirm Body -->
+                <div class="modal-body">
+                    <p id="confirmModalMessage" class="mb-0">Are you sure?</p>
+                </div>
+
+                <!-- Confirm Footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+
+                    <form id="confirmActionForm" method="post" th:action="@{/drink-management}">
+                        <input type="hidden" name="action" id="confirmActionInput">
+                        <input type="hidden" name="id" id="confirmDrinkIdInput">
+
+                        <input type="hidden" name="page" th:value="${pageNo}">
+                        <input type="hidden" name="keyword" th:value="${kw}">
+
+                        <button type="submit" class="btn btn-danger" id="confirmActionBtn">Confirm</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Page Scripts ===== -->
+    <script th:inline="javascript">
+        document.addEventListener("DOMContentLoaded", () => {
+            const alertEl = document.querySelector(".alert.alert-dismissible");
+            if (alertEl) {
+                setTimeout(() => {
+                    if (window.bootstrap?.Alert) {
+                        bootstrap.Alert.getOrCreateInstance(alertEl).close();
+                    } else {
+                        alertEl.remove();
+                    }
+                }, 5000);
+            }
+
+            document.addEventListener("click", (event) => {
+                const trigger = event.target.closest("[data-confirm-action]");
+                if (!trigger || !window.openConfirmModal) return;
+
+                window.openConfirmModal({
+                    title: trigger.dataset.confirmTitle,
+                    message: trigger.dataset.confirmMessage,
+                    action: trigger.dataset.confirmAction,
+                    drinkId: trigger.dataset.drinkId,
+                    btnClass: trigger.dataset.confirmBtnClass,
+                    formAction: trigger.dataset.formAction
+                });
+            });
+        });
+
+        window.CTX = /*[[@{/}]]*/ '/';
+        window.DRINK_ENDPOINT = /*[[@{/drink-management}]]*/ '/drink-management';
+        window.DRINK_MODAL_FLAGS = {
+            showCreateModal: /*[[${showCreateModal != null and showCreateModal}]]*/ false,
+            showEditModal: /*[[${showEditModal != null and showEditModal}]]*/ false,
+            showDetailModal: /*[[${showDetailModal != null and showDetailModal}]]*/ false
+        };
+    </script>
+
+    <script th:src="@{/js/drink/drink-management.js(v=4)}"></script>
+    <script th:src="@{/js/drink/drink-form.js(v=2)}"></script>
+    <script th:src="@{/js/drink/ingredient-selection-manager.js(v=3)}"></script>
+    <script th:src="@{/js/drink/add-drink.js(v=6)}"></script>
+    <script th:src="@{/js/drink/edit-drink.js(v=5)}"></script>
+    <script th:src="@{/js/drink/drink-detail.js(v=2)}"></script>
+    <script th:src="@{/js/drink/add-ingredient.js(v=8)}"></script>
+    <script th:src="@{/js/drink/ingredient-picker.js(v=8)}"></script>
+
+</th:block>
+</html>
