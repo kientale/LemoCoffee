@@ -11,11 +11,5 @@ public interface OrderItemService {
 
     List<OrderItem> findItemsByOrderId(Integer orderId);
 
-    List<OrderItemDTO> getItemDTOsByOrderId(Integer orderId);
-
     BigDecimal replaceOrderItems(Order order, String selectedDrinksJson);
-
-    void deleteItemsByOrderId(Integer orderId);
-
-    boolean hasItems(Integer orderId);
 }

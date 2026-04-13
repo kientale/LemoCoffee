@@ -31,23 +31,16 @@ public class TableServiceImpl implements TableService {
 
     @Override
     public Page<TableTableDTO> getTable(int page, int size, String keyword) {
+
         int pageNo = Math.max(1, page);
         int pageSize = Math.max(1, size);
+        String kw = normalize(keyword);
 
         Pageable pageable = PageRequest.of(pageNo - 1, pageSize, Sort.by(Sort.Direction.DESC, "id"));
 
-        String kw = normalize(keyword);
-
-        Page<CoffeeTable> tablePage;
-
-        if (kw.isEmpty()) {
-            tablePage = tableRepository.findByStatusNot(TableStatusEnum.DELETED,pageable);
-        } else {
-            tablePage = tableRepository.findByTableNameContainingIgnoreCaseAndStatusNot(
-                    kw,
-                    TableStatusEnum.DELETED,
-                    pageable);
-        }
+        Page<CoffeeTable> tablePage = kw.isEmpty() ?
+                tableRepository.findByStatusNot(TableStatusEnum.DELETED, pageable) :
+                tableRepository.findByTableNameContainingIgnoreCaseAndStatusNot(kw, TableStatusEnum.DELETED, pageable);
 
         return tablePage.map(tableMapper::toTableTableDTO);
     }
@@ -68,6 +61,7 @@ public class TableServiceImpl implements TableService {
 
             tableRepository.save(table);
             return TableManagementResult.CREATE_SUCCESS;
+
         } catch (Exception e) {
             log.error("Failed to create table with capacity={}", formData.getCapacity(), e);
             return TableManagementResult.CREATE_FAILED;
@@ -86,6 +80,7 @@ public class TableServiceImpl implements TableService {
     public TableManagementResult updateTable(TableInfoDTO formData) {
         try {
             CoffeeTable table = findTableById(formData.getId());
+
             if (table == null || table.getStatus() == TableStatusEnum.DELETED) {
                 return TableManagementResult.TABLE_NOT_FOUND;
             }
@@ -93,6 +88,7 @@ public class TableServiceImpl implements TableService {
             table.setCapacity(formData.getCapacity());
             tableRepository.save(table);
             return TableManagementResult.UPDATE_SUCCESS;
+
         } catch (Exception e) {
             log.error("Failed to update table id={}", formData.getId(), e);
             return TableManagementResult.UPDATE_FAILED;
@@ -115,6 +111,7 @@ public class TableServiceImpl implements TableService {
             table.setStatus(status);
             tableRepository.save(table);
             return TableManagementResult.DELETE_SUCCESS;
+
         } catch (Exception e) {
             log.error("Failed to delete table id={}", id, e);
             return TableManagementResult.DELETE_FAILED;

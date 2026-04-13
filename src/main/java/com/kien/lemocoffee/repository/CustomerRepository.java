@@ -3,6 +3,7 @@ package com.kien.lemocoffee.repository;
 import com.kien.lemocoffee.entity.Customer;
 import com.kien.lemocoffee.constant.CustomerStatusEnum;
 import com.kien.lemocoffee.dto.TopCustomerStatisticProjection;
+import io.micrometer.common.lang.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -23,7 +24,8 @@ public interface CustomerRepository extends JpaRepository<Customer, Integer> {
             Pageable pageable
     );
 
-    Optional<Customer> findById(Integer id);
+    @NonNull
+    Optional<Customer> findById(@NonNull Integer id);
 
     Optional<Customer> findByPhone(String phone);
 
@@ -39,7 +41,7 @@ public interface CustomerRepository extends JpaRepository<Customer, Integer> {
                         c.phone as customerPhone,
                         coalesce(c.points, 0) as currentPoints,
                         count(o.id) as totalOrders,
-                        coalesce(sum(coalesce(o.final_amount, o.total_amount, 0)), 0) as totalSpent
+                        coalesce(sum(o.final_amount), 0) as totalSpent
                     from customer c
                     join coffee_order o on o.customer_id = c.id
                     where o.status = 'COMPLETED'

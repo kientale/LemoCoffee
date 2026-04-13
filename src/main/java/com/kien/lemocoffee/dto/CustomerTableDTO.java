@@ -9,7 +9,6 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class CustomerTableDTO {
-
     private Integer id;
 
     private String fullName;

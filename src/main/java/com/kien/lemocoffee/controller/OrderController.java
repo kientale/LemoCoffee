@@ -10,6 +10,7 @@ import com.kien.lemocoffee.dto.DrinkTableDTO;
 import com.kien.lemocoffee.dto.OrderInfoDTO;
 import com.kien.lemocoffee.dto.OrderItemDTO;
 import com.kien.lemocoffee.dto.OrderTableDTO;
+import com.kien.lemocoffee.dto.SelectedDrinkDTO;
 import com.kien.lemocoffee.dto.TableTableDTO;
 import com.kien.lemocoffee.service.CustomerService;
 import com.kien.lemocoffee.service.DrinkService;
@@ -212,6 +213,7 @@ public class OrderController {
             RedirectAttributes redirectAttributes
     ) {
         List<String> errors = orderValidator.validateForCreate(formData);
+
         if (!errors.isEmpty()) {
             loadOrderList(page, keyword, model);
             setViewState(
@@ -230,6 +232,7 @@ public class OrderController {
         }
 
         OrderManagementResult result = orderService.createOrder(formData);
+
         if (result != OrderManagementResult.CREATE_SUCCESS) {
             loadOrderList(page, keyword, model);
             setViewState(
@@ -369,11 +372,11 @@ public class OrderController {
     }
 
     private void loadOrderList(int page, String keyword, Model model) {
-        int pageNo = Math.max(1, page);
-        Page<OrderTableDTO> orderPage = orderService.getOrder(pageNo, PAGE_SIZE, keyword);
+
+        Page<OrderTableDTO> orderPage = orderService.getOrder(page, PAGE_SIZE, keyword);
 
         model.addAttribute("orders", orderPage.getContent());
-        model.addAttribute("page", pageNo);
+        model.addAttribute("page", page);
         model.addAttribute("totalPages", Math.max(orderPage.getTotalPages(), 1));
     }
 
@@ -422,38 +425,6 @@ public class OrderController {
         model.addAttribute("selectedDrinkIds", parseSelectedIds(selectedDrinkIds));
     }
 
-    private void setViewState(
-            Model model,
-            boolean showCreateModal,
-            boolean showEditModal,
-            boolean showDetailModal,
-            List<String> errors,
-            OrderInfoDTO formData,
-            OrderInfoDTO editOrder,
-            OrderInfoDTO detailOrder,
-            String selectedDrinksJson,
-            String selectedDrinksJsonEdit
-    ) {
-        model.addAttribute("showCreateModal", showCreateModal);
-        model.addAttribute("showEditModal", showEditModal);
-        model.addAttribute("showDetailModal", showDetailModal);
-
-        model.addAttribute("errors", errors);
-        model.addAttribute("formData", formData == null ? new OrderInfoDTO() : formData);
-        model.addAttribute("editOrder", editOrder == null ? new OrderInfoDTO() : editOrder);
-        model.addAttribute("detailOrder", detailOrder);
-        model.addAttribute("detailOrderItems", getOrderItems(detailOrder));
-
-        model.addAttribute("selectedDrinksJson", defaultSelectedJson(selectedDrinksJson));
-        model.addAttribute("selectedDrinksJsonEdit", defaultSelectedJson(selectedDrinksJsonEdit));
-    }
-
-    private String renderPage(Model model) {
-        model.addAttribute("activePage", "order-management");
-        model.addAttribute("content", CONTENT);
-        return LAYOUT;
-    }
-
     private String redirectWithValidationErrors(
             RedirectAttributes redirectAttributes,
             List<String> errors,
@@ -499,7 +470,7 @@ public class OrderController {
             return EMPTY_SELECTED_DRINKS_JSON;
         }
 
-        List<Map<String, Object>> selectedDrinks = items.stream()
+        List<SelectedDrinkDTO> selectedDrinks = items.stream()
                 .map(this::toSelectedDrinkPayload)
                 .toList();
 
@@ -510,16 +481,13 @@ public class OrderController {
         }
     }
 
-    private Map<String, Object> toSelectedDrinkPayload(OrderItemDTO item) {
-        Map<String, Object> payload = new LinkedHashMap<>();
-        payload.put("id", item.getDrinkId());
-        payload.put("drinkId", item.getDrinkId());
-        payload.put("name", item.getDrinkName());
-        payload.put("drinkName", item.getDrinkName());
-        payload.put("price", item.getUnitPrice());
-        payload.put("unitPrice", item.getUnitPrice());
-        payload.put("quantity", item.getQuantity());
-        return payload;
+    private SelectedDrinkDTO toSelectedDrinkPayload(OrderItemDTO item) {
+        return SelectedDrinkDTO.builder()
+                .drinkId(item.getDrinkId())
+                .drinkName(item.getDrinkName())
+                .unitPrice(item.getUnitPrice())
+                .quantity(item.getQuantity())
+                .build();
     }
 
     private List<OrderItemDTO> getOrderItems(OrderInfoDTO order) {
@@ -587,5 +555,37 @@ public class OrderController {
     private boolean isTerminal(OrderInfoDTO order) {
         String status = order == null ? "" : order.getStatus();
         return "COMPLETED".equals(status) || "CANCELLED".equals(status);
+    }
+
+    private void setViewState(
+            Model model,
+            boolean showCreateModal,
+            boolean showEditModal,
+            boolean showDetailModal,
+            List<String> errors,
+            OrderInfoDTO formData,
+            OrderInfoDTO editOrder,
+            OrderInfoDTO detailOrder,
+            String selectedDrinksJson,
+            String selectedDrinksJsonEdit
+    ) {
+        model.addAttribute("showCreateModal", showCreateModal);
+        model.addAttribute("showEditModal", showEditModal);
+        model.addAttribute("showDetailModal", showDetailModal);
+
+        model.addAttribute("errors", errors);
+        model.addAttribute("formData", formData == null ? new OrderInfoDTO() : formData);
+        model.addAttribute("editOrder", editOrder == null ? new OrderInfoDTO() : editOrder);
+        model.addAttribute("detailOrder", detailOrder);
+        model.addAttribute("detailOrderItems", getOrderItems(detailOrder));
+
+        model.addAttribute("selectedDrinksJson", defaultSelectedJson(selectedDrinksJson));
+        model.addAttribute("selectedDrinksJsonEdit", defaultSelectedJson(selectedDrinksJsonEdit));
+    }
+
+    private String renderPage(Model model) {
+        model.addAttribute("activePage", "order-management");
+        model.addAttribute("content", CONTENT);
+        return LAYOUT;
     }
 }

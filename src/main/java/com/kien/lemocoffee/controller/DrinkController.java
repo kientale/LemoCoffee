@@ -6,6 +6,7 @@ import com.kien.lemocoffee.dto.DrinkInfoDTO;
 import com.kien.lemocoffee.dto.DrinkTableDTO;
 import com.kien.lemocoffee.dto.IngredientInfoDTO;
 import com.kien.lemocoffee.entity.DrinkIngredient;
+import com.kien.lemocoffee.normalizer.DrinkInfoNormalizer;
 import com.kien.lemocoffee.service.DrinkIngredientService;
 import com.kien.lemocoffee.service.DrinkService;
 import com.kien.lemocoffee.service.WarehouseService;
@@ -43,86 +44,12 @@ public class DrinkController {
     private final DrinkIngredientService drinkIngredientService;
     private final WarehouseService warehouseService;
     private final DrinkValidator drinkValidator;
+    private final DrinkInfoNormalizer drinkInfoNormalizer;
 
+    // Cấu hình để Spring bỏ qua image, không bind vào model để bảo mật field về ảnh
     @InitBinder
     public void initBinder(WebDataBinder binder) {
         binder.setDisallowedFields("image");
-    }
-
-    private void setViewState(
-            Model model,
-            boolean showCreateModal,
-            boolean showEditModal,
-            boolean showDetailModal,
-            List<String> errors,
-            DrinkInfoDTO formData,
-
-            DrinkInfoDTO editDrink,
-            DrinkInfoDTO detailDrink,
-            String selectedIngredientsJson,
-            String selectedIngredientsJsonEdit
-    ) {
-        model.addAttribute("showCreateModal", showCreateModal);
-        model.addAttribute("showEditModal", showEditModal);
-        model.addAttribute("showDetailModal", showDetailModal);
-
-        model.addAttribute("errors", errors);
-        model.addAttribute("formData", formData);
-        model.addAttribute("editDrink", editDrink == null ? new DrinkInfoDTO() : editDrink);
-        model.addAttribute("detailDrink", detailDrink);
-        model.addAttribute("detailDrinkIngredients", Collections.emptyList());
-
-        model.addAttribute("selectedIngredientsJson", defaultSelectedJson(selectedIngredientsJson));
-        model.addAttribute("selectedIngredientsJsonEdit", defaultSelectedJson(selectedIngredientsJsonEdit));
-    }
-
-    private String renderPage(Model model) {
-        model.addAttribute("activePage", "drink-management");
-        model.addAttribute("content", CONTENT);
-        return LAYOUT;
-    }
-
-    private String redirectToList(
-            RedirectAttributes redirectAttributes,
-            DrinkManagementResult result,
-            int page,
-            String keyword
-    ) {
-        redirectAttributes.addFlashAttribute("status", result);
-        redirectAttributes.addFlashAttribute("message", result.getMessage());
-        redirectAttributes.addAttribute("page", page);
-        redirectAttributes.addAttribute("keyword", keyword);
-
-        return "redirect:/drink-management";
-    }
-
-    private void loadDrinkList(int page, String keyword, Model model) {
-
-        Page<DrinkTableDTO> drinkPage = drinkService.getDrink(page, PAGE_SIZE, keyword);
-
-        model.addAttribute("drinks", drinkPage.getContent());
-        model.addAttribute("page", page);
-        model.addAttribute("totalPages", Math.max(drinkPage.getTotalPages(), 1));
-    }
-
-    private void loadIngredientPicker(
-            int ingPage,
-            String ingKeyword,
-            String ingField,
-            String selectedIds,
-            Model model
-    ) {
-        Page<IngredientInfoDTO> ingredientPage = warehouseService.getIngredient(
-                ingPage,
-                INGREDIENT_PAGE_SIZE,
-                ingKeyword,
-                ingField
-        );
-
-        model.addAttribute("ingredients", ingredientPage.getContent());
-        model.addAttribute("ingPage", ingPage);
-        model.addAttribute("ingTotalPages", Math.max(ingredientPage.getTotalPages(), 1));
-        model.addAttribute("selectedIngIds", parseSelectedIds(selectedIds));
     }
 
     @GetMapping
@@ -168,7 +95,9 @@ public class DrinkController {
             Model model,
             RedirectAttributes redirectAttributes
     ) {
+        formData = drinkInfoNormalizer.normalize(formData);
         List<String> errors = drinkValidator.validateForCreate(formData, imageFile);
+
         if (!errors.isEmpty()) {
             loadDrinkList(page, keyword, model);
             setViewState(
@@ -187,6 +116,7 @@ public class DrinkController {
         }
 
         DrinkManagementResult result = drinkService.createDrink(formData, imageFile);
+
         if (result != DrinkManagementResult.CREATE_SUCCESS) {
             loadDrinkList(page, keyword, model);
             setViewState(
@@ -216,6 +146,7 @@ public class DrinkController {
             RedirectAttributes redirectAttributes
     ) {
         DrinkInfoDTO editDrink = drinkService.getDrinkInfoById(id);
+
         if (editDrink == null) {
             return redirectToList(redirectAttributes, DrinkManagementResult.DRINK_NOT_FOUND, page, keyword);
         }
@@ -245,7 +176,9 @@ public class DrinkController {
             Model model,
             RedirectAttributes redirectAttributes
     ) {
+        formData = drinkInfoNormalizer.normalize(formData);
         List<String> errors = drinkValidator.validateForUpdate(formData, imageFile);
+
         if (!errors.isEmpty()) {
             loadDrinkList(page, keyword, model);
             setViewState(
@@ -264,6 +197,7 @@ public class DrinkController {
         }
 
         DrinkManagementResult result = drinkService.updateDrink(formData, imageFile);
+
         if (result != DrinkManagementResult.UPDATE_SUCCESS) {
             loadDrinkList(page, keyword, model);
             setViewState(
@@ -293,6 +227,7 @@ public class DrinkController {
             RedirectAttributes redirectAttributes
     ) {
         DrinkInfoDTO detailDrink = drinkService.getDrinkInfoById(id);
+
         if (detailDrink == null) {
             return redirectToList(redirectAttributes, DrinkManagementResult.DRINK_NOT_FOUND, page, keyword);
         }
@@ -375,5 +310,81 @@ public class DrinkController {
             return EMPTY_SELECTED_INGREDIENTS_JSON;
         }
         return selectedIngredientsJson;
+    }
+
+    private void setViewState(
+            Model model,
+            boolean showCreateModal,
+            boolean showEditModal,
+            boolean showDetailModal,
+            List<String> errors,
+            DrinkInfoDTO formData,
+
+            DrinkInfoDTO editDrink,
+            DrinkInfoDTO detailDrink,
+            String selectedIngredientsJson,
+            String selectedIngredientsJsonEdit
+    ) {
+        model.addAttribute("showCreateModal", showCreateModal);
+        model.addAttribute("showEditModal", showEditModal);
+        model.addAttribute("showDetailModal", showDetailModal);
+
+        model.addAttribute("errors", errors);
+        model.addAttribute("formData", formData);
+        model.addAttribute("editDrink", editDrink == null ? new DrinkInfoDTO() : editDrink);
+        model.addAttribute("detailDrink", detailDrink);
+
+        model.addAttribute("detailDrinkIngredients", Collections.emptyList());
+        model.addAttribute("selectedIngredientsJson", defaultSelectedJson(selectedIngredientsJson));
+        model.addAttribute("selectedIngredientsJsonEdit", defaultSelectedJson(selectedIngredientsJsonEdit));
+    }
+
+    private String renderPage(Model model) {
+        model.addAttribute("activePage", "drink-management");
+        model.addAttribute("content", CONTENT);
+        return LAYOUT;
+    }
+
+    private String redirectToList(
+            RedirectAttributes redirectAttributes,
+            DrinkManagementResult result,
+            int page,
+            String keyword
+    ) {
+        redirectAttributes.addFlashAttribute("status", result);
+        redirectAttributes.addFlashAttribute("message", result.getMessage());
+        redirectAttributes.addAttribute("page", page);
+        redirectAttributes.addAttribute("keyword", keyword);
+
+        return "redirect:/drink-management";
+    }
+
+    private void loadDrinkList(int page, String keyword, Model model) {
+
+        Page<DrinkTableDTO> drinkPage = drinkService.getDrink(page, PAGE_SIZE, keyword);
+
+        model.addAttribute("drinks", drinkPage.getContent());
+        model.addAttribute("page", page);
+        model.addAttribute("totalPages", Math.max(drinkPage.getTotalPages(), 1));
+    }
+
+    private void loadIngredientPicker(
+            int ingPage,
+            String ingKeyword,
+            String ingField,
+            String selectedIds,
+            Model model
+    ) {
+        Page<IngredientInfoDTO> ingredientPage = warehouseService.getIngredient(
+                ingPage,
+                INGREDIENT_PAGE_SIZE,
+                ingKeyword,
+                ingField
+        );
+
+        model.addAttribute("ingredients", ingredientPage.getContent());
+        model.addAttribute("ingPage", ingPage);
+        model.addAttribute("ingTotalPages", Math.max(ingredientPage.getTotalPages(), 1));
+        model.addAttribute("selectedIngIds", parseSelectedIds(selectedIds));
     }
 }

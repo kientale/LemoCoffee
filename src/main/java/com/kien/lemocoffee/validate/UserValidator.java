@@ -24,20 +24,12 @@ public class UserValidator {
     public List<String> validateForCreate(UserInfoDTO formData) {
         List<String> errors = new ArrayList<>();
 
-        String username = normalize(formData.getUsername());
-        String fullName = normalize(formData.getFullName());
-        String password = normalize(formData.getPassword());
-        String confirmPassword = normalize(formData.getConfirmPassword());
-        String email = normalizeNullable(formData.getEmail());
-        String phone = normalizeNullable(formData.getPhone());
-        AccountRoleEnum role = formData.getRole();
-
-        validateUsername(username, null, errors);
-        validateFullName(fullName, errors);
-        validatePassword(password, confirmPassword, errors);
-        validateEmail(email, null, errors);
-        validatePhone(phone, null, errors);
-        validateRole(role, errors);
+        validateUsername(formData.getUsername(), null, errors);
+        validateFullName(formData.getFullName(), errors);
+        validatePassword(formData.getPassword(), formData.getConfirmPassword(), errors);
+        validateEmail(formData.getEmail(), null, errors);
+        validatePhone(formData.getPhone(), null, errors);
+        validateRole(formData.getRole(), errors);
 
         return errors;
     }
@@ -46,24 +38,18 @@ public class UserValidator {
         List<String> errors = new ArrayList<>();
 
         Integer accountId = formData.getAccountId();
-        String username = normalize(formData.getUsername());
-        String fullName = normalize(formData.getFullName());
-        String email = normalizeNullable(formData.getEmail());
-        String phone = normalizeNullable(formData.getPhone());
-        AccountRoleEnum role = formData.getRole();
-        AccountStatusEnum status = formData.getStatus();
 
         if (accountId == null || accountId <= 0) {
             errors.add(UserValidationResult.INVALID_ID.getMessage());
             return errors;
         }
 
-        validateUsername(username, accountId, errors);
-        validateFullName(fullName, errors);
-        validateEmail(email, accountId, errors);
-        validatePhone(phone, accountId, errors);
-        validateRole(role, errors);
-        validateStatus(status, errors);
+        validateUsername(formData.getUsername(), accountId, errors);
+        validateFullName(formData.getFullName(), errors);
+        validateEmail(formData.getEmail(), accountId, errors);
+        validatePhone(formData.getPhone(), accountId, errors);
+        validateRole(formData.getRole(), errors);
+        validateStatus(formData.getStatus(), errors);
 
         return errors;
     }
@@ -147,14 +133,5 @@ public class UserValidator {
         if (status == null) {
             errors.add(UserValidationResult.INVALID_STATUS.getMessage());
         }
-    }
-
-    private String normalize(String value) {
-        return value == null ? "" : value.trim();
-    }
-
-    private String normalizeNullable(String value) {
-        String normalized = normalize(value);
-        return normalized.isEmpty() ? null : normalized;
     }
 }

@@ -17,19 +17,11 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Integer> {
     @NonNull
     Optional<OrderItem> findById(@NonNull Integer id);
 
-    List<OrderItem> findByOrderId(Integer orderId);
-
     List<OrderItem> findByOrderIdOrderByIdAsc(Integer orderId);
-
-    List<OrderItem> findByDrinkId(Integer drinkId);
 
     boolean existsByOrderId(Integer orderId);
 
-    long countByOrderId(Integer orderId);
-
     void deleteByOrderId(Integer orderId);
-
-    void deleteByOrderIdAndDrinkId(Integer orderId, Integer drinkId);
 
     @Query(
             value = """

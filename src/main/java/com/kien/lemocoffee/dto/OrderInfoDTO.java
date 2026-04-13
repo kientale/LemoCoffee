@@ -56,14 +56,6 @@ public class OrderInfoDTO {
         return formatDateTime(createdAt);
     }
 
-    public String getUpdatedAtFormatted() {
-        return formatDateTime(updatedAt);
-    }
-
-    public String getCheckedOutAtFormatted() {
-        return formatDateTime(checkedOutAt);
-    }
-
     public String getEffectiveSelectedDrinksJson() {
         if (selectedDrinksJson != null && !selectedDrinksJson.isBlank()) {
             return selectedDrinksJson;

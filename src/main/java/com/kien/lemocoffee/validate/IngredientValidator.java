@@ -16,17 +16,11 @@ public class IngredientValidator {
     public List<String> validateForCreate(IngredientInfoDTO formData) {
         List<String> errors = new ArrayList<>();
 
-        String name = normalize(formData.getName());
-        BigDecimal quantity = formData.getQuantity();
-        String unit = normalize(formData.getUnit());
-        String supplier = normalize(formData.getSupplier());
-        String description = normalizeNullable(formData.getDescription());
-
-        validateName(name, errors);
-        validateQuantity(quantity, errors);
-        validateUnit(unit, errors);
-        validateSupplier(supplier, errors);
-        validateDescription(description, errors);
+        validateName(formData.getName(), errors);
+        validateQuantity(formData.getQuantity(), errors);
+        validateUnit(formData.getUnit(), errors);
+        validateSupplier(formData.getSupplier(), errors);
+        validateDescription(formData.getDescription(), errors);
 
         return errors;
     }
@@ -35,22 +29,17 @@ public class IngredientValidator {
         List<String> errors = new ArrayList<>();
 
         Integer id = formData.getId();
-        String name = normalize(formData.getName());
-        BigDecimal quantity = formData.getQuantity();
-        String unit = normalize(formData.getUnit());
-        String supplier = normalize(formData.getSupplier());
-        String description = normalizeNullable(formData.getDescription());
 
         if (id == null || id <= 0) {
             errors.add(WarehouseValidationResult.INVALID_ID.getMessage());
             return errors;
         }
 
-        validateName(name, errors);
-        validateQuantity(quantity, errors);
-        validateUnit(unit, errors);
-        validateSupplier(supplier, errors);
-        validateDescription(description, errors);
+        validateName(formData.getName(), errors);
+        validateQuantity(formData.getQuantity(), errors);
+        validateUnit(formData.getUnit(), errors);
+        validateSupplier(formData.getSupplier(), errors);
+        validateDescription(formData.getDescription(), errors);
 
         return errors;
     }
@@ -97,17 +86,5 @@ public class IngredientValidator {
         if (description != null && description.length() > 255) {
             errors.add(WarehouseValidationResult.INVALID_DESCRIPTION.getMessage());
         }
-    }
-
-    private String normalize(String value) {
-        if (value == null) {
-            return "";
-        }
-        return value.trim().replaceAll("\\s+", " ");
-    }
-
-    private String normalizeNullable(String value) {
-        String normalized = normalize(value);
-        return normalized.isEmpty() ? null : normalized;
     }
 }

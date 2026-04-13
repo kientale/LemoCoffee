@@ -30,22 +30,13 @@ public class CustomerServiceImpl implements CustomerService {
     public Page<CustomerTableDTO> getCustomer(int page, int size, String keyword) {
         int pageNo = Math.max(1, page);
         int pageSize = Math.max(1, size);
+        String kw = normalize(keyword);
 
         Pageable pageable = PageRequest.of(pageNo - 1, pageSize, Sort.by(Sort.Direction.DESC, "id"));
 
-        String kw = normalize(keyword);
-
-        Page<Customer> customerPage;
-
-        if (kw.isEmpty()) {
-            customerPage = customerRepository.findByStatusNot(CustomerStatusEnum.DELETED, pageable);
-        } else {
-            customerPage = customerRepository.findByFullNameContainingIgnoreCaseAndStatusNot(
-                    kw,
-                    CustomerStatusEnum.DELETED,
-                    pageable
-            );
-        }
+        Page<Customer> customerPage = kw.isEmpty() ?
+                customerRepository.findByStatusNot(CustomerStatusEnum.DELETED, pageable) :
+                customerRepository.findByFullNameContainingIgnoreCaseAndStatusNot(kw, CustomerStatusEnum.DELETED, pageable);
 
         return customerPage.map(customerMapper::toCustomerTableDTO);
     }
@@ -54,12 +45,9 @@ public class CustomerServiceImpl implements CustomerService {
     @Transactional
     public CustomerManagementResult createCustomer(CustomerInfoDTO formData) {
         try {
-            String fullName = normalize(formData.getFullName());
-            String phone = normalize(formData.getPhone());
-
             Customer customer = Customer.builder()
-                    .fullName(fullName)
-                    .phone(phone)
+                    .fullName(formData.getFullName())
+                    .phone(formData.getPhone())
                     .status(CustomerStatusEnum.ACTIVE)
                     .points(0)
                     .build();
@@ -82,6 +70,7 @@ public class CustomerServiceImpl implements CustomerService {
         try {
             Integer id = formData.getId();
             Customer customer = findCustomerById(id);
+
             if (customer == null) {
                 return  CustomerManagementResult.CUSTOMER_NOT_FOUND;
             }
@@ -147,18 +136,12 @@ public class CustomerServiceImpl implements CustomerService {
             return null;
         }
 
-        Customer customer = customerRepository.findById(id).orElse(null);
-        if (customer == null) {
-            return null;
-        }
-
-        return customer;
+        return customerRepository.findById(id).orElse(null);
     }
 
     private boolean isInvalidId(Integer id) {
         return id == null || id <= 0;
     }
-
 
     private String normalize(String value) {
         return value == null ? "" : value.trim();

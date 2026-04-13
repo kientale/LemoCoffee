@@ -19,7 +19,4 @@ public class UserTableDTO {
 
     private AccountRoleEnum role;
     private AccountStatusEnum status;
-
-    private String email;
-    private String phone;
 }

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kien.lemocoffee.constant.OrderStatusEnum;
 import com.kien.lemocoffee.constant.OrderValidationResult;
 import com.kien.lemocoffee.dto.OrderInfoDTO;
+import com.kien.lemocoffee.dto.SelectedDrinkDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -13,7 +14,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 @Component
@@ -170,11 +170,11 @@ public class OrderValidator {
             return;
         }
 
-        List<Map<String, Object>> selectedDrinks;
+        List<SelectedDrinkDTO> selectedDrinks;
         try {
             selectedDrinks = objectMapper.readValue(
                     selectedDrinksJson,
-                    new TypeReference<>() {
+                    new TypeReference<List<SelectedDrinkDTO>>() {
                     }
             );
         } catch (Exception e) {
@@ -188,10 +188,10 @@ public class OrderValidator {
         }
 
         Set<Integer> drinkIds = new HashSet<>();
-        for (Map<String, Object> item : selectedDrinks) {
-            Integer drinkId = firstInteger(item, "drinkId", "id");
-            Integer quantity = firstInteger(item, "quantity", "qty");
-            BigDecimal unitPrice = firstBigDecimal(item, "unitPrice", "price");
+        for (SelectedDrinkDTO selectedDrink : selectedDrinks) {
+            Integer drinkId = selectedDrink.getDrinkId();
+            Integer quantity = selectedDrink.getQuantity();
+            BigDecimal unitPrice = selectedDrink.getUnitPrice();
 
             if (drinkId == null || drinkId <= 0) {
                 errors.add(OrderValidationResult.INVALID_DRINK_ID.getMessage());
@@ -217,56 +217,6 @@ public class OrderValidator {
                 errors.add(OrderValidationResult.INVALID_UNIT_PRICE.getMessage());
                 return;
             }
-        }
-    }
-
-    private Integer firstInteger(Map<String, Object> source, String... keys) {
-        for (String key : keys) {
-            Integer value = toInteger(source.get(key));
-            if (value != null) {
-                return value;
-            }
-        }
-
-        return null;
-    }
-
-    private BigDecimal firstBigDecimal(Map<String, Object> source, String... keys) {
-        for (String key : keys) {
-            BigDecimal value = toBigDecimal(source.get(key));
-            if (value != null) {
-                return value;
-            }
-        }
-
-        return null;
-    }
-
-    private Integer toInteger(Object value) {
-        if (value == null) {
-            return null;
-        }
-
-        if (value instanceof Number number) {
-            return number.intValue();
-        }
-
-        try {
-            return Integer.valueOf(String.valueOf(value));
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    private BigDecimal toBigDecimal(Object value) {
-        if (value == null) {
-            return null;
-        }
-
-        try {
-            return new BigDecimal(String.valueOf(value));
-        } catch (Exception e) {
-            return null;
         }
     }
 

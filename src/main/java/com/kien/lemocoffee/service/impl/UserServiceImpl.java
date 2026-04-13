@@ -38,13 +38,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Page<UserTableDTO> getUser(int page, int size, String keyword, String field) {
+
         int pageNo = Math.max(page, 1);
         int pageSize = Math.max(size, 1);
-
-        Pageable pageable = PageRequest.of(pageNo - 1, pageSize, Sort.by(Sort.Direction.DESC, "id"));
-
         String kw = normalize(keyword);
         String fd = normalize(field).toLowerCase();
+
+        Pageable pageable = PageRequest.of(pageNo - 1, pageSize, Sort.by(Sort.Direction.DESC, "id"));
 
         Page<User> userPage;
 
@@ -63,16 +63,12 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserManagementResult createUser(UserInfoDTO formData) {
         try {
-            String username = normalize(formData.getUsername());
-            String fullName = normalize(formData.getFullName());
-            String email = normalizeNullable(formData.getEmail());
-            String phone = normalizeNullable(formData.getPhone());
             AccountRoleEnum role = formData.getRole();
 
             Account account = Account.builder()
                     .code(generateAccountCode(role))
-                    .username(username)
-                    .passwordHash(passwordEncoder.encode(formData.getPassword().trim()))
+                    .username(formData.getUsername())
+                    .passwordHash(passwordEncoder.encode(formData.getPassword()))
                     .role(role)
                     .status(AccountStatusEnum.ACTIVE)
                     .build();
@@ -81,9 +77,9 @@ public class UserServiceImpl implements UserService {
 
             User user = User.builder()
                     .account(account)
-                    .fullName(fullName)
-                    .email(email)
-                    .phone(phone)
+                    .fullName(formData.getFullName())
+                    .email(formData.getEmail())
+                    .phone(formData.getPhone())
                     .build();
 
             userRepository.save(user);
@@ -113,19 +109,20 @@ public class UserServiceImpl implements UserService {
         try {
             Integer accountId = formData.getAccountId();
             User user = findUserWithAccount(accountId);
+
             if (user == null) {
                 return UserManagementResult.USER_NOT_FOUND;
             }
 
             Account account = user.getAccount();
 
-            account.setUsername(normalize(formData.getUsername()));
+            account.setUsername(formData.getUsername());
             account.setRole(formData.getRole());
             account.setStatus(formData.getStatus());
 
-            user.setFullName(normalize(formData.getFullName()));
-            user.setEmail(normalizeNullable(formData.getEmail()));
-            user.setPhone(normalizeNullable(formData.getPhone()));
+            user.setFullName(formData.getFullName());
+            user.setEmail(formData.getEmail());
+            user.setPhone(formData.getPhone());
 
             userRepository.save(user);
             accountRepository.save(account);
@@ -146,6 +143,7 @@ public class UserServiceImpl implements UserService {
     public UserManagementResult deleteUser(Integer accountId) {
         try {
             User user = findUserWithAccount(accountId);
+
             if (user == null) {
                 return UserManagementResult.USER_NOT_FOUND;
             }
@@ -197,14 +195,12 @@ public class UserServiceImpl implements UserService {
                     .orElse(null);
 
             if (user == null) {
-                log.warn("Reset password failed: user not found, accountId={}", accountId);
                 return UserManagementResult.USER_NOT_FOUND;
             }
 
             String email = user.getEmail();
 
             if (email == null || email.isBlank()) {
-                log.warn("Reset password failed: email not found, accountId={}", accountId);
                 return UserManagementResult.EMAIL_NOT_FOUND;
             }
 
@@ -222,7 +218,6 @@ public class UserServiceImpl implements UserService {
             );
 
             if (!emailSent) {
-                log.error("Reset password email sending failed, rollback transaction, accountId={}", accountId);
                 throw new RuntimeException("Send email failed");
             }
 
@@ -282,11 +277,12 @@ public class UserServiceImpl implements UserService {
     }
 
     private User findUserWithAccount(Integer accountId) {
-        if (isInvalidAccountId(accountId)) {
+        if (accountId == null || accountId <= 0) {
             return null;
         }
 
         User user = userRepository.findByAccount_Id(accountId).orElse(null);
+
         if (user == null || user.getAccount() == null) {
             return null;
         }
@@ -294,16 +290,8 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
-    private boolean isInvalidAccountId(Integer accountId) {
-        return accountId == null || accountId <= 0;
-    }
-
     private String normalize(String value) {
         return value == null ? "" : value.trim();
     }
 
-    private String normalizeNullable(String value) {
-        String normalized = normalize(value);
-        return normalized.isEmpty() ? null : normalized;
-    }
 }

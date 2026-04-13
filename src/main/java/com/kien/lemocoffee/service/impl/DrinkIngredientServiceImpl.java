@@ -2,6 +2,7 @@ package com.kien.lemocoffee.service.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kien.lemocoffee.dto.SelectedIngredientDTO;
 import com.kien.lemocoffee.entity.Drink;
 import com.kien.lemocoffee.entity.DrinkIngredient;
 import com.kien.lemocoffee.entity.DrinkIngredientId;
@@ -16,8 +17,9 @@ import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -40,14 +42,9 @@ public class DrinkIngredientServiceImpl implements DrinkIngredientService {
 
     @Override
     public String getSelectedIngredientsJsonByDrinkId(Integer drinkId) {
-        List<Map<String, Object>> selectedIngredients = getDrinkIngredientsByDrinkId(drinkId)
+        List<SelectedIngredientDTO> selectedIngredients = getDrinkIngredientsByDrinkId(drinkId)
                 .stream()
-                .map(drinkIngredient -> Map.<String, Object>of(
-                        "id", drinkIngredient.getId().getIngredientId(),
-                        "name", drinkIngredient.getIngredientName(),
-                        "unit", drinkIngredient.getUnit(),
-                        "quantity", drinkIngredient.getQuantity()
-                ))
+                .map(this::toSelectedIngredientDTO)
                 .toList();
 
         try {
@@ -64,25 +61,25 @@ public class DrinkIngredientServiceImpl implements DrinkIngredientService {
             throw new IllegalArgumentException("Invalid drink");
         }
 
-        List<Map<String, Object>> selectedIngredients = parseSelectedIngredients(selectedIngredientsJson);
+        List<SelectedIngredientDTO> selectedIngredients = parseSelectedIngredients(selectedIngredientsJson);
 
         drinkIngredientRepository.deleteByIdDrinkId(drink.getId());
         drinkIngredientRepository.flush();
 
         List<DrinkIngredient> drinkIngredients = selectedIngredients.stream()
-                .map(item -> toDrinkIngredient(drink, item))
+                .map(selectedIngredient -> toDrinkIngredient(drink, selectedIngredient))
                 .toList();
 
         drinkIngredientRepository.saveAllAndFlush(drinkIngredients);
     }
 
-    private List<Map<String, Object>> parseSelectedIngredients(String selectedIngredientsJson) {
+    private List<SelectedIngredientDTO> parseSelectedIngredients(String selectedIngredientsJson) {
         if (!StringUtils.hasText(selectedIngredientsJson)) {
             throw new IllegalArgumentException("Invalid selected ingredients");
         }
 
         try {
-            List<Map<String, Object>> selectedIngredients = objectMapper.readValue(
+            List<SelectedIngredientDTO> selectedIngredients = objectMapper.readValue(
                     selectedIngredientsJson,
                     new TypeReference<>() {
                     }
@@ -92,19 +89,26 @@ public class DrinkIngredientServiceImpl implements DrinkIngredientService {
                 throw new IllegalArgumentException("Invalid selected ingredients");
             }
 
+            validateSelectedIngredients(selectedIngredients);
             return selectedIngredients;
+        } catch (IllegalArgumentException e) {
+            throw e;
         } catch (Exception e) {
             throw new IllegalArgumentException("Invalid selected ingredients", e);
         }
     }
 
-    private DrinkIngredient toDrinkIngredient(Drink drink, Map<String, Object> item) {
-        Integer ingredientId = toInteger(item.get("id"));
-        BigDecimal quantity = toBigDecimal(item.get("quantity"));
+    private SelectedIngredientDTO toSelectedIngredientDTO(DrinkIngredient drinkIngredient) {
+        return SelectedIngredientDTO.builder()
+                .id(drinkIngredient.getId().getIngredientId())
+                .name(drinkIngredient.getIngredientName())
+                .unit(drinkIngredient.getUnit())
+                .quantity(drinkIngredient.getQuantity())
+                .build();
+    }
 
-        if (ingredientId == null || ingredientId <= 0 || quantity == null || quantity.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Invalid selected ingredient");
-        }
+    private DrinkIngredient toDrinkIngredient(Drink drink, SelectedIngredientDTO selectedIngredient) {
+        Integer ingredientId = selectedIngredient.getId();
 
         Ingredient ingredient = warehouseRepository.findById(ingredientId)
                 .orElseThrow(() -> new IllegalArgumentException("Ingredient not found"));
@@ -114,32 +118,24 @@ public class DrinkIngredientServiceImpl implements DrinkIngredientService {
                 .drink(drink)
                 .ingredient(ingredient)
                 .ingredientName(ingredient.getName())
-                .quantity(quantity)
+                .quantity(selectedIngredient.getQuantity())
                 .unit(ingredient.getUnit())
                 .build();
     }
 
-    private Integer toInteger(Object value) {
-        if (value instanceof Number number) {
-            return number.intValue();
-        }
+    private void validateSelectedIngredients(List<SelectedIngredientDTO> selectedIngredients) {
+        Set<Integer> ingredientIds = new HashSet<>();
+        for (SelectedIngredientDTO selectedIngredient : selectedIngredients) {
+            Integer ingredientId = selectedIngredient.getId();
+            BigDecimal quantity = selectedIngredient.getQuantity();
 
-        try {
-            return Integer.valueOf(String.valueOf(value));
-        } catch (Exception e) {
-            return null;
-        }
-    }
+            if (ingredientId == null || ingredientId <= 0 || quantity == null || quantity.compareTo(BigDecimal.ZERO) <= 0) {
+                throw new IllegalArgumentException("Invalid selected ingredient");
+            }
 
-    private BigDecimal toBigDecimal(Object value) {
-        if (value == null) {
-            return null;
-        }
-
-        try {
-            return new BigDecimal(String.valueOf(value));
-        } catch (Exception e) {
-            return null;
+            if (!ingredientIds.add(ingredientId)) {
+                throw new IllegalArgumentException("Duplicate selected ingredient");
+            }
         }
     }
 }

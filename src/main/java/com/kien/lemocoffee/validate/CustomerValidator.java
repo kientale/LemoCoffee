@@ -20,11 +20,8 @@ public class CustomerValidator {
     public List<String> validateForCreate(CustomerInfoDTO formData) {
         List<String> errors = new ArrayList<>();
 
-        String fullName = normalize(formData.getFullName());
-        String phone = normalize(formData.getPhone());
-
-        validateFullName(fullName, errors);
-        validatePhone(phone, null, errors);
+        validateFullName(formData.getFullName(), errors);
+        validatePhone(formData.getPhone(), null, errors);
 
         return errors;
     }
@@ -33,18 +30,15 @@ public class CustomerValidator {
         List<String> errors = new ArrayList<>();
 
         Integer id = formData.getId();
-        String fullName = normalize(formData.getFullName());
-        String phone = normalize(formData.getPhone());
-        CustomerStatusEnum status = formData.getStatus();
 
         if (id == null || id <= 0) {
             errors.add(CustomerValidationResult.INVALID_ID.getMessage());
             return errors;
         }
 
-        validateFullName(fullName, errors);
-        validatePhone(phone, id, errors);
-        validateStatus(status, errors);
+        validateFullName(formData.getFullName(), errors);
+        validatePhone(formData.getPhone(), id, errors);
+        validateStatus(formData.getStatus(), errors);
 
         return errors;
     }
@@ -74,12 +68,5 @@ public class CustomerValidator {
         if (status == null) {
             errors.add(CustomerValidationResult.INVALID_STATUS.getMessage());
         }
-    }
-
-    private String normalize(String value) {
-        if (value == null) {
-            return "";
-        }
-        return value.trim().replaceAll("\\s+", " ");
     }
 }

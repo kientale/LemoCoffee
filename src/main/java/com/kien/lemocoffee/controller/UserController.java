@@ -4,6 +4,7 @@ import com.kien.lemocoffee.constant.AccountStatusEnum;
 import com.kien.lemocoffee.dto.UserInfoDTO;
 import com.kien.lemocoffee.dto.UserTableDTO;
 import com.kien.lemocoffee.constant.UserManagementResult;
+import com.kien.lemocoffee.normalizer.UserInfoNormalizer;
 import com.kien.lemocoffee.service.UserService;
 import com.kien.lemocoffee.validate.UserValidator;
 import lombok.RequiredArgsConstructor;
@@ -26,56 +27,7 @@ public class UserController {
 
     private final UserService userService;
     private final UserValidator userValidator;
-
-    private void setViewState(
-            Model model,
-            boolean showCreateModal,
-            boolean showEditModal,
-            boolean showDetailModal,
-            List<String> errors,
-            UserInfoDTO formData,
-            UserInfoDTO user
-    ) {
-        model.addAttribute("showCreateModal", showCreateModal);
-        model.addAttribute("showEditModal", showEditModal);
-        model.addAttribute("showDetailModal", showDetailModal);
-
-        model.addAttribute("errors", errors);
-        model.addAttribute("formData", formData);
-        model.addAttribute("user", user);
-    }
-
-    private String renderPage(Model model) {
-        model.addAttribute("activePage", "user-management");
-        model.addAttribute("content", CONTENT);
-        return LAYOUT;
-    }
-
-    private String redirectToList(
-            RedirectAttributes redirectAttributes,
-            UserManagementResult result,
-            int page,
-            String keyword,
-            String field
-    ) {
-        redirectAttributes.addFlashAttribute("status", result);
-        redirectAttributes.addFlashAttribute("message", result.getMessage());
-
-        redirectAttributes.addAttribute("page", page);
-        redirectAttributes.addAttribute("keyword", keyword);
-        redirectAttributes.addAttribute("field", field);
-
-        return "redirect:/user-management";
-    }
-
-    private void loadUserList(int page, String keyword, String field, Model model) {
-
-        Page<UserTableDTO> userPage = userService.getUser(page, PAGE_SIZE, keyword, field);
-
-        model.addAttribute("users", userPage.getContent());
-        model.addAttribute("page", page);
-        model.addAttribute("totalPages", Math.max(userPage.getTotalPages(), 1));
-    }
+    private final UserInfoNormalizer userInfoNormalizer;
 
     @GetMapping
     public String getAllUser(
@@ -98,6 +50,7 @@ public class UserController {
             Model model,
             RedirectAttributes redirectAttributes
     ) {
+        formData = userInfoNormalizer.normalize(formData);
         List<String> errors = userValidator.validateForCreate(formData);
 
         if (!errors.isEmpty()) {
@@ -152,6 +105,7 @@ public class UserController {
             Model model,
             RedirectAttributes redirectAttributes
     ) {
+        formData = userInfoNormalizer.normalize(formData);
         List<String> errors = userValidator.validateForUpdate(formData);
 
         if (!errors.isEmpty()) {
@@ -243,5 +197,55 @@ public class UserController {
     ) {
         UserManagementResult result = userService.resetPassword(accountId);
         return redirectToList(redirectAttributes, result, page, keyword, field);
+    }
+
+    private void setViewState(
+            Model model,
+            boolean showCreateModal,
+            boolean showEditModal,
+            boolean showDetailModal,
+            List<String> errors,
+            UserInfoDTO formData,
+            UserInfoDTO user
+    ) {
+        model.addAttribute("showCreateModal", showCreateModal);
+        model.addAttribute("showEditModal", showEditModal);
+        model.addAttribute("showDetailModal", showDetailModal);
+
+        model.addAttribute("errors", errors);
+        model.addAttribute("formData", formData);
+        model.addAttribute("user", user);
+    }
+
+    private String renderPage(Model model) {
+        model.addAttribute("activePage", "user-management");
+        model.addAttribute("content", CONTENT);
+        return LAYOUT;
+    }
+
+    private String redirectToList(
+            RedirectAttributes redirectAttributes,
+            UserManagementResult result,
+            int page,
+            String keyword,
+            String field
+    ) {
+        redirectAttributes.addFlashAttribute("status", result);
+        redirectAttributes.addFlashAttribute("message", result.getMessage());
+
+        redirectAttributes.addAttribute("page", page);
+        redirectAttributes.addAttribute("keyword", keyword);
+        redirectAttributes.addAttribute("field", field);
+
+        return "redirect:/user-management";
+    }
+
+    private void loadUserList(int page, String keyword, String field, Model model) {
+
+        Page<UserTableDTO> userPage = userService.getUser(page, PAGE_SIZE, keyword, field);
+
+        model.addAttribute("users", userPage.getContent());
+        model.addAttribute("page", page);
+        model.addAttribute("totalPages", Math.max(userPage.getTotalPages(), 1));
     }
 }

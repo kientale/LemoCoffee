@@ -21,16 +21,6 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     @NonNull
     Optional<Order> findById(@NonNull Integer id);
 
-    Page<Order> findByStatusNot(OrderStatusEnum status, Pageable pageable);
-
-    Page<Order> findByStatus(OrderStatusEnum status, Pageable pageable);
-
-    List<Order> findByTableId(Integer tableId);
-
-    List<Order> findByCustomerId(Integer customerId);
-
-    Optional<Order> findFirstByTableIdAndStatus(Integer tableId, OrderStatusEnum status);
-
     boolean existsByTableIdAndStatus(Integer tableId, OrderStatusEnum status);
 
     @Query(
@@ -57,37 +47,7 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
 
     @Query(
             value = """
-                    select o.*
-                    from coffee_order o
-                    left join coffee_table t on t.id = o.table_id
-                    where o.status <> :status
-                      and (:keyword is null or :keyword = ''
-                           or lower(t.table_name) like lower(concat('%', :keyword, '%')))
-                    """,
-            countQuery = """
-                    select count(*)
-                    from coffee_order o
-                    left join coffee_table t on t.id = o.table_id
-                    where o.status <> :status
-                      and (:keyword is null or :keyword = ''
-                           or lower(t.table_name) like lower(concat('%', :keyword, '%')))
-                    """,
-            nativeQuery = true
-    )
-    Page<Order> searchByTableNameAndStatusNot(
-            @Param("keyword") String keyword,
-            @Param("status") String status,
-            Pageable pageable
-    );
-
-    List<Order> findByCreatedAtBetween(
-            LocalDateTime fromDate,
-            LocalDateTime toDate
-    );
-
-    @Query(
-            value = """
-                    select coalesce(sum(coalesce(o.final_amount, o.total_amount, 0)), 0)
+                    select coalesce(sum(o.final_amount), 0)
                     from coffee_order o
                     where o.status = :status
                       and o.created_at >= :fromDate
@@ -100,6 +60,4 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
             @Param("fromDate") LocalDateTime fromDate,
             @Param("toDate") LocalDateTime toDate
     );
-
-    Optional<Order> findTopByOrderByIdDesc();
 }

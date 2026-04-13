@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kien.lemocoffee.constant.DrinkStatusEnum;
 import com.kien.lemocoffee.constant.DrinkValidationResult;
 import com.kien.lemocoffee.dto.DrinkInfoDTO;
+import com.kien.lemocoffee.dto.SelectedIngredientDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -14,7 +15,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 @Component
@@ -34,16 +34,11 @@ public class DrinkValidator {
     public List<String> validateForCreate(DrinkInfoDTO formData, MultipartFile imageFile) {
         List<String> errors = new ArrayList<>();
 
-        String name = normalize(formData.getName());
-        BigDecimal price = formData.getPrice();
-        String description = normalizeNullable(formData.getDescription());
-        String selectedIngredientsJson = normalizeNullable(formData.getSelectedIngredientsJson());
-
-        validateName(name, errors);
-        validatePrice(price, errors);
-        validateDescription(description, errors);
+        validateName(formData.getName(), errors);
+        validatePrice(formData.getPrice(), errors);
+        validateDescription(formData.getDescription(), errors);
         validateImage(imageFile, true, errors);
-        validateSelectedIngredients(selectedIngredientsJson, errors);
+        validateSelectedIngredients(formData.getSelectedIngredientsJson(), errors);
 
         return errors;
     }
@@ -56,23 +51,18 @@ public class DrinkValidator {
         List<String> errors = new ArrayList<>();
 
         Integer id = formData.getId();
-        String name = normalize(formData.getName());
-        BigDecimal price = formData.getPrice();
-        String description = normalizeNullable(formData.getDescription());
-        DrinkStatusEnum status = formData.getStatus();
-        String selectedIngredientsJson = normalizeNullable(formData.getSelectedIngredientsJson());
 
         if (id == null || id <= 0) {
             errors.add(DrinkValidationResult.INVALID_ID.getMessage());
             return errors;
         }
 
-        validateName(name, errors);
-        validatePrice(price, errors);
-        validateDescription(description, errors);
+        validateName(formData.getName(), errors);
+        validatePrice(formData.getPrice(), errors);
+        validateDescription(formData.getDescription(), errors);
         validateImage(imageFile, false, errors);
-        validateStatus(status, errors);
-        validateSelectedIngredients(selectedIngredientsJson, errors);
+        validateStatus(formData.getStatus(), errors);
+        validateSelectedIngredients(formData.getSelectedIngredientsJson(), errors);
 
         return errors;
     }
@@ -115,7 +105,7 @@ public class DrinkValidator {
             return;
         }
 
-        String contentType = normalize(image.getContentType()).toLowerCase();
+        String contentType = trimToEmpty(image.getContentType()).toLowerCase();
         if (!ALLOWED_IMAGE_TYPES.contains(contentType) || image.getSize() > MAX_IMAGE_SIZE) {
             errors.add(DrinkValidationResult.INVALID_IMAGE.getMessage());
         }
@@ -133,11 +123,11 @@ public class DrinkValidator {
             return;
         }
 
-        List<Map<String, Object>> selectedIngredients;
+        List<SelectedIngredientDTO> selectedIngredients;
         try {
             selectedIngredients = objectMapper.readValue(
                     selectedIngredientsJson,
-                    new TypeReference<>() {
+                    new TypeReference<List<SelectedIngredientDTO>>() {
                     }
             );
         } catch (Exception e) {
@@ -151,9 +141,9 @@ public class DrinkValidator {
         }
 
         Set<Integer> ingredientIds = new HashSet<>();
-        for (Map<String, Object> item : selectedIngredients) {
-            Integer ingredientId = toInteger(item.get("id"));
-            BigDecimal quantity = toBigDecimal(item.get("quantity"));
+        for (SelectedIngredientDTO selectedIngredient : selectedIngredients) {
+            Integer ingredientId = selectedIngredient.getId();
+            BigDecimal quantity = selectedIngredient.getQuantity();
 
             if (ingredientId == null || ingredientId <= 0) {
                 errors.add(DrinkValidationResult.INVALID_INGREDIENT.getMessage());
@@ -172,39 +162,7 @@ public class DrinkValidator {
         }
     }
 
-    private Integer toInteger(Object value) {
-        if (value instanceof Number number) {
-            return number.intValue();
-        }
-
-        try {
-            return Integer.valueOf(String.valueOf(value));
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    private BigDecimal toBigDecimal(Object value) {
-        if (value == null) {
-            return null;
-        }
-
-        try {
-            return new BigDecimal(String.valueOf(value));
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    private String normalize(String value) {
-        if (value == null) {
-            return "";
-        }
-        return value.trim().replaceAll("\\s+", " ");
-    }
-
-    private String normalizeNullable(String value) {
-        String normalized = normalize(value);
-        return normalized.isEmpty() ? null : normalized;
+    private String trimToEmpty(String value) {
+        return value == null ? "" : value.trim();
     }
 }

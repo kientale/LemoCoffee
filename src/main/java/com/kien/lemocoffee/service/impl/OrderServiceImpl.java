@@ -34,6 +34,7 @@ import org.springframework.util.StringUtils;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -56,9 +57,9 @@ public class OrderServiceImpl implements OrderService {
     public Page<OrderTableDTO> getOrder(int page, int size, String keyword) {
         int pageNo = Math.max(1, page);
         int pageSize = Math.max(1, size);
+        String kw = normalize(keyword);
 
         Pageable pageable = PageRequest.of(pageNo - 1, pageSize, Sort.by(Sort.Direction.DESC, "id"));
-        String kw = normalize(keyword);
 
         Page<Order> orderPage = kw.isEmpty()
                 ? orderRepository.findAll(pageable)
@@ -71,16 +72,14 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public OrderManagementResult createOrder(OrderInfoDTO formData) {
         try {
-            CoffeeTable table = findTableById(formData == null ? null : formData.getTableId());
+            CoffeeTable table = findTableById(formData.getTableId());
+
             if (table == null || table.getStatus() == TableStatusEnum.DELETED) {
                 return OrderManagementResult.TABLE_NOT_FOUND;
             }
 
-            if (table.getStatus() != TableStatusEnum.AVAILABLE) {
-                return OrderManagementResult.TABLE_UNAVAILABLE;
-            }
-
             Customer customer = findActiveCustomerById(formData.getCustomerId());
+
             if (formData.getCustomerId() != null && customer == null) {
                 return OrderManagementResult.CUSTOMER_NOT_FOUND;
             }
@@ -98,7 +97,6 @@ public class OrderServiceImpl implements OrderService {
                     .build();
 
             orderRepository.saveAndFlush(order);
-
             BigDecimal totalAmount = orderItemService.replaceOrderItems(
                     order,
                     formData.getEffectiveSelectedDrinksJson()
@@ -130,16 +128,6 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderTableDTO getOrderTableById(Integer id) {
-        Order order = findOrderById(id);
-        if (order == null) {
-            return null;
-        }
-
-        return toOrderTableDTO(order);
-    }
-
-    @Override
     @Transactional
     public OrderManagementResult updateOrder(OrderInfoDTO formData) {
         try {
@@ -152,6 +140,7 @@ public class OrderServiceImpl implements OrderService {
                 return OrderManagementResult.ORDER_CANNOT_BE_EDITED;
             }
 
+            assert formData != null;
             CoffeeTable newTable = findTableById(formData.getTableId());
             if (newTable == null || newTable.getStatus() == TableStatusEnum.DELETED) {
                 return OrderManagementResult.TABLE_NOT_FOUND;
@@ -309,37 +298,6 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    @Transactional
-    public OrderManagementResult changeOrderStatus(Integer id, OrderStatusEnum status) {
-        if (status == null) {
-            return OrderManagementResult.INVALID_STATUS;
-        }
-
-        if (status == OrderStatusEnum.CANCELLED) {
-            return cancelOrder(id);
-        }
-
-        if (status == OrderStatusEnum.COMPLETED) {
-            return checkoutOrder(id, "earn", null);
-        }
-
-        try {
-            Order order = findOrderById(id);
-            if (order == null) {
-                return OrderManagementResult.ORDER_NOT_FOUND;
-            }
-
-            order.setStatus(status);
-            orderRepository.save(order);
-            return OrderManagementResult.CHANGE_STATUS_SUCCESS;
-        } catch (Exception e) {
-            rollbackCurrentTransaction();
-            log.error("Failed to change order status id={}, status={}", id, status, e);
-            return OrderManagementResult.CHANGE_STATUS_FAILED;
-        }
-    }
-
-    @Override
     public String buildInvoiceContent(Integer id) {
         OrderInfoDTO order = getOrderInfoById(id);
         if (order == null) {
@@ -448,7 +406,7 @@ public class OrderServiceImpl implements OrderService {
     private BigDecimal calculateTotal(List<OrderItem> items) {
         return items.stream()
                 .map(OrderItem::getSubtotal)
-                .filter(amount -> amount != null)
+                .filter(Objects::nonNull)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 

@@ -6,6 +6,7 @@ import com.kien.lemocoffee.dto.OrderInfoDTO;
 import com.kien.lemocoffee.entity.CustomerPointTransaction;
 import com.kien.lemocoffee.constant.CustomerManagementResult;
 import com.kien.lemocoffee.constant.CustomerStatusEnum;
+import com.kien.lemocoffee.normalizer.CustomerInfoNormalizer;
 import com.kien.lemocoffee.service.CustomerPointTransactionService;
 import com.kien.lemocoffee.service.CustomerService;
 import com.kien.lemocoffee.service.OrderService;
@@ -33,61 +34,7 @@ public class CustomerController {
     private final CustomerPointTransactionService customerPointTransactionService;
     private final OrderService orderService;
     private final CustomerValidator customerValidator;
-
-    private void setViewState(
-            Model model,
-            boolean showCreateModal,
-            boolean showEditModal,
-            boolean showDetailModal,
-            List<String> errors,
-            CustomerInfoDTO formData,
-            CustomerInfoDTO customer
-    ) {
-        model.addAttribute("showCreateModal", showCreateModal);
-        model.addAttribute("showEditModal", showEditModal);
-        model.addAttribute("showDetailModal", showDetailModal);
-
-        model.addAttribute("errors", errors);
-        model.addAttribute("formData", formData);
-        model.addAttribute("customer", customer);
-
-        model.addAttribute("showPointHistoryModal", false);
-        model.addAttribute("showOrderDetailModal", false);
-        model.addAttribute("historyCustomer", null);
-        model.addAttribute("pointTransactions", Collections.emptyList());
-        model.addAttribute("detailOrder", null);
-        model.addAttribute("detailOrderItems", Collections.emptyList());
-    }
-
-    private String renderPage(Model model) {
-        model.addAttribute("activePage", "customer-management");
-        model.addAttribute("content", CONTENT);
-        return LAYOUT;
-    }
-
-    private String redirectToList(
-            RedirectAttributes redirectAttributes,
-            CustomerManagementResult result,
-            int page,
-            String keyword
-    ) {
-        redirectAttributes.addFlashAttribute("status", result);
-        redirectAttributes.addFlashAttribute("message", result.getMessage());
-
-        redirectAttributes.addAttribute("page", page);
-        redirectAttributes.addAttribute("keyword", keyword);
-
-        return "redirect:/customer-management";
-    }
-
-    private void loadCustomerList(int page, String keyword, Model model) {
-
-        Page<CustomerTableDTO> customerPage = customerService.getCustomer(page, PAGE_SIZE, keyword);
-
-        model.addAttribute("customers", customerPage.getContent());
-        model.addAttribute("page", page);
-        model.addAttribute("totalPages", Math.max(customerPage.getTotalPages(), 1));
-    }
+    private final CustomerInfoNormalizer customerInfoNormalizer;
 
     @GetMapping
     public String getAllCustomer (
@@ -108,6 +55,7 @@ public class CustomerController {
             Model model,
             RedirectAttributes redirectAttributes
     ) {
+        formData = customerInfoNormalizer.normalize(formData);
         List<String> errors = customerValidator.validateForCreate(formData);
 
         if (!errors.isEmpty()) {
@@ -159,6 +107,7 @@ public class CustomerController {
             Model model,
             RedirectAttributes redirectAttributes
     ) {
+        formData = customerInfoNormalizer.normalize(formData);
         List<String> errors = customerValidator.validateForUpdate(formData);
 
         if (!errors.isEmpty()) {
@@ -259,6 +208,7 @@ public class CustomerController {
         }
 
         OrderInfoDTO order = orderService.getOrderInfoById(orderId);
+
         if (order != null && (order.getCustomerId() == null || !order.getCustomerId().equals(id))) {
             order = null;
         }
@@ -266,6 +216,7 @@ public class CustomerController {
         loadCustomerList(page, keyword, model);
         setViewState(model, false, false, false, null, null, null);
         setPointHistoryState(model, customer, customerPointTransactionService.getTransactionsByCustomerId(id));
+
         model.addAttribute("showOrderDetailModal", true);
         model.addAttribute("detailOrder", order);
         model.addAttribute("detailOrderItems", order == null ? Collections.emptyList() : order.getItems());
@@ -282,4 +233,58 @@ public class CustomerController {
         model.addAttribute("pointTransactions", pointTransactions == null ? Collections.emptyList() : pointTransactions);
     }
 
+    private void setViewState(
+            Model model,
+            boolean showCreateModal,
+            boolean showEditModal,
+            boolean showDetailModal,
+            List<String> errors,
+            CustomerInfoDTO formData,
+            CustomerInfoDTO customer
+    ) {
+        model.addAttribute("showCreateModal", showCreateModal);
+        model.addAttribute("showEditModal", showEditModal);
+        model.addAttribute("showDetailModal", showDetailModal);
+
+        model.addAttribute("errors", errors);
+        model.addAttribute("formData", formData);
+        model.addAttribute("customer", customer);
+
+        model.addAttribute("showPointHistoryModal", false);
+        model.addAttribute("showOrderDetailModal", false);
+        model.addAttribute("historyCustomer", null);
+        model.addAttribute("pointTransactions", Collections.emptyList());
+        model.addAttribute("detailOrder", null);
+        model.addAttribute("detailOrderItems", Collections.emptyList());
+    }
+
+    private String renderPage(Model model) {
+        model.addAttribute("activePage", "customer-management");
+        model.addAttribute("content", CONTENT);
+        return LAYOUT;
+    }
+
+    private String redirectToList(
+            RedirectAttributes redirectAttributes,
+            CustomerManagementResult result,
+            int page,
+            String keyword
+    ) {
+        redirectAttributes.addFlashAttribute("status", result);
+        redirectAttributes.addFlashAttribute("message", result.getMessage());
+
+        redirectAttributes.addAttribute("page", page);
+        redirectAttributes.addAttribute("keyword", keyword);
+
+        return "redirect:/customer-management";
+    }
+
+    private void loadCustomerList(int page, String keyword, Model model) {
+
+        Page<CustomerTableDTO> customerPage = customerService.getCustomer(page, PAGE_SIZE, keyword);
+
+        model.addAttribute("customers", customerPage.getContent());
+        model.addAttribute("page", page);
+        model.addAttribute("totalPages", Math.max(customerPage.getTotalPages(), 1));
+    }
 }

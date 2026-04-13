@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kien.lemocoffee.constant.DrinkStatusEnum;
 import com.kien.lemocoffee.dto.OrderItemDTO;
+import com.kien.lemocoffee.dto.SelectedDrinkDTO;
 import com.kien.lemocoffee.entity.Drink;
 import com.kien.lemocoffee.entity.Order;
 import com.kien.lemocoffee.entity.OrderItem;
@@ -15,13 +16,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 @Service
@@ -32,21 +33,15 @@ public class OrderItemServiceImpl implements OrderItemService {
 
     private final OrderItemRepository orderItemRepository;
     private final DrinkRepository drinkRepository;
-    private final OrderMapper orderMapper;
     private final ObjectMapper objectMapper;
 
     @Override
     public List<OrderItem> findItemsByOrderId(Integer orderId) {
-        if (isInvalidId(orderId)) {
+        if (orderId == null || orderId <= 0) {
             return Collections.emptyList();
         }
 
         return orderItemRepository.findByOrderIdOrderByIdAsc(orderId);
-    }
-
-    @Override
-    public List<OrderItemDTO> getItemDTOsByOrderId(Integer orderId) {
-        return orderMapper.toOrderItemDTOs(findItemsByOrderId(orderId));
     }
 
     @Override
@@ -56,30 +51,27 @@ public class OrderItemServiceImpl implements OrderItemService {
             throw new IllegalArgumentException("Invalid order");
         }
 
-        List<SelectedDrink> selectedDrinks = parseSelectedDrinks(selectedDrinksJson);
-        if (selectedDrinks.isEmpty()) {
-            throw new IllegalArgumentException("Order must contain at least one drink");
-        }
+        List<SelectedDrinkDTO> selectedDrinks = parseSelectedDrinks(selectedDrinksJson);
 
         orderItemRepository.deleteByOrderId(order.getId());
 
         List<OrderItem> orderItems = new ArrayList<>();
         BigDecimal totalAmount = BigDecimal.ZERO;
 
-        for (SelectedDrink selectedDrink : selectedDrinks) {
-            Drink drink = drinkRepository.findById(selectedDrink.drinkId()).orElse(null);
+        for (SelectedDrinkDTO selectedDrink : selectedDrinks) {
+            Drink drink = drinkRepository.findById(selectedDrink.getDrinkId()).orElse(null);
             if (drink == null || drink.getStatus() != DrinkStatusEnum.AVAILABLE) {
                 throw new IllegalArgumentException("Drink is not available");
             }
 
             BigDecimal unitPrice = drink.getPrice() == null ? BigDecimal.ZERO : drink.getPrice();
-            BigDecimal subtotal = unitPrice.multiply(BigDecimal.valueOf(selectedDrink.quantity()));
+            BigDecimal subtotal = unitPrice.multiply(BigDecimal.valueOf(selectedDrink.getQuantity()));
 
             orderItems.add(OrderItem.builder()
                     .orderId(order.getId())
                     .drinkId(drink.getId())
                     .drinkName(drink.getName())
-                    .quantity(selectedDrink.quantity())
+                    .quantity(selectedDrink.getQuantity())
                     .unitPrice(unitPrice)
                     .subtotal(subtotal)
                     .pricingType("NORMAL")
@@ -93,43 +85,40 @@ public class OrderItemServiceImpl implements OrderItemService {
         return totalAmount;
     }
 
-    @Override
-    @Transactional
-    public void deleteItemsByOrderId(Integer orderId) {
-        if (isInvalidId(orderId)) {
-            return;
+    private List<SelectedDrinkDTO> parseSelectedDrinks(String selectedDrinksJson) {
+        if (!StringUtils.hasText(selectedDrinksJson)) {
+            throw new IllegalArgumentException("Invalid selected drinks");
         }
 
-        orderItemRepository.deleteByOrderId(orderId);
-    }
-
-    @Override
-    public boolean hasItems(Integer orderId) {
-        return !isInvalidId(orderId) && orderItemRepository.existsByOrderId(orderId);
-    }
-
-    private List<SelectedDrink> parseSelectedDrinks(String selectedDrinksJson) {
-        List<Map<String, Object>> rawItems;
         try {
-            rawItems = objectMapper.readValue(
-                    selectedDrinksJson == null ? "[]" : selectedDrinksJson,
+            List<SelectedDrinkDTO> selectedDrinks = objectMapper.readValue(
+                    selectedDrinksJson,
                     new TypeReference<>() {
                     }
             );
+
+            if (selectedDrinks == null || selectedDrinks.isEmpty()) {
+                throw new IllegalArgumentException("Invalid selected drinks");
+            }
+
+            validateSelectedDrinks(selectedDrinks);
+            return selectedDrinks;
+        } catch (IllegalArgumentException e) {
+            throw e;
         } catch (Exception e) {
-            throw new IllegalArgumentException("Invalid selected drinks JSON", e);
+            throw new IllegalArgumentException("Invalid selected drinks", e);
         }
+    }
 
-        if (rawItems == null || rawItems.isEmpty()) {
-            return Collections.emptyList();
-        }
+    private boolean isInvalidId(Integer id) {
+        return id == null || id <= 0;
+    }
 
+    private void validateSelectedDrinks(List<SelectedDrinkDTO> selectedDrinks) {
         Set<Integer> drinkIds = new HashSet<>();
-        List<SelectedDrink> selectedDrinks = new ArrayList<>();
-
-        for (Map<String, Object> item : rawItems) {
-            Integer drinkId = firstInteger(item, "drinkId", "id");
-            Integer quantity = firstInteger(item, "quantity", "qty");
+        for (SelectedDrinkDTO selectedDrink : selectedDrinks) {
+            Integer drinkId = selectedDrink.getDrinkId();
+            Integer quantity = selectedDrink.getQuantity();
 
             if (drinkId == null || drinkId <= 0 || quantity == null || quantity <= 0) {
                 throw new IllegalArgumentException("Invalid selected drink");
@@ -138,44 +127,6 @@ public class OrderItemServiceImpl implements OrderItemService {
             if (!drinkIds.add(drinkId)) {
                 throw new IllegalArgumentException("Duplicate selected drink");
             }
-
-            selectedDrinks.add(new SelectedDrink(drinkId, quantity));
         }
-
-        return selectedDrinks;
-    }
-
-    private Integer firstInteger(Map<String, Object> source, String... keys) {
-        for (String key : keys) {
-            Integer value = toInteger(source.get(key));
-            if (value != null) {
-                return value;
-            }
-        }
-
-        return null;
-    }
-
-    private Integer toInteger(Object value) {
-        if (value == null) {
-            return null;
-        }
-
-        if (value instanceof Number number) {
-            return number.intValue();
-        }
-
-        try {
-            return Integer.valueOf(String.valueOf(value));
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    private boolean isInvalidId(Integer id) {
-        return id == null || id <= 0;
-    }
-
-    private record SelectedDrink(Integer drinkId, Integer quantity) {
     }
 }

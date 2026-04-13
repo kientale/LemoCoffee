@@ -41,35 +41,28 @@ public class DrinkServiceImpl implements DrinkService {
 
     @Override
     public Page<DrinkTableDTO> getDrink(int page, int size, String keyword) {
+
         int pageNo = Math.max(1, page);
         int pageSize = Math.max(1, size);
+        String kw = normalize(keyword);
 
         Pageable pageable = PageRequest.of(pageNo - 1, pageSize, Sort.by(Sort.Direction.DESC, "id"));
 
-        String kw = normalize(keyword);
-
-        Page<Drink> drinkPage;
-
-        if (kw.isEmpty()) {
-            drinkPage = drinkRepository.findByStatusNot(DrinkStatusEnum.DELETED, pageable);
-        } else {
-            drinkPage = drinkRepository.findByNameContainingIgnoreCaseAndStatusNot(
-                    kw,
-                    DrinkStatusEnum.DELETED,
-                    pageable
-            );
-        }
+        Page<Drink> drinkPage = kw.isEmpty() ?
+                drinkRepository.findByStatusNot(DrinkStatusEnum.DELETED, pageable) :
+                drinkRepository.findByNameContainingIgnoreCaseAndStatusNot(kw, DrinkStatusEnum.DELETED, pageable);
 
         return drinkPage.map(drinkMapper::toDrinkTableDTO);
     }
 
     @Override
     public Page<DrinkTableDTO> getAvailableDrinks(int page, int size, String keyword) {
+
         int pageNo = Math.max(1, page);
         int pageSize = Math.max(1, size);
+        String kw = normalize(keyword);
 
         Pageable pageable = PageRequest.of(pageNo - 1, pageSize, Sort.by(Sort.Direction.ASC, "name"));
-        String kw = normalize(keyword);
 
         Page<Drink> drinkPage;
         if (kw.isEmpty()) {
@@ -89,26 +82,29 @@ public class DrinkServiceImpl implements DrinkService {
     @Transactional
     public DrinkManagementResult createDrink(DrinkInfoDTO formData, MultipartFile imageFile) {
         String savedImagePath = null;
-        try {
-            String name = normalize(formData.getName());
 
-            if (drinkRepository.existsByNameIgnoreCase(name)) {
+        try {
+            if (drinkRepository.existsByNameIgnoreCase(formData.getName())) {
                 return DrinkManagementResult.DRINK_ALREADY_EXISTS;
             }
 
             savedImagePath = saveImage(imageFile);
 
             Drink drink = Drink.builder()
-                    .name(name)
+                    .name(formData.getName())
                     .price(formData.getPrice())
-                    .description(normalizeNullable(formData.getDescription()))
-                    .image(StringUtils.hasText(savedImagePath) ? savedImagePath : normalizeNullable(formData.getImage()))
+                    .description(formData.getDescription())
+                    .image(StringUtils.hasText(savedImagePath) ? savedImagePath : formData.getImage())
                     .status(DrinkStatusEnum.AVAILABLE)
                     .build();
 
             drinkRepository.saveAndFlush(drink);
-            drinkIngredientService.replaceDrinkIngredients(drink, formData.getSelectedIngredientsJson());
+            drinkIngredientService.replaceDrinkIngredients(
+                    drink,
+                    formData.getSelectedIngredientsJson());
+
             return DrinkManagementResult.CREATE_SUCCESS;
+
         } catch (ImageStorageException e) {
             log.error("Failed to save drink image for name={}", formData.getName(), e);
             rollbackCurrentTransaction();
@@ -138,32 +134,27 @@ public class DrinkServiceImpl implements DrinkService {
         try {
             Integer id = formData.getId();
             Drink drink = findDrinkById(id);
+
             if (drink == null || drink.getStatus() == DrinkStatusEnum.DELETED) {
                 return DrinkManagementResult.DRINK_NOT_FOUND;
             }
 
-            String name = normalize(formData.getName());
-            if (drinkRepository.existsByNameIgnoreCaseAndIdNot(name, id)) {
+            if (drinkRepository.existsByNameIgnoreCaseAndIdNot(formData.getName(), id)) {
                 return DrinkManagementResult.DRINK_ALREADY_EXISTS;
             }
 
             savedImagePath = saveImage(imageFile);
 
-            drink.setName(name);
+            drink.setName(formData.getName());
             drink.setPrice(formData.getPrice());
-            drink.setDescription(normalizeNullable(formData.getDescription()));
-
-            if (StringUtils.hasText(savedImagePath)) {
-                drink.setImage(savedImagePath);
-            }
-
-            if (formData.getStatus() != null) {
-                drink.setStatus(formData.getStatus());
-            }
+            drink.setDescription(formData.getDescription());
+            drink.setStatus(formData.getStatus());
+            drink.setImage(savedImagePath);
 
             drinkRepository.saveAndFlush(drink);
             drinkIngredientService.replaceDrinkIngredients(drink, formData.getSelectedIngredientsJson());
             return DrinkManagementResult.UPDATE_SUCCESS;
+
         } catch (ImageStorageException e) {
             log.error("Failed to save drink image for id={}", formData.getId(), e);
             rollbackCurrentTransaction();
@@ -185,6 +176,7 @@ public class DrinkServiceImpl implements DrinkService {
             }
 
             Drink drink = findDrinkById(id);
+
             if (drink == null || drink.getStatus() == DrinkStatusEnum.DELETED) {
                 return DrinkManagementResult.DRINK_NOT_FOUND;
             }
@@ -228,6 +220,7 @@ public class DrinkServiceImpl implements DrinkService {
     }
 
     private String saveImage(MultipartFile imageFile) {
+
         if (imageFile == null || imageFile.isEmpty()) {
             return null;
         }
@@ -262,12 +255,6 @@ public class DrinkServiceImpl implements DrinkService {
     private String normalize(String value) {
         return value == null ? "" : value.trim();
     }
-
-    private String normalizeNullable(String value) {
-        String normalized = normalize(value);
-        return normalized.isEmpty() ? null : normalized;
-    }
-
     private void rollbackCurrentTransaction() {
         try {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();

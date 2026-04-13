@@ -14,15 +14,11 @@ public interface OrderService {
 
     OrderInfoDTO getOrderInfoById(Integer id);
 
-    OrderTableDTO getOrderTableById(Integer id);
-
     OrderManagementResult updateOrder(OrderInfoDTO formData);
 
     OrderManagementResult cancelOrder(Integer id);
 
     OrderManagementResult checkoutOrder(Integer id, String loyaltyAction, Integer freeDrinkId);
-
-    OrderManagementResult changeOrderStatus(Integer id, OrderStatusEnum status);
 
     String buildInvoiceContent(Integer id);
 }

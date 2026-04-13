@@ -16,8 +16,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -29,13 +27,13 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     @Override
     public Page<IngredientInfoDTO> getIngredient(int page, int size, String keyword, String field) {
+
         int pageNo = Math.max(1, page);
         int pageSize = Math.max(1, size);
-
-        Pageable pageable = PageRequest.of(pageNo - 1, pageSize, Sort.by(Sort.Direction.DESC, "id"));
-
         String kw = normalize(keyword);
         String fd = normalize(field).toLowerCase();
+
+        Pageable pageable = PageRequest.of(pageNo - 1, pageSize, Sort.by(Sort.Direction.DESC, "id"));
 
         Page<Ingredient> ingredientPage;
 
@@ -68,27 +66,22 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Transactional
     public WarehouseManagementResult createIngredient(IngredientInfoDTO formData) {
         try {
-            String name = normalize(formData.getName());
-            String unit = normalize(formData.getUnit());
-            String supplier = normalize(formData.getSupplier());
-            String description = normalizeNullable(formData.getDescription());
-            BigDecimal quantity = formData.getQuantity();
-
-            if (warehouseRepository.existsByNameIgnoreCase(name)) {
+            if (warehouseRepository.existsByNameIgnoreCase(formData.getName())) {
                 return WarehouseManagementResult.INGREDIENT_ALREADY_EXISTS;
             }
 
             Ingredient ingredient = Ingredient.builder()
-                    .name(name)
-                    .quantity(quantity)
-                    .description(description)
-                    .unit(unit)
-                    .supplier(supplier)
+                    .name(formData.getName())
+                    .quantity(formData.getQuantity())
+                    .description(formData.getDescription())
+                    .unit(formData.getUnit())
+                    .supplier(formData.getSupplier())
                     .status(IngredientStatusEnum.ACTIVE)
                     .build();
 
             warehouseRepository.save(ingredient);
             return WarehouseManagementResult.CREATE_SUCCESS;
+
         } catch (Exception e) {
             log.error("Failed to create ingredient with name={}", formData.getName(), e);
             return WarehouseManagementResult.CREATE_FAILED;
@@ -108,20 +101,20 @@ public class WarehouseServiceImpl implements WarehouseService {
         try {
             Integer id = formData.getId();
             Ingredient ingredient = findIngredientById(id);
+
             if (ingredient == null) {
                 return WarehouseManagementResult.INGREDIENT_NOT_FOUND;
             }
 
-            String name = normalize(formData.getName());
-            if (warehouseRepository.existsByNameIgnoreCaseAndIdNot(name, id)) {
+            if (warehouseRepository.existsByNameIgnoreCaseAndIdNot(formData.getName(), id)) {
                 return WarehouseManagementResult.INGREDIENT_ALREADY_EXISTS;
             }
 
-            ingredient.setName(name);
+            ingredient.setName(formData.getName());
             ingredient.setQuantity(formData.getQuantity());
-            ingredient.setDescription(normalizeNullable(formData.getDescription()));
-            ingredient.setUnit(normalize(formData.getUnit()));
-            ingredient.setSupplier(normalize(formData.getSupplier()));
+            ingredient.setDescription(formData.getDescription());
+            ingredient.setUnit(formData.getUnit());
+            ingredient.setSupplier(formData.getSupplier());
 
             if (formData.getStatus() != null) {
                 ingredient.setStatus(formData.getStatus());
@@ -129,6 +122,7 @@ public class WarehouseServiceImpl implements WarehouseService {
 
             warehouseRepository.save(ingredient);
             return WarehouseManagementResult.UPDATE_SUCCESS;
+
         } catch (Exception e) {
             log.error("Failed to update ingredient with id={}", formData.getId(), e);
             return WarehouseManagementResult.UPDATE_FAILED;
@@ -144,6 +138,7 @@ public class WarehouseServiceImpl implements WarehouseService {
             }
 
             Ingredient ingredient = findIngredientById(id);
+
             if (ingredient == null) {
                 return WarehouseManagementResult.INGREDIENT_NOT_FOUND;
             }
@@ -151,6 +146,7 @@ public class WarehouseServiceImpl implements WarehouseService {
             ingredient.setStatus(status);
             warehouseRepository.save(ingredient);
             return WarehouseManagementResult.DELETE_SUCCESS;
+
         } catch (Exception e) {
             log.error("Failed to delete ingredient id={}", id, e);
             return WarehouseManagementResult.DELETE_FAILED;
@@ -167,10 +163,5 @@ public class WarehouseServiceImpl implements WarehouseService {
 
     private String normalize(String value) {
         return value == null ? "" : value.trim();
-    }
-
-    private String normalizeNullable(String value) {
-        String normalized = normalize(value);
-        return normalized.isEmpty() ? null : normalized;
     }
 }
