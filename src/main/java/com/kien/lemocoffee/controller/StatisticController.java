@@ -2,6 +2,7 @@ package com.kien.lemocoffee.controller;
 
 import com.kien.lemocoffee.service.StatisticService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +20,7 @@ public class StatisticController {
     private final StatisticService statisticService;
 
     @GetMapping
+    @PreAuthorize("hasAuthority(T(com.kien.lemocoffee.constant.PermissionEnum).STATISTIC_VIEW.name())")
     public String showStatistics(Model model) {
         model.addAttribute("activePage", "statistics");
         model.addAttribute("content", CONTENT);

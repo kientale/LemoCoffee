@@ -11,8 +11,10 @@ public enum DrinkManagementResult {
     INVALID_ACTION("Invalid action"),
 
     DRINK_NOT_FOUND("Drink not found"),
+    INVALID_DRINK("Invalid drink"),
     DRINK_ALREADY_EXISTS("Drink already exists"),
     INGREDIENT_NOT_FOUND("Ingredient not found"),
+    DUPLICATE_SELECTED_INGREDIENT("Duplicate selected ingredient"),
 
     INVALID_INPUT("Invalid input"),
     VALIDATION_FAILED("Validation failed"),
@@ -20,6 +22,7 @@ public enum DrinkManagementResult {
     INVALID_NAME("Invalid drink name"),
     INVALID_PRICE("Invalid price"),
     INVALID_DESCRIPTION("Invalid description"),
+    REQUIRED_IMAGE("Drink image is required"),
     INVALID_IMAGE("Invalid image"),
     IMAGE_SAVE_FAILED("Failed to save drink image"),
     INVALID_STATUS("Invalid status"),

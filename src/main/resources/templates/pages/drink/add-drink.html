@@ -62,23 +62,27 @@
                                        th:value="${formData != null ? formData.price : ''}">
                             </div>
 
-                            <div class="mb-3">
-                                <label class="form-label">Drink Image</label>
-                                <input type="file"
-                                       name="image"
-                                       class="form-control"
-                                       accept="image/*"
-                                       required>
-                                <small class="text-muted">Only 1 image is allowed (PNG, JPG, JPEG)</small>
+                            <div class="col-lg-6 d-flex">
+                                <div class="drink-form-panel w-100">
+                                    <label class="form-label">Drink Image</label>
+                                    <input type="file"
+                                           name="image"
+                                           class="form-control"
+                                           accept="image/*"
+                                           required>
+                                    <small class="text-muted drink-form-helper">Only 1 image is allowed (PNG, JPG, JPEG)</small>
+                                </div>
                             </div>
 
-                            <div class="col-md-12">
-                                <label class="form-label">Description</label>
-                                <textarea name="description"
-                                          class="form-control"
-                                          rows="3"
-                                          placeholder="Short description of the drink"
-                                          th:text="${formData != null ? formData.description : ''}"></textarea>
+                            <div class="col-lg-6 d-flex">
+                                <div class="drink-form-panel w-100">
+                                    <label class="form-label">Description</label>
+                                    <textarea name="description"
+                                              class="form-control drink-form-description-textarea"
+                                              rows="4"
+                                              placeholder="Short description of the drink"
+                                              th:text="${formData != null ? formData.description : ''}"></textarea>
+                                </div>
                             </div>
 
                             <!-- Selected Ingredients Section -->
@@ -149,22 +153,24 @@
                                     </div>
                                 </div>
 
-                                <!-- Selected Ingredient Pagination -->
-                                <div class="mt-3 d-flex justify-content-end align-items-center gap-2 d-none" id="selectedPager">
-                                    <button type="button" class="btn btn-outline-secondary btn-sm" id="btnSelPrev">Prev</button>
-                                    <span class="fw-semibold small" id="selPageInfo">1 / 1</span>
-                                    <button type="button" class="btn btn-outline-secondary btn-sm" id="btnSelNext">Next</button>
-                                </div>
                             </div>
                         </div>
 
                         <!-- Add Modal Footer Actions -->
-                        <div class="mt-4 text-end">
-                            <a th:href="@{/drink-management(page=${pageNo}, keyword=${kw})}"
-                               class="btn btn-outline-secondary">
-                                Cancel
-                            </a>
-                            <button type="submit" class="btn btn-primary">Create</button>
+                        <div class="drink-form-footer">
+                            <div class="drink-form-footer-pagination d-flex align-items-center gap-2 d-none" id="selectedPager">
+                                <button type="button" class="btn btn-outline-secondary" id="btnSelPrev">Prev</button>
+                                <span class="fw-semibold small" id="selPageInfo">1 / 1</span>
+                                <button type="button" class="btn btn-outline-secondary" id="btnSelNext">Next</button>
+                            </div>
+
+                            <div class="drink-form-footer-actions">
+                                <a th:href="@{/drink-management(page=${pageNo}, keyword=${kw})}"
+                                   class="btn btn-outline-secondary">
+                                    Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary">Create</button>
+                            </div>
                         </div>
                     </form>
                 </div>

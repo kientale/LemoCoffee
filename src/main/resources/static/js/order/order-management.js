@@ -271,7 +271,7 @@
             );
         } else {
             setCheckoutNotice(
-                `Redeem available: spend ${POINTS_REQUIRED_FOR_REDEEM} points to get 1 free drink (one drink per checkout).`
+                `Redeem available: spend ${POINTS_REQUIRED_FOR_REDEEM} points to get 1 free drink and still earn points from the remaining paid amount.`
             );
         }
 

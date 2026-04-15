@@ -60,9 +60,9 @@
 
     <!-- ===== Picker Pagination ===== -->
     <div class="table-table-footer">
-        <div class="d-flex align-items-center gap-3 justify-content-end w-100">
+        <div class="table-table-footer-pagination d-flex align-items-center gap-3">
             <button type="button"
-                    class="btn btn-outline-secondary btn-sm"
+                    class="btn btn-outline-secondary"
                     th:attr="data-customer-page=${customerPageNo - 1}"
                     th:disabled="${customerPageNo <= 1}">
                 Prev
@@ -72,10 +72,19 @@
                   th:text="${customerPageNo + ' / ' + safeTotalPages}"></span>
 
             <button type="button"
-                    class="btn btn-outline-secondary btn-sm"
+                    class="btn btn-outline-secondary"
                     th:attr="data-customer-page=${customerPageNo + 1}"
                     th:disabled="${customerPageNo >= safeTotalPages}">
                 Next
+            </button>
+        </div>
+
+        <div class="table-table-footer-actions">
+            <button type="button"
+                    class="btn btn-outline-secondary"
+                    id="btnCloseCustomerModal"
+                    data-bs-dismiss="modal">
+                Close
             </button>
         </div>
     </div>

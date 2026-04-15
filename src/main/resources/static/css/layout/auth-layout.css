@@ -280,7 +280,7 @@ body.auth-layout::before {
     overflow: hidden;
     background:
             linear-gradient(145deg, rgba(18, 48, 37, 0.32), rgba(11, 29, 22, 0.24)),
-            url("../../img/cafe18.png") center/cover no-repeat;
+            url("../../img/drink/cafe18.png") center/cover no-repeat;
 }
 
 .auth-visual-backdrop {

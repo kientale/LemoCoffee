@@ -7,6 +7,7 @@ import com.kien.lemocoffee.normalizer.IngredientNormalizer;
 import com.kien.lemocoffee.service.WarehouseService;
 import com.kien.lemocoffee.validate.IngredientValidator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -33,6 +34,7 @@ public class WarehouseController {
     private final IngredientNormalizer ingredientNormalizer;
 
     @GetMapping
+    @PreAuthorize("hasAuthority(T(com.kien.lemocoffee.constant.PermissionEnum).INGREDIENT_VIEW.name())")
     public String getAllIngredients(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "") String keyword,
@@ -45,6 +47,7 @@ public class WarehouseController {
     }
 
     @PostMapping(params = "action=create")
+    @PreAuthorize("hasAuthority(T(com.kien.lemocoffee.constant.PermissionEnum).INGREDIENT_CREATE.name())")
     public String createIngredient(
             @ModelAttribute("formData") IngredientInfoDTO formData,
             @RequestParam(defaultValue = "1") int page,
@@ -74,6 +77,7 @@ public class WarehouseController {
     }
 
     @GetMapping(params = {"view=edit", "id"})
+    @PreAuthorize("hasAuthority(T(com.kien.lemocoffee.constant.PermissionEnum).INGREDIENT_UPDATE.name())")
     public String showEditIngredient(
             @RequestParam("id") Integer id,
             @RequestParam(defaultValue = "1") int page,
@@ -100,6 +104,7 @@ public class WarehouseController {
     }
 
     @PostMapping(params = "action=edit")
+    @PreAuthorize("hasAuthority(T(com.kien.lemocoffee.constant.PermissionEnum).INGREDIENT_UPDATE.name())")
     public String editIngredient(
             @ModelAttribute("formData") IngredientInfoDTO formData,
             @RequestParam(defaultValue = "1") int page,
@@ -129,6 +134,7 @@ public class WarehouseController {
     }
 
     @PostMapping(params = "action=delete")
+    @PreAuthorize("hasAuthority(T(com.kien.lemocoffee.constant.PermissionEnum).INGREDIENT_DELETE.name())")
     public String deleteIngredient(
             @RequestParam("id") Integer id,
             @RequestParam(defaultValue = "1") int page,

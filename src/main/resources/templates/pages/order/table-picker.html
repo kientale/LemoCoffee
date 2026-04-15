@@ -70,9 +70,9 @@
 
     <!-- ===== Picker Pagination ===== -->
     <div class="table-table-footer">
-        <div class="d-flex align-items-center gap-3 justify-content-end w-100">
+        <div class="table-table-footer-pagination d-flex align-items-center gap-3">
             <button type="button"
-                    class="btn btn-outline-secondary btn-sm btn-table-page"
+                    class="btn btn-outline-secondary btn-table-page"
                     th:attr="data-table-page=${tablePageNo - 1}"
                     th:disabled="${tablePageNo <= 1}">
                 Prev
@@ -82,10 +82,19 @@
                   th:text="${tablePageNo + ' / ' + safeTotalPages}"></span>
 
             <button type="button"
-                    class="btn btn-outline-secondary btn-sm btn-table-page"
+                    class="btn btn-outline-secondary btn-table-page"
                     th:attr="data-table-page=${tablePageNo + 1}"
                     th:disabled="${tablePageNo >= safeTotalPages}">
                 Next
+            </button>
+        </div>
+
+        <div class="table-table-footer-actions">
+            <button type="button"
+                    class="btn btn-outline-secondary"
+                    id="btnCloseTableModal"
+                    data-bs-dismiss="modal">
+                Close
             </button>
         </div>
     </div>

@@ -151,7 +151,6 @@
     function bindEvents() {
         const searchForm = Order.$("drinkPickerSearchForm");
         const btnReset = Order.$("btnResetDrinkSearch");
-        const btnClose = Order.$("btnCloseDrinkModal");
         const container = Order.$("drinkPickerContainer");
         const pickerModalEl = document.getElementById("drinkPickerModal");
 
@@ -168,10 +167,6 @@
             if (keywordInput) keywordInput.value = "";
 
             await load(1, { showLoading: false });
-        });
-
-        btnClose?.addEventListener("click", () => {
-            Order.modal.hide("drinkPickerModal");
         });
 
         container?.addEventListener("click", async (event) => {

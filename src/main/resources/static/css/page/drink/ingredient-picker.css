@@ -15,15 +15,26 @@
 }
 
 .ingredient-table-footer {
-    height: 50px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 16px;
+    gap: 12px;
+    padding: 8px 16px;
     border-top: 1px solid #dee2e6;
     background: #f8f9fa;
     font-size: 16px;
     font-weight: 500;
+}
+
+.ingredient-table-footer-pagination {
+    min-height: 38px;
+}
+
+.ingredient-table-footer-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
 }
 
 .ingredient-table-footer .small {
@@ -61,4 +72,24 @@ tr.self-row {
 
 tr.self-row td:first-child {
     font-weight: 700;
+}
+
+@media (max-width: 575.98px) {
+    .ingredient-table-footer {
+        flex-wrap: wrap;
+    }
+
+    .ingredient-table-footer-pagination,
+    .ingredient-table-footer-actions {
+        width: 100%;
+    }
+
+    .ingredient-table-footer-pagination {
+        justify-content: center;
+        order: 2;
+    }
+
+    .ingredient-table-footer-actions {
+        justify-content: flex-end;
+    }
 }

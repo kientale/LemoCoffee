@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="">
 <th:block
         th:fragment="content"
         th:with="
@@ -60,6 +62,7 @@
 
                     <!-- Add User Button -->
                     <button class="btn btn-warning fw-semibold"
+                            sec:authorize="hasAuthority('USER_CREATE')"
                             data-bs-toggle="modal"
                             data-bs-target="#addUserModal">
                         <i class="fa-solid fa-plus me-1"></i> Add New User
@@ -137,14 +140,14 @@
                                             </a>
                                         </li>
 
-                                        <li>
+                                        <li sec:authorize="hasAuthority('USER_UPDATE')">
                                             <a class="dropdown-item text-dark"
                                                th:href="@{/user-management(view='edit', id=${u.accountId}, page=${pageNo}, keyword=${kw}, field=${fd})}">
                                                 <i class="fa-regular fa-pen-to-square me-2 text-warning"></i> Edit User
                                             </a>
                                         </li>
 
-                                        <li>
+                                        <li sec:authorize="hasAuthority('USER_RESET_PASSWORD')">
                                             <button class="dropdown-item text-dark"
                                                     type="button"
                                                     onclick="openConfirmModal(this)"
@@ -157,7 +160,7 @@
                                             </button>
                                         </li>
 
-                                        <li>
+                                        <li sec:authorize="hasAuthority('USER_STATUS_UPDATE')">
                                             <button class="dropdown-item text-dark"
                                                     type="button"
                                                     onclick="openConfirmModal(this)"
@@ -172,11 +175,11 @@
                                             </button>
                                         </li>
 
-                                        <li>
+                                        <li sec:authorize="hasAuthority('USER_DELETE')">
                                             <hr class="dropdown-divider">
                                         </li>
 
-                                        <li>
+                                        <li sec:authorize="hasAuthority('USER_DELETE')">
                                             <button class="dropdown-item text-dark"
                                                     type="button"
                                                     onclick="openConfirmModal(this)"
@@ -235,7 +238,11 @@
     </div>
 
     <!-- ===== Modal: Add User ===== -->
-    <div class="modal fade" id="addUserModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade"
+         id="addUserModal"
+         sec:authorize="hasAuthority('USER_CREATE')"
+         tabindex="-1"
+         aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered modal-scrollable">
             <div class="modal-content">
 
@@ -403,33 +410,47 @@
                                        placeholder="Enter phone number">
                             </div>
 
-                            <div class="col-md-6">
-                                <label class="form-label">Role</label>
-                                <select name="role" class="form-select">
-                                    <option value="ADMIN"
-                                            th:selected="${formData != null and #strings.toString(formData.role) == 'ADMIN'}">
-                                        ADMIN
-                                    </option>
-                                    <option value="STAFF"
-                                            th:selected="${formData != null and #strings.toString(formData.role) == 'STAFF'}">
-                                        STAFF
-                                    </option>
-                                </select>
-                            </div>
+                            <th:block sec:authorize="hasAuthority('USER_ROLE_UPDATE')">
+                                <div class="col-md-6">
+                                    <label class="form-label">Role</label>
+                                    <select name="role" class="form-select">
+                                        <option value="ADMIN"
+                                                th:selected="${formData != null and #strings.toString(formData.role) == 'ADMIN'}">
+                                            ADMIN
+                                        </option>
+                                        <option value="STAFF"
+                                                th:selected="${formData != null and #strings.toString(formData.role) == 'STAFF'}">
+                                            STAFF
+                                        </option>
+                                    </select>
+                                </div>
+                            </th:block>
 
-                            <div class="col-md-6">
-                                <label class="form-label">Status</label>
-                                <select name="status" class="form-select">
-                                    <option value="ACTIVE"
-                                            th:selected="${formData != null and #strings.toString(formData.status) == 'ACTIVE'}">
-                                        ACTIVE
-                                    </option>
-                                    <option value="LOCKED"
-                                            th:selected="${formData != null and #strings.toString(formData.status) == 'LOCKED'}">
-                                        LOCKED
-                                    </option>
-                                </select>
-                            </div>
+                            <input sec:authorize="!hasAuthority('USER_ROLE_UPDATE')"
+                                   type="hidden"
+                                   name="role"
+                                   th:value="${formData != null ? formData.role : ''}">
+
+                            <th:block sec:authorize="hasAuthority('USER_STATUS_UPDATE')">
+                                <div class="col-md-6">
+                                    <label class="form-label">Status</label>
+                                    <select name="status" class="form-select">
+                                        <option value="ACTIVE"
+                                                th:selected="${formData != null and #strings.toString(formData.status) == 'ACTIVE'}">
+                                            ACTIVE
+                                        </option>
+                                        <option value="LOCKED"
+                                                th:selected="${formData != null and #strings.toString(formData.status) == 'LOCKED'}">
+                                            LOCKED
+                                        </option>
+                                    </select>
+                                </div>
+                            </th:block>
+
+                            <input sec:authorize="!hasAuthority('USER_STATUS_UPDATE')"
+                                   type="hidden"
+                                   name="status"
+                                   th:value="${formData != null ? formData.status : ''}">
                         </div>
 
                         <div class="mt-4 d-flex justify-content-end gap-2">
@@ -500,6 +521,7 @@
 
                         <div class="detail-actions">
                             <button type="button"
+                                    sec:authorize="hasAuthority('USER_STATUS_UPDATE')"
                                     class="btn px-3"
                                     onclick="openConfirmModal(this)"
                                     th:classappend="${userStatus == 'ACTIVE'} ? ' btn-danger' : ' btn-success'"
@@ -514,12 +536,14 @@
                             </button>
 
                             <div class="actions-right">
-                                <a th:href="@{/user-management(view='edit', id=${user.accountId}, page=${pageNo}, keyword=${kw}, field=${fd})}"
+                                <a sec:authorize="hasAuthority('USER_UPDATE')"
+                                   th:href="@{/user-management(view='edit', id=${user.accountId}, page=${pageNo}, keyword=${kw}, field=${fd})}"
                                    class="btn btn-warning px-3">
                                     <i class="fa-regular fa-pen-to-square me-1"></i> Edit
                                 </a>
 
                                 <button type="button"
+                                        sec:authorize="hasAuthority('USER_RESET_PASSWORD')"
                                         class="btn btn-reset-password px-3"
                                         onclick="openConfirmModal(this)"
                                         th:attr="data-confirm-title='Reset Password',
@@ -531,6 +555,7 @@
                                 </button>
 
                                 <button type="button"
+                                        sec:authorize="hasAuthority('USER_DELETE')"
                                         class="btn btn-danger px-3"
                                         onclick="openConfirmModal(this)"
                                         th:attr="data-confirm-title='Delete User',

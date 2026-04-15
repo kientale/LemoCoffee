@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <th:block th:fragment="content">
 
     <!-- ===== Modal: Drink Detail ===== -->
@@ -119,7 +120,8 @@
 
                             <!-- Status Action -->
                             <div>
-                                <button th:if="${detailStatus == 'AVAILABLE'}"
+                                <button sec:authorize="hasAuthority('DRINK_STATUS_UPDATE')"
+                                        th:if="${detailStatus == 'AVAILABLE'}"
                                         type="button"
                                         class="btn btn-warning px-3"
                                         data-confirm-title="Mark as Unavailable"
@@ -131,7 +133,8 @@
                                     <i class="fa-solid fa-eye-slash me-1"></i> Unavailable
                                 </button>
 
-                                <button th:if="${detailStatus == 'UNAVAILABLE'}"
+                                <button sec:authorize="hasAuthority('DRINK_STATUS_UPDATE')"
+                                        th:if="${detailStatus == 'UNAVAILABLE'}"
                                         type="button"
                                         class="btn btn-success px-3"
                                         data-confirm-title="Mark as Available"
@@ -146,12 +149,14 @@
 
                             <!-- Main Actions -->
                             <div class="actions-right">
-                                <a th:href="@{/drink-management(view='edit', id=${detailDrink.id}, page=${pageNo}, keyword=${kw})}"
+                                <a sec:authorize="hasAuthority('DRINK_UPDATE')"
+                                   th:href="@{/drink-management(view='edit', id=${detailDrink.id}, page=${pageNo}, keyword=${kw})}"
                                    class="btn btn-warning px-3">
                                     <i class="fa-regular fa-pen-to-square me-1"></i> Edit Drink
                                 </a>
 
                                 <button type="button"
+                                        sec:authorize="hasAuthority('DRINK_DELETE')"
                                         class="btn btn-danger px-3"
                                         data-confirm-title="Delete Drink"
                                         data-confirm-message="This drink will be permanently deleted. This action cannot be undone."

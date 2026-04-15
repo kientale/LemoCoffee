@@ -198,6 +198,59 @@ html, body {
     font-weight: 600;
 }
 
+#addDrinkModal .drink-form-panel,
+#editDrinkModal .drink-form-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 12px 14px;
+    border: 1px solid rgba(17, 24, 39, 0.08);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.58);
+}
+
+#addDrinkModal .drink-form-helper,
+#editDrinkModal .drink-form-helper {
+    margin-top: 8px;
+}
+
+#addDrinkModal .drink-form-description-textarea,
+#editDrinkModal .drink-form-description-textarea {
+    flex: 1 1 auto;
+    min-height: 132px;
+    resize: vertical;
+}
+
+#addDrinkModal .drink-form-footer,
+#editDrinkModal .drink-form-footer {
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+#addDrinkModal .drink-form-footer-pagination,
+#editDrinkModal .drink-form-footer-pagination {
+    min-height: 38px;
+}
+
+#addDrinkModal .drink-form-footer-actions,
+#editDrinkModal .drink-form-footer-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+#editDrinkModal .drink-form-upload-preview {
+    margin-top: auto;
+    padding-top: 12px;
+}
+
 #editDrinkModal .form-control, #editDrinkModal .form-select {
     border-color: rgba(17, 24, 39, 0.18);
 }
@@ -257,6 +310,13 @@ html, body {
     border-radius: 12px;
     padding: 16px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+@media (max-width: 991.98px) {
+    #addDrinkModal .drink-form-panel,
+    #editDrinkModal .drink-form-panel {
+        padding: 10px 12px;
+    }
 }
 
 /* label rõ hơn */
@@ -515,4 +575,24 @@ tr.self-row td:first-child {
 #addDrinkIngredientModal .modal-footer {
     background: rgba(0, 0, 0, 0.25);
     border-top: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+@media (max-width: 575.98px) {
+    #addDrinkModal .drink-form-footer-pagination,
+    #editDrinkModal .drink-form-footer-pagination,
+    #addDrinkModal .drink-form-footer-actions,
+    #editDrinkModal .drink-form-footer-actions {
+        width: 100%;
+    }
+
+    #addDrinkModal .drink-form-footer-pagination,
+    #editDrinkModal .drink-form-footer-pagination {
+        justify-content: center;
+        order: 2;
+    }
+
+    #addDrinkModal .drink-form-footer-actions,
+    #editDrinkModal .drink-form-footer-actions {
+        justify-content: flex-end;
+    }
 }

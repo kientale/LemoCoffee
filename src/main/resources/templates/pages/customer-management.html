@@ -567,7 +567,7 @@
                                                 <td class="text-start">
                                                     <span th:text="${it.drinkName}"></span>
                                                     <span class="badge bg-info text-dark ms-2"
-                                                          th:if="${#strings.toString(it.pricingType) == 'POINT_REWARD'}">
+                                                          th:if="${it.pointReward}">
                                                         Free Drink
                                                     </span>
                                                 </td>

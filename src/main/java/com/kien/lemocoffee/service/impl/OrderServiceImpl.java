@@ -2,6 +2,7 @@ package com.kien.lemocoffee.service.impl;
 
 import com.kien.lemocoffee.constant.CustomerStatusEnum;
 import com.kien.lemocoffee.constant.CustomerPointTransactionTypeEnum;
+import com.kien.lemocoffee.constant.OrderItemPricingTypeEnum;
 import com.kien.lemocoffee.constant.OrderManagementResult;
 import com.kien.lemocoffee.constant.OrderStatusEnum;
 import com.kien.lemocoffee.constant.TableStatusEnum;
@@ -12,6 +13,7 @@ import com.kien.lemocoffee.entity.Customer;
 import com.kien.lemocoffee.entity.CustomerPointTransaction;
 import com.kien.lemocoffee.entity.Order;
 import com.kien.lemocoffee.entity.OrderItem;
+import com.kien.lemocoffee.exception.OrderProcessException;
 import com.kien.lemocoffee.mapper.OrderMapper;
 import com.kien.lemocoffee.repository.CustomerPointTransactionRepository;
 import com.kien.lemocoffee.repository.CustomerRepository;
@@ -26,12 +28,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -110,6 +117,10 @@ public class OrderServiceImpl implements OrderService {
             tableRepository.save(table);
 
             return OrderManagementResult.CREATE_SUCCESS;
+        } catch (OrderProcessException e) {
+            rollbackCurrentTransaction();
+            log.warn("Cannot create order: {}", e.getMessage());
+            return e.getResult();
         } catch (Exception e) {
             rollbackCurrentTransaction();
             log.error("Failed to create order", e);
@@ -131,7 +142,11 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public OrderManagementResult updateOrder(OrderInfoDTO formData) {
         try {
-            Order order = findOrderById(formData == null ? null : formData.getId());
+            if (formData == null || formData.getId() == null) {
+                return OrderManagementResult.UPDATE_FAILED;
+            }
+
+            Order order = findOrderById(formData.getId());
             if (order == null) {
                 return OrderManagementResult.ORDER_NOT_FOUND;
             }
@@ -140,7 +155,6 @@ public class OrderServiceImpl implements OrderService {
                 return OrderManagementResult.ORDER_CANNOT_BE_EDITED;
             }
 
-            assert formData != null;
             CoffeeTable newTable = findTableById(formData.getTableId());
             if (newTable == null || newTable.getStatus() == TableStatusEnum.DELETED) {
                 return OrderManagementResult.TABLE_NOT_FOUND;
@@ -174,12 +188,17 @@ public class OrderServiceImpl implements OrderService {
             if (tableChanged) {
                 setTableStatus(oldTableId, TableStatusEnum.AVAILABLE);
             }
+
             setTableStatus(newTable.getId(), TableStatusEnum.OCCUPIED);
 
             return OrderManagementResult.UPDATE_SUCCESS;
+        } catch (OrderProcessException e) {
+            rollbackCurrentTransaction();
+            log.warn("Cannot update order id={}: {}", formData.getId(), e.getMessage());
+            return e.getResult();
         } catch (Exception e) {
             rollbackCurrentTransaction();
-            log.error("Failed to update order id={}", formData == null ? null : formData.getId(), e);
+            log.error("Failed to update order id={}", formData.getId(), e);
             return OrderManagementResult.UPDATE_FAILED;
         }
     }
@@ -189,23 +208,21 @@ public class OrderServiceImpl implements OrderService {
     public OrderManagementResult cancelOrder(Integer id) {
         try {
             Order order = findOrderById(id);
-            if (order == null) {
-                return OrderManagementResult.ORDER_NOT_FOUND;
-            }
-
-            if (order.getStatus() == OrderStatusEnum.COMPLETED) {
-                return OrderManagementResult.ORDER_ALREADY_COMPLETED;
-            }
-
-            if (order.getStatus() == OrderStatusEnum.CANCELLED) {
-                return OrderManagementResult.ORDER_ALREADY_CANCELLED;
+            OrderManagementResult validationResult = validateOrderForCompletionAction(order);
+            if (validationResult != null) {
+                return validationResult;
             }
 
             order.setStatus(OrderStatusEnum.CANCELLED);
+            orderItemService.restoreIngredientStockByOrderId(order.getId());
             orderRepository.save(order);
             releaseTableIfNoPendingOrder(order.getTableId());
 
             return OrderManagementResult.CANCEL_SUCCESS;
+        } catch (OrderProcessException e) {
+            rollbackCurrentTransaction();
+            log.warn("Cannot cancel order id={}: {}", id, e.getMessage());
+            return e.getResult();
         } catch (Exception e) {
             rollbackCurrentTransaction();
             log.error("Failed to cancel order id={}", id, e);
@@ -218,16 +235,9 @@ public class OrderServiceImpl implements OrderService {
     public OrderManagementResult checkoutOrder(Integer id, String loyaltyAction, Integer freeDrinkId) {
         try {
             Order order = findOrderById(id);
-            if (order == null) {
-                return OrderManagementResult.ORDER_NOT_FOUND;
-            }
-
-            if (order.getStatus() == OrderStatusEnum.COMPLETED) {
-                return OrderManagementResult.ORDER_ALREADY_COMPLETED;
-            }
-
-            if (order.getStatus() == OrderStatusEnum.CANCELLED) {
-                return OrderManagementResult.ORDER_ALREADY_CANCELLED;
+            OrderManagementResult validationResult = validateOrderForCompletionAction(order);
+            if (validationResult != null) {
+                return validationResult;
             }
 
             List<OrderItem> items = orderItemService.findItemsByOrderId(order.getId());
@@ -264,15 +274,17 @@ public class OrderServiceImpl implements OrderService {
                 finalAmount = originalTotal.subtract(discount).max(BigDecimal.ZERO);
 
                 freeItem.setSubtotal(freeItem.getSubtotal().subtract(discount).max(BigDecimal.ZERO));
-                freeItem.setPricingType("POINT_REWARD");
+                freeItem.setPricingType(OrderItemPricingTypeEnum.POINT_REWARD);
                 freeItem.setPointsRedeemed(POINTS_REQUIRED_FOR_REDEEM);
                 orderItemRepository.save(freeItem);
 
                 redeemedPoints = POINTS_REQUIRED_FOR_REDEEM;
-                customer.setPoints(customer.getPoints() - POINTS_REQUIRED_FOR_REDEEM);
-            } else if ("earn".equals(action) && customer != null) {
+            }
+
+            if (customer != null && !"none".equals(action)) {
                 earnedPoints = finalAmount.divideToIntegralValue(POINT_AMOUNT_UNIT).intValue();
-                customer.setPoints((customer.getPoints() == null ? 0 : customer.getPoints()) + earnedPoints);
+                int currentPoints = customer.getPoints() == null ? 0 : customer.getPoints();
+                customer.setPoints(currentPoints - redeemedPoints + earnedPoints);
             }
 
             if (customer != null) {
@@ -298,7 +310,29 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public String buildInvoiceContent(Integer id) {
+    public ResponseEntity<byte[]> downloadInvoice(Integer id) {
+        if (isInvalidId(id)) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        String invoiceContent = buildInvoiceContent(id);
+        if (!StringUtils.hasText(invoiceContent)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        byte[] body = invoiceContent.getBytes(StandardCharsets.UTF_8);
+        ContentDisposition contentDisposition = ContentDisposition.attachment()
+                .filename("invoice-order-" + id + ".txt", StandardCharsets.UTF_8)
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
+                .contentType(new MediaType("text", "plain", StandardCharsets.UTF_8))
+                .contentLength(body.length)
+                .body(body);
+    }
+
+    private String buildInvoiceContent(Integer id) {
         OrderInfoDTO order = getOrderInfoById(id);
         if (order == null) {
             return "";
@@ -403,6 +437,22 @@ public class OrderServiceImpl implements OrderService {
                 || order.getStatus() == OrderStatusEnum.CANCELLED;
     }
 
+    private OrderManagementResult validateOrderForCompletionAction(Order order) {
+        if (order == null) {
+            return OrderManagementResult.ORDER_NOT_FOUND;
+        }
+
+        if (order.getStatus() == OrderStatusEnum.COMPLETED) {
+            return OrderManagementResult.ORDER_ALREADY_COMPLETED;
+        }
+
+        if (order.getStatus() == OrderStatusEnum.CANCELLED) {
+            return OrderManagementResult.ORDER_ALREADY_CANCELLED;
+        }
+
+        return null;
+    }
+
     private BigDecimal calculateTotal(List<OrderItem> items) {
         return items.stream()
                 .map(OrderItem::getSubtotal)
@@ -431,7 +481,8 @@ public class OrderServiceImpl implements OrderService {
             return;
         }
 
-        int balanceAfter = customer.getPoints() == null ? 0 : customer.getPoints();
+        int currentBalance = customer.getPoints() == null ? 0 : customer.getPoints();
+        currentBalance = currentBalance - earnedPoints + redeemedPoints;
 
         if (redeemedPoints > 0) {
             savePointTransaction(
@@ -439,10 +490,10 @@ public class OrderServiceImpl implements OrderService {
                     order.getId(),
                     CustomerPointTransactionTypeEnum.REDEEM,
                     -redeemedPoints,
-                    balanceAfter,
+                    currentBalance - redeemedPoints,
                     "Redeemed " + redeemedPoints + " points for order #" + order.getId()
             );
-            return;
+            currentBalance -= redeemedPoints;
         }
 
         if (earnedPoints > 0) {
@@ -451,7 +502,7 @@ public class OrderServiceImpl implements OrderService {
                     order.getId(),
                     CustomerPointTransactionTypeEnum.EARN,
                     earnedPoints,
-                    balanceAfter,
+                    currentBalance + earnedPoints,
                     "Earned " + earnedPoints + " points from order #" + order.getId()
             );
         }

@@ -56,9 +56,9 @@
 
     <!-- ===== Picker Pagination ===== -->
     <div class="drink-table-footer">
-        <div class="d-flex align-items-center gap-3 justify-content-end w-100">
+        <div class="drink-table-footer-pagination d-flex align-items-center gap-3">
             <button type="button"
-                    class="btn btn-outline-secondary btn-sm btn-drink-page"
+                    class="btn btn-outline-secondary btn-drink-page"
                     th:attr="data-drink-page=${drinkPageNo - 1}"
                     th:disabled="${drinkPageNo <= 1}">
                 Prev
@@ -68,10 +68,19 @@
                   th:text="${drinkPageNo + ' / ' + safeTotalPages}"></span>
 
             <button type="button"
-                    class="btn btn-outline-secondary btn-sm btn-drink-page"
+                    class="btn btn-outline-secondary btn-drink-page"
                     th:attr="data-drink-page=${drinkPageNo + 1}"
                     th:disabled="${drinkPageNo >= safeTotalPages}">
                 Next
+            </button>
+        </div>
+
+        <div class="drink-table-footer-actions">
+            <button type="button"
+                    class="btn btn-outline-secondary"
+                    id="btnCloseDrinkModal"
+                    data-bs-dismiss="modal">
+                Close
             </button>
         </div>
     </div>

@@ -119,8 +119,6 @@
     function bindEvents() {
         const searchForm = Drink.$("ingredientPickerSearchForm");
         const btnReset = Drink.$("btnResetIngSearch");
-        const btnClose = Drink.$("btnCloseIngModal");
-        const container = Drink.$("ingredientPickerContainer");
         const pickerModalEl = document.getElementById("addDrinkIngredientModal");
 
         searchForm?.addEventListener("submit", async (e) => {
@@ -140,11 +138,7 @@
             await load(1, { showLoading: false });
         });
 
-        btnClose?.addEventListener("click", () => {
-            Drink.modal.hide("addDrinkIngredientModal");
-        });
-
-        container?.addEventListener("click", async (e) => {
+        pickerModalEl?.addEventListener("click", async (e) => {
             const pageBtn = e.target.closest("[data-ing-page]");
             if (!pageBtn) return;
 

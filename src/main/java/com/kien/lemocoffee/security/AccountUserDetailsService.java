@@ -24,7 +24,7 @@ public class AccountUserDetailsService implements UserDetailsService {
                 .withUsername(account.getUsername())
                 .password(account.getPasswordHash())
                 .accountLocked(account.isLocked())
-                .authorities("ROLE_" + account.getRole())
+                .authorities(account.getRole().getAuthorities())
                 .build();
     }
 }

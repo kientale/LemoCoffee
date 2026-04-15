@@ -25,6 +25,7 @@
                 </div>
 
                 <div class="sidebar-item"
+                     sec:authorize="hasAuthority('USER_VIEW')"
                      th:classappend="${activePage == 'user-management'} ? ' active'">
                     <a class="sidebar-btn" th:href="@{/user-management}">
                         <i class="fa-solid fa-users"></i>
@@ -49,6 +50,7 @@
                 </div>
 
                 <div class="sidebar-item"
+                     sec:authorize="hasAuthority('INGREDIENT_VIEW')"
                      th:classappend="${activePage == 'warehouse-management'} ? ' active'">
                     <a class="sidebar-btn" th:href="@{/ingredient-management}">
                         <i class="fa-solid fa-boxes-stacked"></i>
@@ -57,6 +59,7 @@
                 </div>
 
                 <div class="sidebar-item"
+                     sec:authorize="hasAuthority('DRINK_VIEW')"
                      th:classappend="${activePage == 'drink-management'} ? ' active'">
                     <a class="sidebar-btn" th:href="@{/drink-management}">
                         <i class="fa-solid fa-mug-hot"></i>
@@ -65,6 +68,7 @@
                 </div>
 
                 <div class="sidebar-item"
+                     sec:authorize="hasAuthority('STATISTIC_VIEW')"
                      th:classappend="${activePage == 'statistics'} ? ' active'">
                     <a class="sidebar-btn" th:href="@{/statistics}">
                         <i class="fa-solid fa-chart-column"></i>

@@ -63,75 +63,79 @@
 
                     <!-- Edit Form Fields -->
                     <div class="row g-3">
-                        <!-- Table Picker -->
-                        <div class="col-md-12">
-                            <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
-                                <label class="form-label fw-semibold mb-0">Table</label>
+                        <div class="col-12">
+                            <div class="order-party-grid">
+                                <!-- Table Picker -->
+                                <div class="order-party-card">
+                                    <div class="order-party-card-header d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                                        <label class="form-label fw-semibold mb-0">Table</label>
 
-                                <div class="d-flex gap-2">
-                                    <button type="button" class="btn btn-success btn-sm" id="btnOpenTableModalEdit">
-                                        <span class="btn-text">
-                                            <i class="fa-solid fa-chair me-1"></i> Choose Table
-                                        </span>
-                                        <span class="spinner-border spinner-border-sm d-none" id="tableOpenSpinnerEdit"></span>
-                                    </button>
+                                        <div class="order-party-card-actions d-flex gap-2 flex-wrap justify-content-end">
+                                            <button type="button" class="btn btn-success btn-sm" id="btnOpenTableModalEdit">
+                                                <span class="btn-text">
+                                                    <i class="fa-solid fa-chair me-1"></i> Choose Table
+                                                </span>
+                                                <span class="spinner-border spinner-border-sm d-none" id="tableOpenSpinnerEdit"></span>
+                                            </button>
 
-                                    <button type="button" class="btn btn-outline-danger btn-sm" id="btnClearTableEdit">
-                                        <i class="fa-solid fa-broom me-1"></i> Clear
-                                    </button>
+                                            <button type="button" class="btn btn-outline-danger btn-sm" id="btnClearTableEdit">
+                                                <i class="fa-solid fa-broom me-1"></i> Clear
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <input type="text"
+                                           id="selectedTableNameEdit"
+                                           name="tableName"
+                                           class="form-control"
+                                           placeholder="No table selected"
+                                           th:value="${editOrder == null or editOrder.tableName == null ? '' : editOrder.tableName}"
+                                           readonly>
+
+                                    <small class="text-muted">Each order can only belong to one table.</small>
+                                </div>
+
+                                <!-- Customer Picker -->
+                                <div class="order-party-card">
+                                    <div class="order-party-card-header d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                                        <label class="form-label fw-semibold mb-0">Customer</label>
+
+                                        <div class="order-party-card-actions d-flex gap-2 flex-wrap justify-content-end">
+                                            <button type="button" class="btn btn-success btn-sm" id="btnOpenCustomerModalEdit">
+                                                <span class="btn-text">
+                                                    <i class="fa-solid fa-user me-1"></i> Choose Customer
+                                                </span>
+                                                <span class="spinner-border spinner-border-sm d-none" id="customerOpenSpinnerEdit"></span>
+                                            </button>
+
+                                            <button type="button" class="btn btn-warning btn-sm" id="btnOpenNewCustomerModalEdit">
+                                                <span class="btn-text">
+                                                    <i class="fa-solid fa-user-plus me-1"></i> New Customer
+                                                </span>
+                                                <span class="spinner-border spinner-border-sm d-none" id="newCustomerOpenSpinnerEdit"></span>
+                                            </button>
+
+                                            <button type="button" class="btn btn-outline-danger btn-sm" id="btnClearCustomerEdit">
+                                                <i class="fa-solid fa-broom me-1"></i> Clear
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <input type="text"
+                                           id="selectedCustomerNameEdit"
+                                           name="customerName"
+                                           class="form-control"
+                                           placeholder="No customer selected"
+                                           th:value="${editOrder == null or editOrder.customerName == null ? '' : editOrder.customerName}"
+                                           readonly>
+
+                                    <small class="text-muted">Select customer to update loyalty and order history.</small>
                                 </div>
                             </div>
-
-                            <input type="text"
-                                   id="selectedTableNameEdit"
-                                   name="tableName"
-                                   class="form-control"
-                                   placeholder="No table selected"
-                                   th:value="${editOrder == null or editOrder.tableName == null ? '' : editOrder.tableName}"
-                                   readonly>
-
-                            <small class="text-muted">Each order can only belong to one table.</small>
-                        </div>
-
-                        <!-- Customer Picker -->
-                        <div class="col-md-12">
-                            <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
-                                <label class="form-label fw-semibold mb-0">Customer</label>
-
-                                <div class="d-flex gap-2">
-                                    <button type="button" class="btn btn-success btn-sm" id="btnOpenCustomerModalEdit">
-                                        <span class="btn-text">
-                                            <i class="fa-solid fa-user me-1"></i> Choose Customer
-                                        </span>
-                                        <span class="spinner-border spinner-border-sm d-none" id="customerOpenSpinnerEdit"></span>
-                                    </button>
-
-                                    <button type="button" class="btn btn-warning btn-sm" id="btnOpenNewCustomerModalEdit">
-                                        <span class="btn-text">
-                                            <i class="fa-solid fa-user-plus me-1"></i> New Customer
-                                        </span>
-                                        <span class="spinner-border spinner-border-sm d-none" id="newCustomerOpenSpinnerEdit"></span>
-                                    </button>
-
-                                    <button type="button" class="btn btn-outline-danger btn-sm" id="btnClearCustomerEdit">
-                                        <i class="fa-solid fa-broom me-1"></i> Clear
-                                    </button>
-                                </div>
-                            </div>
-
-                            <input type="text"
-                                   id="selectedCustomerNameEdit"
-                                   name="customerName"
-                                   class="form-control"
-                                   placeholder="No customer selected"
-                                   th:value="${editOrder == null or editOrder.customerName == null ? '' : editOrder.customerName}"
-                                   readonly>
-
-                            <small class="text-muted">Select customer to update loyalty and order history.</small>
                         </div>
 
                         <!-- Note -->
-                        <div class="col-md-12">
+                        <div class="col-12">
                             <label class="form-label">Note</label>
                             <textarea name="note"
                                       class="form-control"
@@ -141,7 +145,7 @@
                         </div>
 
                         <!-- Selected Drinks -->
-                        <div class="mt-4">
+                        <div class="col-12 mt-4">
                             <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
                                 <h6 class="fw-bold mb-0">Selected Drinks</h6>
 
@@ -232,22 +236,25 @@
                                     <span id="orderTotalPreviewEdit" class="text-success">0 &#273;</span>
                                 </div>
 
-                                <div class="d-flex justify-content-end align-items-center gap-2 d-none" id="selectedDrinkPagerEdit">
-                                    <button type="button" class="btn btn-outline-secondary btn-sm" id="btnSelDrinkPrevEdit">Prev</button>
-                                    <span class="fw-semibold small" id="selDrinkPageInfoEdit">1 / 1</span>
-                                    <button type="button" class="btn btn-outline-secondary btn-sm" id="btnSelDrinkNextEdit">Next</button>
-                                </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Edit Modal Footer Actions -->
-                    <div class="mt-4 text-end">
-                        <a th:href="@{/order-management(page=${pageNo}, keyword=${kw})}"
-                           class="btn btn-outline-secondary">
-                            Cancel
-                        </a>
-                        <button type="submit" class="btn btn-primary">Update</button>
+                    <div class="order-form-footer">
+                        <div class="order-form-footer-pagination d-flex align-items-center gap-2 d-none" id="selectedDrinkPagerEdit">
+                            <button type="button" class="btn btn-outline-secondary" id="btnSelDrinkPrevEdit">Prev</button>
+                            <span class="fw-semibold small" id="selDrinkPageInfoEdit">1 / 1</span>
+                            <button type="button" class="btn btn-outline-secondary" id="btnSelDrinkNextEdit">Next</button>
+                        </div>
+
+                        <div class="order-form-footer-actions">
+                            <a th:href="@{/order-management(page=${pageNo}, keyword=${kw})}"
+                               class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">Update</button>
+                        </div>
                     </div>
                 </form>
             </div>

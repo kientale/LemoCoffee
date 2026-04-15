@@ -65,7 +65,7 @@
 
         <!-- ===== Picker Pagination ===== -->
         <div class="ingredient-table-footer">
-            <div class="d-flex align-items-center gap-3 justify-content-end w-100">
+            <div class="ingredient-table-footer-pagination d-flex align-items-center gap-3">
                 <button type="button"
                         class="btn btn-outline-secondary btn-sm btn-ing-page"
                         th:attr="data-ing-page=${ingPageNo - 1}"
@@ -83,6 +83,15 @@
                         th:attr="data-ing-page=${ingPageNo + 1}"
                         th:disabled="${ingPageNo >= safeTotalPages}">
                     Next
+                </button>
+            </div>
+
+            <div class="ingredient-table-footer-actions">
+                <button type="button"
+                        class="btn btn-outline-secondary"
+                        id="btnCloseIngModal"
+                        data-bs-dismiss="modal">
+                    Close
                 </button>
             </div>
         </div>

@@ -2,6 +2,7 @@ package com.kien.lemocoffee.service.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kien.lemocoffee.constant.DrinkManagementResult;
 import com.kien.lemocoffee.dto.SelectedIngredientDTO;
 import com.kien.lemocoffee.entity.Drink;
 import com.kien.lemocoffee.entity.DrinkIngredient;
@@ -57,8 +58,9 @@ public class DrinkIngredientServiceImpl implements DrinkIngredientService {
     @Override
     @Transactional
     public void replaceDrinkIngredients(Drink drink, String selectedIngredientsJson) {
+
         if (drink == null || drink.getId() == null || drink.getId() <= 0) {
-            throw new IllegalArgumentException("Invalid drink");
+            throw new IllegalArgumentException(DrinkManagementResult.INVALID_DRINK.getMessage());
         }
 
         List<SelectedIngredientDTO> selectedIngredients = parseSelectedIngredients(selectedIngredientsJson);
@@ -75,10 +77,12 @@ public class DrinkIngredientServiceImpl implements DrinkIngredientService {
 
     private List<SelectedIngredientDTO> parseSelectedIngredients(String selectedIngredientsJson) {
         if (!StringUtils.hasText(selectedIngredientsJson)) {
-            throw new IllegalArgumentException("Invalid selected ingredients");
+            throw new IllegalArgumentException(DrinkManagementResult.INVALID_INGREDIENT.getMessage());
         }
 
         try {
+            //readValue() là hàm dùng để convert chuỗi Json thành kiểu Java mà ta chỉ định.
+            //TypeReference là trả về kiểu generic: List, Map, Set.
             List<SelectedIngredientDTO> selectedIngredients = objectMapper.readValue(
                     selectedIngredientsJson,
                     new TypeReference<>() {
@@ -86,7 +90,7 @@ public class DrinkIngredientServiceImpl implements DrinkIngredientService {
             );
 
             if (selectedIngredients == null || selectedIngredients.isEmpty()) {
-                throw new IllegalArgumentException("Invalid selected ingredients");
+                throw new IllegalArgumentException(DrinkManagementResult.INVALID_INGREDIENT.getMessage());
             }
 
             validateSelectedIngredients(selectedIngredients);
@@ -94,7 +98,7 @@ public class DrinkIngredientServiceImpl implements DrinkIngredientService {
         } catch (IllegalArgumentException e) {
             throw e;
         } catch (Exception e) {
-            throw new IllegalArgumentException("Invalid selected ingredients", e);
+            throw new IllegalArgumentException(DrinkManagementResult.INVALID_INGREDIENT.getMessage(), e);
         }
     }
 
@@ -111,7 +115,7 @@ public class DrinkIngredientServiceImpl implements DrinkIngredientService {
         Integer ingredientId = selectedIngredient.getId();
 
         Ingredient ingredient = warehouseRepository.findById(ingredientId)
-                .orElseThrow(() -> new IllegalArgumentException("Ingredient not found"));
+                .orElseThrow(() -> new IllegalArgumentException(DrinkManagementResult.INGREDIENT_NOT_FOUND.getMessage()));
 
         return DrinkIngredient.builder()
                 .id(new DrinkIngredientId(drink.getId(), ingredient.getId()))
@@ -125,16 +129,17 @@ public class DrinkIngredientServiceImpl implements DrinkIngredientService {
 
     private void validateSelectedIngredients(List<SelectedIngredientDTO> selectedIngredients) {
         Set<Integer> ingredientIds = new HashSet<>();
+
         for (SelectedIngredientDTO selectedIngredient : selectedIngredients) {
             Integer ingredientId = selectedIngredient.getId();
             BigDecimal quantity = selectedIngredient.getQuantity();
 
             if (ingredientId == null || ingredientId <= 0 || quantity == null || quantity.compareTo(BigDecimal.ZERO) <= 0) {
-                throw new IllegalArgumentException("Invalid selected ingredient");
+                throw new IllegalArgumentException(DrinkManagementResult.INVALID_INGREDIENT.getMessage());
             }
 
             if (!ingredientIds.add(ingredientId)) {
-                throw new IllegalArgumentException("Duplicate selected ingredient");
+                throw new IllegalArgumentException(DrinkManagementResult.DUPLICATE_SELECTED_INGREDIENT.getMessage());
             }
         }
     }

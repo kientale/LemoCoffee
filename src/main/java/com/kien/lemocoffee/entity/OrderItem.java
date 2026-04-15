@@ -1,5 +1,6 @@
 package com.kien.lemocoffee.entity;
 
+import com.kien.lemocoffee.constant.OrderItemPricingTypeEnum;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -36,8 +37,9 @@ public class OrderItem {
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal subtotal;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "pricing_type", length = 50)
-    private String pricingType; // NORMAL, POINT_REWARD
+    private OrderItemPricingTypeEnum pricingType;
 
     @Column(name = "points_redeemed")
     private Integer pointsRedeemed;

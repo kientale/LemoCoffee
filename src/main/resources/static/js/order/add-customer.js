@@ -308,7 +308,6 @@
     function bindEvents() {
         const searchForm = Order.$("customerPickerSearchForm");
         const btnReset = Order.$("btnResetCustomerSearch");
-        const btnClose = Order.$("btnCloseCustomerModal");
         const container = Order.$("customerPickerContainer");
         const pickerModalEl = document.getElementById("customerPickerModal");
         const createModalEl = document.getElementById("orderCreateCustomerModal");
@@ -327,10 +326,6 @@
             if (keywordInput) keywordInput.value = "";
 
             await load(1, { showLoading: false });
-        });
-
-        btnClose?.addEventListener("click", () => {
-            Order.modal.hide("customerPickerModal");
         });
 
         container?.addEventListener("click", async (event) => {

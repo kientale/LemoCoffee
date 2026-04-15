@@ -1,6 +1,5 @@
 package com.kien.lemocoffee.service;
 
-import com.kien.lemocoffee.dto.OrderItemDTO;
 import com.kien.lemocoffee.entity.Order;
 import com.kien.lemocoffee.entity.OrderItem;
 
@@ -11,5 +10,9 @@ public interface OrderItemService {
 
     List<OrderItem> findItemsByOrderId(Integer orderId);
 
+    String getSelectedDrinksJsonByOrderId(Integer orderId);
+
     BigDecimal replaceOrderItems(Order order, String selectedDrinksJson);
+
+    void restoreIngredientStockByOrderId(Integer orderId);
 }

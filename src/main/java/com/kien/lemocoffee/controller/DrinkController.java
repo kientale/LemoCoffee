@@ -12,6 +12,7 @@ import com.kien.lemocoffee.service.DrinkService;
 import com.kien.lemocoffee.service.WarehouseService;
 import com.kien.lemocoffee.validate.DrinkValidator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -53,6 +54,7 @@ public class DrinkController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAuthority(T(com.kien.lemocoffee.constant.PermissionEnum).DRINK_VIEW.name())")
     public String getAllDrinks(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "") String keyword,
@@ -75,6 +77,12 @@ public class DrinkController {
     }
 
     @GetMapping(params = "action=ingredientPicker")
+    @PreAuthorize("""
+                hasAnyAuthority(
+                T(com.kien.lemocoffee.constant.PermissionEnum).DRINK_CREATE.name(),
+                T(com.kien.lemocoffee.constant.PermissionEnum).DRINK_UPDATE.name()
+            )
+            """)
     public String getIngredientPicker(
             @RequestParam(defaultValue = "1") int ingPage,
             @RequestParam(defaultValue = "") String ingKeyword,
@@ -87,6 +95,7 @@ public class DrinkController {
     }
 
     @PostMapping(params = "action=create")
+    @PreAuthorize("hasAuthority(T(com.kien.lemocoffee.constant.PermissionEnum).DRINK_CREATE.name())")
     public String createDrink(
             @ModelAttribute("formData") DrinkInfoDTO formData,
             @RequestParam(value = "image", required = false) MultipartFile imageFile,
@@ -138,6 +147,7 @@ public class DrinkController {
     }
 
     @GetMapping(params = {"view=edit", "id"})
+    @PreAuthorize("hasAuthority(T(com.kien.lemocoffee.constant.PermissionEnum).DRINK_UPDATE.name())")
     public String showEditDrink(
             @RequestParam("id") Integer id,
             @RequestParam(defaultValue = "1") int page,
@@ -168,6 +178,7 @@ public class DrinkController {
     }
 
     @PostMapping(params = "action=update")
+    @PreAuthorize("hasAuthority(T(com.kien.lemocoffee.constant.PermissionEnum).DRINK_UPDATE.name())")
     public String updateDrink(
             @ModelAttribute("formData") DrinkInfoDTO formData,
             @RequestParam(value = "image", required = false) MultipartFile imageFile,
@@ -219,6 +230,7 @@ public class DrinkController {
     }
 
     @GetMapping(params = {"view=detail", "id"})
+    @PreAuthorize("hasAuthority(T(com.kien.lemocoffee.constant.PermissionEnum).DRINK_VIEW.name())")
     public String showDrinkDetail(
             @RequestParam("id") Integer id,
             @RequestParam(defaultValue = "1") int page,
@@ -252,6 +264,7 @@ public class DrinkController {
     }
 
     @PostMapping(params = "action=available")
+    @PreAuthorize("hasAuthority(T(com.kien.lemocoffee.constant.PermissionEnum).DRINK_STATUS_UPDATE.name())")
     public String markDrinkAvailable(
             @RequestParam("id") Integer id,
             @RequestParam(defaultValue = "1") int page,
@@ -263,6 +276,7 @@ public class DrinkController {
     }
 
     @PostMapping(params = "action=unavailable")
+    @PreAuthorize("hasAuthority(T(com.kien.lemocoffee.constant.PermissionEnum).DRINK_STATUS_UPDATE.name())")
     public String markDrinkUnavailable(
             @RequestParam("id") Integer id,
             @RequestParam(defaultValue = "1") int page,
@@ -274,6 +288,7 @@ public class DrinkController {
     }
 
     @PostMapping(params = "action=delete")
+    @PreAuthorize("hasAuthority(T(com.kien.lemocoffee.constant.PermissionEnum).DRINK_DELETE.name())")
     public String deleteDrink(
             @RequestParam("id") Integer id,
             @RequestParam(defaultValue = "1") int page,

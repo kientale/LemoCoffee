@@ -64,16 +64,9 @@ public class DrinkServiceImpl implements DrinkService {
 
         Pageable pageable = PageRequest.of(pageNo - 1, pageSize, Sort.by(Sort.Direction.ASC, "name"));
 
-        Page<Drink> drinkPage;
-        if (kw.isEmpty()) {
-            drinkPage = drinkRepository.findByStatus(DrinkStatusEnum.AVAILABLE, pageable);
-        } else {
-            drinkPage = drinkRepository.findByNameContainingIgnoreCaseAndStatus(
-                    kw,
-                    DrinkStatusEnum.AVAILABLE,
-                    pageable
-            );
-        }
+        Page<Drink> drinkPage = kw.isEmpty() ?
+                drinkRepository.findByStatus(DrinkStatusEnum.AVAILABLE, pageable) :
+                drinkRepository.findByNameContainingIgnoreCaseAndStatus(kw, DrinkStatusEnum.AVAILABLE, pageable);
 
         return drinkPage.map(drinkMapper::toDrinkTableDTO);
     }
@@ -88,13 +81,13 @@ public class DrinkServiceImpl implements DrinkService {
                 return DrinkManagementResult.DRINK_ALREADY_EXISTS;
             }
 
-            savedImagePath = saveImage(imageFile);
+            savedImagePath = saveImage(imageFile, true);
 
             Drink drink = Drink.builder()
                     .name(formData.getName())
                     .price(formData.getPrice())
                     .description(formData.getDescription())
-                    .image(StringUtils.hasText(savedImagePath) ? savedImagePath : formData.getImage())
+                    .image(savedImagePath)
                     .status(DrinkStatusEnum.AVAILABLE)
                     .build();
 
@@ -108,7 +101,7 @@ public class DrinkServiceImpl implements DrinkService {
         } catch (ImageStorageException e) {
             log.error("Failed to save drink image for name={}", formData.getName(), e);
             rollbackCurrentTransaction();
-            return DrinkManagementResult.IMAGE_SAVE_FAILED;
+            return e.getResult();
         } catch (Exception e) {
             deleteSavedImage(savedImagePath);
             rollbackCurrentTransaction();
@@ -143,22 +136,29 @@ public class DrinkServiceImpl implements DrinkService {
                 return DrinkManagementResult.DRINK_ALREADY_EXISTS;
             }
 
-            savedImagePath = saveImage(imageFile);
+            String oldImagePath = drink.getImage();
+            savedImagePath = saveImage(imageFile, false);
+            String effectiveImagePath = StringUtils.hasText(savedImagePath) ? savedImagePath : oldImagePath;
 
             drink.setName(formData.getName());
             drink.setPrice(formData.getPrice());
             drink.setDescription(formData.getDescription());
             drink.setStatus(formData.getStatus());
-            drink.setImage(savedImagePath);
+            drink.setImage(effectiveImagePath);
 
             drinkRepository.saveAndFlush(drink);
             drinkIngredientService.replaceDrinkIngredients(drink, formData.getSelectedIngredientsJson());
+
+            if (StringUtils.hasText(savedImagePath) && !savedImagePath.equals(oldImagePath)) {
+                deleteSavedImage(oldImagePath);
+            }
+
             return DrinkManagementResult.UPDATE_SUCCESS;
 
         } catch (ImageStorageException e) {
             log.error("Failed to save drink image for id={}", formData.getId(), e);
             rollbackCurrentTransaction();
-            return DrinkManagementResult.IMAGE_SAVE_FAILED;
+            return e.getResult();
         } catch (Exception e) {
             deleteSavedImage(savedImagePath);
             rollbackCurrentTransaction();
@@ -219,22 +219,27 @@ public class DrinkServiceImpl implements DrinkService {
         return drinkRepository.findById(id).orElse(null);
     }
 
-    private String saveImage(MultipartFile imageFile) {
-
+    private String saveImage(MultipartFile imageFile, boolean required) {
         if (imageFile == null || imageFile.isEmpty()) {
+            if (required) {
+                throw new ImageStorageException(DrinkManagementResult.REQUIRED_IMAGE);
+            }
             return null;
         }
 
         try {
             String originalFilename = normalize(imageFile.getOriginalFilename());
             String extension = getExtension(originalFilename);
+
             if (!ALLOWED_EXTENSIONS.contains(extension)) {
-                throw new IllegalArgumentException("Invalid image extension");
+                throw new ImageStorageException(DrinkManagementResult.INVALID_IMAGE);
             }
 
             return FileStorageUtil.saveFile(imageFile, UPLOAD_DIR, PUBLIC_IMAGE_DIR);
+        } catch (ImageStorageException e) {
+            throw e;
         } catch (Exception e) {
-            throw new ImageStorageException(e);
+            throw new ImageStorageException(DrinkManagementResult.IMAGE_SAVE_FAILED, e);
         }
     }
 
@@ -263,8 +268,20 @@ public class DrinkServiceImpl implements DrinkService {
     }
 
     private static class ImageStorageException extends RuntimeException {
-        private ImageStorageException(Throwable cause) {
+        private final DrinkManagementResult result;
+
+        private ImageStorageException(DrinkManagementResult result) {
+            super(result.getMessage());
+            this.result = result;
+        }
+
+        private ImageStorageException(DrinkManagementResult result, Throwable cause) {
             super(cause);
+            this.result = result;
+        }
+
+        private DrinkManagementResult getResult() {
+            return result;
         }
     }
 }

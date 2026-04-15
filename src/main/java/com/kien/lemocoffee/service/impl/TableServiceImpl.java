@@ -46,6 +46,22 @@ public class TableServiceImpl implements TableService {
     }
 
     @Override
+    public Page<TableTableDTO> getAvailableTables(int page, int size, String keyword) {
+
+        int pageNo = Math.max(1, page);
+        int pageSize = Math.max(1, size);
+        String kw = normalize(keyword);
+
+        Pageable pageable = PageRequest.of(pageNo - 1, pageSize, Sort.by(Sort.Direction.DESC, "id"));
+
+        Page<CoffeeTable> tablePage = kw.isEmpty() ?
+                tableRepository.findByStatus(TableStatusEnum.AVAILABLE, pageable) :
+                tableRepository.findByTableNameContainingIgnoreCaseAndStatus(kw, TableStatusEnum.AVAILABLE, pageable);
+
+        return tablePage.map(tableMapper::toTableTableDTO);
+    }
+
+    @Override
     @Transactional
     public TableManagementResult createTable(TableInfoDTO formData) {
         try {

@@ -2,12 +2,18 @@ package com.kien.lemocoffee.repository;
 
 import com.kien.lemocoffee.constant.IngredientStatusEnum;
 import com.kien.lemocoffee.entity.Ingredient;
+import jakarta.persistence.LockModeType;
 import io.micrometer.common.lang.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -35,6 +41,10 @@ public interface WarehouseRepository extends JpaRepository<Ingredient, Integer> 
 
     @NonNull
     Optional<Ingredient> findById(@NonNull Integer id);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select i from Ingredient i where i.id in :ids")
+    List<Ingredient> findAllByIdInForUpdate(@Param("ids") Collection<Integer> ids);
 
     boolean existsByNameIgnoreCase(String name);
 

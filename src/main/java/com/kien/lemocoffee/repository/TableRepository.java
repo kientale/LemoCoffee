@@ -15,7 +15,15 @@ public interface TableRepository extends JpaRepository<CoffeeTable,Integer> {
 
     Page<CoffeeTable> findByStatusNot(TableStatusEnum status, Pageable pageable);
 
+    Page<CoffeeTable> findByStatus(TableStatusEnum status, Pageable pageable);
+
     Page<CoffeeTable> findByTableNameContainingIgnoreCaseAndStatusNot(
+            String keyword,
+            TableStatusEnum status,
+            Pageable pageable
+    );
+
+    Page<CoffeeTable> findByTableNameContainingIgnoreCaseAndStatus(
             String keyword,
             TableStatusEnum status,
             Pageable pageable

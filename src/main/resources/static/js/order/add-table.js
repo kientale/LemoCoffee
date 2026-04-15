@@ -153,7 +153,6 @@
     function bindEvents() {
         const searchForm = Order.$("tablePickerSearchForm");
         const btnReset = Order.$("btnResetTableSearch");
-        const btnClose = Order.$("btnCloseTableModal");
         const container = Order.$("tablePickerContainer");
         const pickerModalEl = document.getElementById("tablePickerModal");
 
@@ -170,10 +169,6 @@
             if (keywordInput) keywordInput.value = "";
 
             await load(1, { showLoading: false });
-        });
-
-        btnClose?.addEventListener("click", () => {
-            Order.modal.hide("tablePickerModal");
         });
 
         container?.addEventListener("click", async (event) => {
@@ -211,4 +206,3 @@
         init();
     }
 })();
-

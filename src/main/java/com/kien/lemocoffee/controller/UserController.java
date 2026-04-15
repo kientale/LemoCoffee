@@ -1,6 +1,7 @@
 package com.kien.lemocoffee.controller;
 
 import com.kien.lemocoffee.constant.AccountStatusEnum;
+import com.kien.lemocoffee.constant.PermissionEnum;
 import com.kien.lemocoffee.dto.UserInfoDTO;
 import com.kien.lemocoffee.dto.UserTableDTO;
 import com.kien.lemocoffee.constant.UserManagementResult;
@@ -8,6 +9,8 @@ import com.kien.lemocoffee.normalizer.UserInfoNormalizer;
 import com.kien.lemocoffee.service.UserService;
 import com.kien.lemocoffee.validate.UserValidator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -30,6 +33,7 @@ public class UserController {
     private final UserInfoNormalizer userInfoNormalizer;
 
     @GetMapping
+    @PreAuthorize("hasAuthority(T(com.kien.lemocoffee.constant.PermissionEnum).USER_VIEW.name())")
     public String getAllUser(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "") String keyword,
@@ -42,6 +46,7 @@ public class UserController {
     }
 
     @PostMapping(params = "action=create")
+    @PreAuthorize("hasAuthority(T(com.kien.lemocoffee.constant.PermissionEnum).USER_CREATE.name())")
     public String createUser(
             @ModelAttribute("formData") UserInfoDTO formData,
             @RequestParam(defaultValue = "1") int page,
@@ -71,6 +76,7 @@ public class UserController {
     }
 
     @GetMapping(params = {"view=edit", "id"})
+    @PreAuthorize("hasAuthority(T(com.kien.lemocoffee.constant.PermissionEnum).USER_UPDATE.name())")
     public String showEditUser(
             @RequestParam("id") Integer accountId,
             @RequestParam(defaultValue = "1") int page,
@@ -97,15 +103,18 @@ public class UserController {
     }
 
     @PostMapping(params = "action=edit")
+    @PreAuthorize("hasAuthority(T(com.kien.lemocoffee.constant.PermissionEnum).USER_UPDATE.name())")
     public String editUser(
             @ModelAttribute("formData") UserInfoDTO formData,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "") String keyword,
             @RequestParam(defaultValue = "name") String field,
             Model model,
-            RedirectAttributes redirectAttributes
+            RedirectAttributes redirectAttributes,
+            Authentication authentication
     ) {
         formData = userInfoNormalizer.normalize(formData);
+        preserveRestrictedUserFields(formData, authentication);
         List<String> errors = userValidator.validateForUpdate(formData);
 
         if (!errors.isEmpty()) {
@@ -126,6 +135,7 @@ public class UserController {
     }
 
     @PostMapping(params = "action=delete")
+    @PreAuthorize("hasAuthority(T(com.kien.lemocoffee.constant.PermissionEnum).USER_DELETE.name())")
     public String deleteUser(
             @RequestParam("id") Integer accountId,
             @RequestParam(defaultValue = "1") int page,
@@ -138,6 +148,7 @@ public class UserController {
     }
 
     @GetMapping(params = {"view=detail", "id"})
+    @PreAuthorize("hasAuthority(T(com.kien.lemocoffee.constant.PermissionEnum).USER_VIEW.name())")
     public String showUserDetail(
             @RequestParam("id") Integer accountId,
             @RequestParam(defaultValue = "1") int page,
@@ -164,6 +175,7 @@ public class UserController {
     }
 
     @PostMapping(params = "action=lock")
+    @PreAuthorize("hasAuthority(T(com.kien.lemocoffee.constant.PermissionEnum).USER_STATUS_UPDATE.name())")
     public String lockUser(
             @RequestParam("id") Integer accountId,
             @RequestParam(defaultValue = "1") int page,
@@ -176,6 +188,7 @@ public class UserController {
     }
 
     @PostMapping(params = "action=unlock")
+    @PreAuthorize("hasAuthority(T(com.kien.lemocoffee.constant.PermissionEnum).USER_STATUS_UPDATE.name())")
     public String unlockUser(
             @RequestParam("id") Integer accountId,
             @RequestParam(defaultValue = "1") int page,
@@ -188,6 +201,7 @@ public class UserController {
     }
 
     @PostMapping(params = "action=reset-password")
+    @PreAuthorize("hasAuthority(T(com.kien.lemocoffee.constant.PermissionEnum).USER_RESET_PASSWORD.name())")
     public String resetPassword(
             @RequestParam("id") Integer accountId,
             @RequestParam(defaultValue = "1") int page,
@@ -247,5 +261,40 @@ public class UserController {
         model.addAttribute("users", userPage.getContent());
         model.addAttribute("page", page);
         model.addAttribute("totalPages", Math.max(userPage.getTotalPages(), 1));
+    }
+
+    private void preserveRestrictedUserFields(UserInfoDTO formData, Authentication authentication) {
+        if (formData == null || formData.getAccountId() == null) {
+            return;
+        }
+
+        boolean canUpdateRole = hasPermission(authentication, PermissionEnum.USER_ROLE_UPDATE);
+        boolean canUpdateStatus = hasPermission(authentication, PermissionEnum.USER_STATUS_UPDATE);
+
+        if (canUpdateRole && canUpdateStatus) {
+            return;
+        }
+
+        UserInfoDTO currentUser = userService.getUserInfoByAccountId(formData.getAccountId());
+        if (currentUser == null) {
+            return;
+        }
+
+        if (!canUpdateRole) {
+            formData.setRole(currentUser.getRole());
+        }
+
+        if (!canUpdateStatus) {
+            formData.setStatus(currentUser.getStatus());
+        }
+    }
+
+    private boolean hasPermission(Authentication authentication, PermissionEnum permission) {
+        if (authentication == null || permission == null) {
+            return false;
+        }
+
+        return authentication.getAuthorities().stream()
+                .anyMatch(authority -> permission.getAuthority().equals(authority.getAuthority()));
     }
 }

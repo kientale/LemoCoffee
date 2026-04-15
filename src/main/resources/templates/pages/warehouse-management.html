@@ -1,4 +1,5 @@
 <th:block xmlns:th="http://www.thymeleaf.org"
+          xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
           th:fragment="content"
           th:with="
                 pageNo=${page == null ? 1 : page},
@@ -61,6 +62,7 @@
 
                     <!-- Add Ingredient Button -->
                     <button class="btn btn-warning fw-semibold"
+                            sec:authorize="hasAuthority('INGREDIENT_CREATE')"
                             data-bs-toggle="modal"
                             data-bs-target="#addIngredientModal">
                         <i class="fa-solid fa-plus me-1"></i> Add New Ingredient
@@ -123,13 +125,14 @@
                             <td>
                                 <div class="dropdown text-center">
                                     <button class="btn btn-outline-secondary btn-sm dropdown-toggle actions-toggle"
+                                            sec:authorize="hasAnyAuthority('INGREDIENT_UPDATE', 'INGREDIENT_DELETE')"
                                             data-bs-toggle="dropdown"
                                             type="button">
                                         Actions
                                     </button>
 
                                     <ul class="dropdown-menu dropdown-menu-end shadow-sm actions-menu">
-                                        <li>
+                                        <li sec:authorize="hasAuthority('INGREDIENT_UPDATE')">
                                             <a class="dropdown-item text-dark"
                                                th:href="@{/warehouse-management(
                                                     view='edit',
@@ -143,11 +146,11 @@
                                             </a>
                                         </li>
 
-                                        <li>
+                                        <li sec:authorize="hasAuthority('INGREDIENT_DELETE')">
                                             <hr class="dropdown-divider">
                                         </li>
 
-                                        <li>
+                                        <li sec:authorize="hasAuthority('INGREDIENT_DELETE')">
                                             <button class="dropdown-item text-dark"
                                                     type="button"
                                                     onclick="openConfirmModal(this)"
@@ -202,7 +205,11 @@
     </div>
 
     <!-- ===== Modal: Add Ingredient ===== -->
-    <div class="modal fade" id="addIngredientModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade"
+         id="addIngredientModal"
+         sec:authorize="hasAuthority('INGREDIENT_CREATE')"
+         tabindex="-1"
+         aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered modal-scrollable">
             <div class="modal-content">
 
@@ -289,7 +296,11 @@
     </div>
 
     <!-- ===== Modal: Edit Ingredient ===== -->
-    <div class="modal fade" id="editIngredientModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade"
+         id="editIngredientModal"
+         sec:authorize="hasAuthority('INGREDIENT_UPDATE')"
+         tabindex="-1"
+         aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered modal-scrollable">
             <div class="modal-content">
                 <!-- Edit Modal Header -->

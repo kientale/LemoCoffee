@@ -9,11 +9,16 @@ public enum OrderManagementResult {
     UNKNOWN_ERROR("An unexpected error occurred"),
     DATABASE_ERROR("Database error occurred"),
     INVALID_ACTION("Invalid action"),
+    INVALID_ORDER("Invalid order"),
+    DUPLICATE_SELECTED_DRINK("Duplicate selected drink"),
 
     ORDER_NOT_FOUND("Order not found"),
     TABLE_NOT_FOUND("Table not found"),
     CUSTOMER_NOT_FOUND("Customer not found"),
     DRINK_NOT_FOUND("Drink not found"),
+    DRINK_RECIPE_NOT_FOUND("Drink recipe not found"),
+    DRINK_RECIPE_INVALID("Drink recipe is invalid"),
+    INGREDIENT_NOT_FOUND("Ingredient not found"),
     ORDER_ITEM_NOT_FOUND("Order item not found"),
 
     INVALID_INPUT("Invalid input"),
@@ -21,7 +26,7 @@ public enum OrderManagementResult {
     MISSING_REQUIRED_FIELDS("Missing required fields"),
     INVALID_TABLE("Invalid table"),
     INVALID_CUSTOMER("Invalid customer"),
-    INVALID_DRINK("Invalid drink"),
+    INVALID_SELECTED_DRINK("Invalid selected drink"),
     INVALID_ORDER_ITEM("Invalid order item"),
     INVALID_QUANTITY("Invalid quantity"),
     INVALID_PRICE("Invalid price"),
@@ -29,6 +34,7 @@ public enum OrderManagementResult {
     INVALID_NOTE("Invalid note"),
     INVALID_STATUS("Invalid order status"),
     EMPTY_ORDER("Order must contain at least one drink"),
+    INSUFFICIENT_INGREDIENT_STOCK("Not enough ingredients in stock"),
 
     TABLE_UNAVAILABLE("Table is not available"),
     DRINK_UNAVAILABLE("Drink is not available"),

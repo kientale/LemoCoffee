@@ -99,6 +99,7 @@ public class CustomerServiceImpl implements CustomerService {
             }
 
             Customer customer = findCustomerById(id);
+
             if (customer == null) {
                 return  CustomerManagementResult.CUSTOMER_NOT_FOUND;
             }
@@ -122,6 +123,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public CustomerInfoDTO getCustomerInfoByPhone(String phone) {
         String normalizedPhone = normalize(phone);
+
         if (normalizedPhone.isEmpty()) {
             return null;
         }

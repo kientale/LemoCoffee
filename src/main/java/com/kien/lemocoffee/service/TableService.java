@@ -10,6 +10,8 @@ public interface TableService {
 
     Page<TableTableDTO> getTable(int page, int size, String keyword);
 
+    Page<TableTableDTO> getAvailableTables(int page, int size, String keyword);
+
     TableManagementResult createTable(TableInfoDTO formData);
 
     TableInfoDTO getTableInfoById(Integer id);

@@ -5,6 +5,7 @@ import com.kien.lemocoffee.constant.OrderStatusEnum;
 import com.kien.lemocoffee.dto.OrderInfoDTO;
 import com.kien.lemocoffee.dto.OrderTableDTO;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 
 public interface OrderService {
 
@@ -20,5 +21,5 @@ public interface OrderService {
 
     OrderManagementResult checkoutOrder(Integer id, String loyaltyAction, Integer freeDrinkId);
 
-    String buildInvoiceContent(Integer id);
+    ResponseEntity<byte[]> downloadInvoice(Integer id);
 }

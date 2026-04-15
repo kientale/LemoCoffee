@@ -89,7 +89,7 @@
                                             <td th:text="${loop.index + 1}"></td>
                                             <td class="text-start">
                                                 <span th:text="${it.drinkName}"></span>
-                                                <span th:if="${it.pricingType == 'POINT_REWARD'}"
+                                                <span th:if="${it.pointReward}"
                                                       class="badge bg-info text-dark ms-2">
                                                         Free Drink
                                                     </span>

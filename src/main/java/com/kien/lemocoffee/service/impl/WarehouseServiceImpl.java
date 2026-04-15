@@ -34,7 +34,6 @@ public class WarehouseServiceImpl implements WarehouseService {
         String fd = normalize(field).toLowerCase();
 
         Pageable pageable = PageRequest.of(pageNo - 1, pageSize, Sort.by(Sort.Direction.DESC, "id"));
-
         Page<Ingredient> ingredientPage;
 
         if (kw.isEmpty()) {
@@ -115,10 +114,7 @@ public class WarehouseServiceImpl implements WarehouseService {
             ingredient.setDescription(formData.getDescription());
             ingredient.setUnit(formData.getUnit());
             ingredient.setSupplier(formData.getSupplier());
-
-            if (formData.getStatus() != null) {
-                ingredient.setStatus(formData.getStatus());
-            }
+            ingredient.setStatus(formData.getStatus());
 
             warehouseRepository.save(ingredient);
             return WarehouseManagementResult.UPDATE_SUCCESS;

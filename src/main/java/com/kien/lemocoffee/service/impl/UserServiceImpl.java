@@ -18,6 +18,7 @@ import org.springframework.data.domain.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.security.SecureRandom;
 
@@ -45,7 +46,6 @@ public class UserServiceImpl implements UserService {
         String fd = normalize(field).toLowerCase();
 
         Pageable pageable = PageRequest.of(pageNo - 1, pageSize, Sort.by(Sort.Direction.DESC, "id"));
-
         Page<User> userPage;
 
         if (kw.isEmpty()) {
@@ -218,7 +218,8 @@ public class UserServiceImpl implements UserService {
             );
 
             if (!emailSent) {
-                throw new RuntimeException("Send email failed");
+                rollbackCurrentTransaction();
+                return UserManagementResult.SEND_EMAIL_FAILED;
             }
 
             return UserManagementResult.RESET_PASSWORD_SUCCESS;
@@ -292,6 +293,13 @@ public class UserServiceImpl implements UserService {
 
     private String normalize(String value) {
         return value == null ? "" : value.trim();
+    }
+
+    private void rollbackCurrentTransaction() {
+        try {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+        } catch (Exception ignored) {
+        }
     }
 
 }

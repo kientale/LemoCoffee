@@ -1,7 +1,5 @@
 package com.kien.lemocoffee.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kien.lemocoffee.constant.CustomerManagementResult;
 import com.kien.lemocoffee.constant.OrderManagementResult;
 import com.kien.lemocoffee.dto.CustomerInfoDTO;
@@ -10,18 +8,16 @@ import com.kien.lemocoffee.dto.DrinkTableDTO;
 import com.kien.lemocoffee.dto.OrderInfoDTO;
 import com.kien.lemocoffee.dto.OrderItemDTO;
 import com.kien.lemocoffee.dto.OrderTableDTO;
-import com.kien.lemocoffee.dto.SelectedDrinkDTO;
 import com.kien.lemocoffee.dto.TableTableDTO;
 import com.kien.lemocoffee.service.CustomerService;
 import com.kien.lemocoffee.service.DrinkService;
+import com.kien.lemocoffee.service.OrderItemService;
 import com.kien.lemocoffee.service.OrderService;
 import com.kien.lemocoffee.service.TableService;
 import com.kien.lemocoffee.validate.CustomerValidator;
 import com.kien.lemocoffee.validate.OrderValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.http.ContentDisposition;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -35,7 +31,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -49,7 +44,6 @@ public class OrderController {
 
     private static final int PAGE_SIZE = 10;
     private static final int PICKER_PAGE_SIZE = 10;
-    private static final int DRINK_PICKER_PAGE_SIZE = 10;
     private static final String CONTENT = "pages/order/order-management";
     private static final String LAYOUT = "layouts/admin-layout";
     private static final String EMPTY_SELECTED_DRINKS_JSON = "[]";
@@ -59,8 +53,8 @@ public class OrderController {
     private final TableService tableService;
     private final CustomerService customerService;
     private final DrinkService drinkService;
+    private final OrderItemService orderItemService;
     private final CustomerValidator customerValidator;
-    private final ObjectMapper objectMapper;
 
     @GetMapping
     public String getAllOrders(
@@ -121,87 +115,7 @@ public class OrderController {
     public ResponseEntity<byte[]> downloadInvoice(
             @RequestParam("id") Integer id
     ) {
-        if (id == null || id <= 0) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        String invoiceContent = orderService.buildInvoiceContent(id);
-        if (!StringUtils.hasText(invoiceContent)) {
-            return ResponseEntity.notFound().build();
-        }
-
-        byte[] body = invoiceContent.getBytes(StandardCharsets.UTF_8);
-        ContentDisposition contentDisposition = ContentDisposition.attachment()
-                .filename("invoice-order-" + id + ".txt", StandardCharsets.UTF_8)
-                .build();
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
-                .contentType(new MediaType("text", "plain", StandardCharsets.UTF_8))
-                .contentLength(body.length)
-                .body(body);
-    }
-
-    @GetMapping(params = {"view=edit", "id"})
-    public String showEditOrder(
-            @RequestParam("id") Integer id,
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "") String keyword,
-            Model model,
-            RedirectAttributes redirectAttributes
-    ) {
-        OrderInfoDTO editOrder = orderService.getOrderInfoById(id);
-        if (editOrder == null) {
-            return redirectToList(redirectAttributes, OrderManagementResult.ORDER_NOT_FOUND, page, keyword);
-        }
-
-        if (isTerminal(editOrder)) {
-            return redirectToList(redirectAttributes, OrderManagementResult.ORDER_CANNOT_BE_EDITED, page, keyword);
-        }
-
-        loadOrderList(page, keyword, model);
-        setViewState(
-                model,
-                false,
-                true,
-                false,
-                null,
-                null,
-                editOrder,
-                null,
-                null,
-                toSelectedDrinksJson(editOrder)
-        );
-        return renderPage(model);
-    }
-
-    @GetMapping(params = {"view=detail", "id"})
-    public String showOrderDetail(
-            @RequestParam("id") Integer id,
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "") String keyword,
-            Model model,
-            RedirectAttributes redirectAttributes
-    ) {
-        OrderInfoDTO detailOrder = orderService.getOrderInfoById(id);
-        if (detailOrder == null) {
-            return redirectToList(redirectAttributes, OrderManagementResult.ORDER_NOT_FOUND, page, keyword);
-        }
-
-        loadOrderList(page, keyword, model);
-        setViewState(
-                model,
-                false,
-                false,
-                true,
-                null,
-                null,
-                null,
-                detailOrder,
-                null,
-                null
-        );
-        return renderPage(model);
+        return orderService.downloadInvoice(id);
     }
 
     @PostMapping(params = "action=create")
@@ -253,6 +167,39 @@ public class OrderController {
         return redirectToList(redirectAttributes, result, page, keyword);
     }
 
+    @GetMapping(params = {"view=edit", "id"})
+    public String showEditOrder(
+            @RequestParam("id") Integer id,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "") String keyword,
+            Model model,
+            RedirectAttributes redirectAttributes
+    ) {
+        OrderInfoDTO editOrder = orderService.getOrderInfoById(id);
+        if (editOrder == null) {
+            return redirectToList(redirectAttributes, OrderManagementResult.ORDER_NOT_FOUND, page, keyword);
+        }
+
+        if (isTerminal(editOrder)) {
+            return redirectToList(redirectAttributes, OrderManagementResult.ORDER_CANNOT_BE_EDITED, page, keyword);
+        }
+
+        loadOrderList(page, keyword, model);
+        setViewState(
+                model,
+                false,
+                true,
+                false,
+                null,
+                null,
+                editOrder,
+                null,
+                null,
+                orderItemService.getSelectedDrinksJsonByOrderId(id)
+        );
+        return renderPage(model);
+    }
+
     @PostMapping(params = "action=update")
     public String updateOrder(
             @ModelAttribute("formData") OrderInfoDTO formData,
@@ -298,6 +245,35 @@ public class OrderController {
         }
 
         return redirectToList(redirectAttributes, result, page, keyword);
+    }
+
+    @GetMapping(params = {"view=detail", "id"})
+    public String showOrderDetail(
+            @RequestParam("id") Integer id,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "") String keyword,
+            Model model,
+            RedirectAttributes redirectAttributes
+    ) {
+        OrderInfoDTO detailOrder = orderService.getOrderInfoById(id);
+        if (detailOrder == null) {
+            return redirectToList(redirectAttributes, OrderManagementResult.ORDER_NOT_FOUND, page, keyword);
+        }
+
+        loadOrderList(page, keyword, model);
+        setViewState(
+                model,
+                false,
+                false,
+                true,
+                null,
+                null,
+                null,
+                detailOrder,
+                null,
+                null
+        );
+        return renderPage(model);
     }
 
     @PostMapping(params = "action=cancel")
@@ -387,7 +363,7 @@ public class OrderController {
             Model model
     ) {
         int pageNo = Math.max(1, tablePage);
-        Page<TableTableDTO> tables = tableService.getTable(pageNo, PICKER_PAGE_SIZE, tableKeyword);
+        Page<TableTableDTO> tables = tableService.getAvailableTables(pageNo, PICKER_PAGE_SIZE, tableKeyword);
 
         model.addAttribute("tables", tables.getContent());
         model.addAttribute("tablePage", pageNo);
@@ -417,7 +393,7 @@ public class OrderController {
             Model model
     ) {
         int pageNo = Math.max(1, drinkPage);
-        Page<DrinkTableDTO> drinks = drinkService.getDrink(pageNo, DRINK_PICKER_PAGE_SIZE, drinkKeyword);
+        Page<DrinkTableDTO> drinks = drinkService.getAvailableDrinks(pageNo, PICKER_PAGE_SIZE, drinkKeyword);
 
         model.addAttribute("drinks", drinks.getContent());
         model.addAttribute("drinkPage", pageNo);
@@ -462,32 +438,6 @@ public class OrderController {
         redirectAttributes.addAttribute("keyword", keyword == null ? "" : keyword);
 
         return "redirect:/order-management";
-    }
-
-    private String toSelectedDrinksJson(OrderInfoDTO order) {
-        List<OrderItemDTO> items = getOrderItems(order);
-        if (items.isEmpty()) {
-            return EMPTY_SELECTED_DRINKS_JSON;
-        }
-
-        List<SelectedDrinkDTO> selectedDrinks = items.stream()
-                .map(this::toSelectedDrinkPayload)
-                .toList();
-
-        try {
-            return objectMapper.writeValueAsString(selectedDrinks);
-        } catch (JsonProcessingException e) {
-            return EMPTY_SELECTED_DRINKS_JSON;
-        }
-    }
-
-    private SelectedDrinkDTO toSelectedDrinkPayload(OrderItemDTO item) {
-        return SelectedDrinkDTO.builder()
-                .drinkId(item.getDrinkId())
-                .drinkName(item.getDrinkName())
-                .unitPrice(item.getUnitPrice())
-                .quantity(item.getQuantity())
-                .build();
     }
 
     private List<OrderItemDTO> getOrderItems(OrderInfoDTO order) {
