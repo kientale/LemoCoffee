@@ -25,10 +25,6 @@
 
                     <table class="table table-bordered mb-0">
                         <tr>
-                            <th style="width: 180px;">Order ID</th>
-                            <td th:text="${'#' + detailOrder.id}"></td>
-                        </tr>
-                        <tr>
                             <th>Table</th>
                             <td th:text="${detailOrder.tableName == null or #strings.isEmpty(detailOrder.tableName) ? '-' : detailOrder.tableName}"></td>
                         </tr>

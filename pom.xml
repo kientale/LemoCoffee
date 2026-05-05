@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.kien</groupId>
-	<artifactId>hoangkiencoffee</artifactId>
+	<artifactId>keycoffee</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name/>
-	<description/>
+	<name>KeyCoffee</name>
+	<description>KeyCoffee management application</description>
 	<url/>
 	<licenses>
 		<license/>

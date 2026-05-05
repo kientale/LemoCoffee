@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Service | KeyCoffee</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" th:href="@{/vendor/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/page/landing.css(v=2)}">
+</head>
+<body class="landing-page landing-inner-page" th:attr="data-context=@{/}">
+
+<header th:replace="~{common/landing-public :: nav('service')}"></header>
+
+<main>
+    <section class="landing-sub-hero landing-service-hero" aria-labelledby="servicePageTitle">
+        <div class="container landing-sub-hero-inner">
+            <p class="landing-eyebrow">Service</p>
+            <h1 id="servicePageTitle">Fast orders, clear totals, steady checkout.</h1>
+            <p>
+                Every table can move from first cup to final receipt without slowing down the counter.
+            </p>
+        </div>
+    </section>
+
+    <section class="landing-section landing-service-detail">
+        <div class="container landing-service-detail-grid">
+            <div class="landing-service-photo">
+                <img th:src="@{/img/drink/cafe13.png}" alt="Two iced drinks on a cafe table" loading="lazy">
+            </div>
+
+            <div class="landing-service-detail-copy">
+                <p class="landing-kicker">Counter Rhythm</p>
+                <h2>Orders stay organized while staff stay close to guests.</h2>
+                <p>
+                    Table status, drink quantity, checkout amount, and member points stay connected through the full visit.
+                </p>
+                <a class="landing-solid-btn" th:href="@{/auth/login}">Sign in to Manage</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="landing-service-band">
+        <div class="container landing-service-grid">
+            <div class="landing-service-copy">
+                <p class="landing-kicker">Daily Flow</p>
+                <h2>Simple steps for a busy cafe day.</h2>
+                <p>
+                    Seat guests, build orders, check out, and keep point activity ready for loyal customers.
+                </p>
+            </div>
+
+            <div class="landing-step-list" aria-label="Service flow">
+                <article class="landing-step">
+                    <span>01</span>
+                    <h3>Seat Guests</h3>
+                    <p>Choose a table and keep availability clear for the next group.</p>
+                </article>
+                <article class="landing-step">
+                    <span>02</span>
+                    <h3>Build Orders</h3>
+                    <p>Add drinks, update quantities, and keep the total visible before payment.</p>
+                </article>
+                <article class="landing-step">
+                    <span>03</span>
+                    <h3>Reward Visits</h3>
+                    <p>Apply member points and keep transaction history ready for customer care.</p>
+                </article>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{common/landing-public :: footer}"></footer>
+
+<script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

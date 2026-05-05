@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>KeyCoffee | Fresh Coffee Every Day</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" th:href="@{/vendor/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/page/landing.css(v=2)}">
+</head>
+<body class="landing-page" th:attr="data-context=@{/}">
+
+<header th:replace="~{common/landing-public :: nav('home')}"></header>
+
+<main>
+    <section class="landing-hero" aria-labelledby="landingHeroTitle">
+        <div class="container landing-hero-inner">
+            <p class="landing-eyebrow">KeyCoffee</p>
+            <h1 id="landingHeroTitle">Fresh coffee, steady service, clear daily operations.</h1>
+            <p class="landing-hero-copy">
+                Warm cups, quick table orders, member points, and a counter flow that stays calm during busy hours.
+            </p>
+
+            <div class="landing-hero-actions">
+                <a class="landing-solid-btn landing-solid-btn-lg" th:href="@{/dashboard}">
+                    Open Dashboard
+                </a>
+                <a class="landing-outline-btn" th:href="@{/menu}">
+                    Explore Drinks
+                </a>
+            </div>
+
+            <div class="landing-hero-meta" aria-label="Cafe strengths">
+                <span><i class="fa-solid fa-seedling"></i> Fresh Ingredients</span>
+                <span><i class="fa-solid fa-chair"></i> Table Orders</span>
+                <span><i class="fa-solid fa-star"></i> Loyalty Points</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="landing-section landing-home-pages">
+        <div class="container">
+            <div class="landing-section-heading">
+                <p class="landing-kicker">Cafe Pages</p>
+                <h2>Choose where you want to start.</h2>
+                <p>
+                    Drinks, counter flow, and cafe space are ready as separate pages for guests and staff.
+                </p>
+            </div>
+
+            <div class="landing-page-grid">
+                <article class="landing-page-card">
+                    <img th:src="@{/img/drink/cafe1.png}" alt="Hot black coffee in a white cup" loading="lazy">
+                    <div class="landing-page-card-body">
+                        <h3>Menu</h3>
+                        <p>Coffee, tea, cold cups, and current prices from the shop database.</p>
+                        <a th:href="@{/menu}">View Menu</a>
+                    </div>
+                </article>
+
+                <article class="landing-page-card">
+                    <img th:src="@{/img/drink/cafe6.png}" alt="Iced coffee in a clear cup" loading="lazy">
+                    <div class="landing-page-card-body">
+                        <h3>Service</h3>
+                        <p>Table orders, checkout rhythm, and member points for busy shifts.</p>
+                        <a th:href="@{/service}">View Service</a>
+                    </div>
+                </article>
+
+                <article class="landing-page-card">
+                    <img th:src="@{/img/tb-bg-tb.png}" alt="Cafe tables and seating area" loading="lazy">
+                    <div class="landing-page-card-body">
+                        <h3>Space</h3>
+                        <p>Warm seating, quiet corners, and a counter ready for quick stops.</p>
+                        <a th:href="@{/space}">View Space</a>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{common/landing-public :: footer}"></footer>
+
+<script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

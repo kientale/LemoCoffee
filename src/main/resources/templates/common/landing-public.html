@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<header class="landing-nav" th:fragment="nav(activePage)">
+    <div class="container landing-nav-inner">
+        <a class="landing-brand" th:href="@{/landing}">
+            <span class="landing-brand-mark">
+                <i class="fa-solid fa-mug-hot"></i>
+            </span>
+            <span>
+                <strong>KeyCoffee</strong>
+                <small>KeyCoffee System</small>
+            </span>
+        </a>
+
+        <nav class="landing-links" aria-label="Landing navigation">
+            <a th:href="@{/menu}"
+               th:classappend="${activePage == 'menu'} ? ' active' : ''">Menu</a>
+            <a th:href="@{/service}"
+               th:classappend="${activePage == 'service'} ? ' active' : ''">Service</a>
+            <a th:href="@{/space}"
+               th:classappend="${activePage == 'space'} ? ' active' : ''">Space</a>
+        </nav>
+
+        <div class="landing-nav-actions">
+            <a class="landing-link-btn" th:href="@{/auth/login}">Sign in</a>
+            <a class="landing-solid-btn" th:href="@{/dashboard}">Dashboard</a>
+        </div>
+    </div>
+</header>
+
+<footer class="landing-footer" th:fragment="footer">
+    <div class="container landing-footer-inner">
+        <span>KeyCoffee</span>
+        <div class="landing-footer-links">
+            <a th:href="@{/menu}">Menu</a>
+            <a th:href="@{/service}">Service</a>
+            <a th:href="@{/space}">Space</a>
+            <a th:href="@{/auth/login}">Admin Sign in</a>
+        </div>
+    </div>
+</footer>
+</body>
+</html>

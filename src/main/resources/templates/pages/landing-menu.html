@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Menu | KeyCoffee</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" th:href="@{/vendor/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/page/landing.css(v=2)}">
+</head>
+<body class="landing-page landing-inner-page" th:attr="data-context=@{/}">
+
+<header th:replace="~{common/landing-public :: nav('menu')}"></header>
+
+<main>
+    <section class="landing-sub-hero landing-menu-hero" aria-labelledby="menuPageTitle">
+        <div class="container landing-sub-hero-inner">
+            <p class="landing-eyebrow">Menu</p>
+            <h1 id="menuPageTitle">Fresh drinks from today's database.</h1>
+            <p>
+                Available coffee, tea, cold cups, and seasonal drinks with current prices.
+            </p>
+        </div>
+    </section>
+
+    <section class="landing-section landing-menu-list-section">
+        <div class="container">
+            <div class="landing-menu-topbar">
+                <div>
+                    <p class="landing-kicker">Available Drinks</p>
+                    <h2>Choose a cup for the next order.</h2>
+                </div>
+
+                <form class="landing-menu-search" th:action="@{/menu}" method="get">
+                    <input type="text"
+                           name="keyword"
+                           th:value="${keyword}"
+                           placeholder="Search drink..."
+                           aria-label="Search drink">
+                    <button type="submit">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        Search
+                    </button>
+                    <a th:href="@{/menu}" th:if="${keyword != null and !#strings.isEmpty(keyword)}">
+                        Reset
+                    </a>
+                </form>
+            </div>
+
+            <div class="landing-menu-empty"
+                 th:if="${drinks == null or #lists.isEmpty(drinks)}">
+                <i class="fa-solid fa-mug-saucer"></i>
+                <h3>No available drinks found.</h3>
+                <p>Try another keyword or add available drinks in Menu Management.</p>
+            </div>
+
+            <div class="landing-menu-grid landing-db-menu-grid"
+                 th:if="${drinks != null and !#lists.isEmpty(drinks)}">
+                <article class="landing-menu-card" th:each="drink : ${drinks}">
+                    <img th:src="${drink.publicImageUrl}"
+                         th:alt="${drink.name}"
+                         loading="lazy">
+                    <div class="landing-menu-body">
+                        <div class="landing-menu-card-top">
+                            <h3 th:text="${drink.name}">Drink Name</h3>
+                            <span>Available</span>
+                        </div>
+                        <p th:text="${#strings.isEmpty(drink.description) ? 'Fresh cup ready for today.' : drink.description}">
+                            Fresh cup ready for today.
+                        </p>
+                        <div class="landing-menu-price">
+                            <span th:text="${drink.priceFormatted}">0</span>
+                            <small>VND</small>
+                        </div>
+                    </div>
+                </article>
+            </div>
+
+            <nav class="landing-pagination"
+                 th:if="${totalPages != null and totalPages > 1}"
+                 aria-label="Menu pagination">
+                <a th:classappend="${prevDisabled} ? ' disabled' : ''"
+                   th:href="@{/menu(page=${prevPage}, keyword=${keyword})}">
+                    Prev
+                </a>
+                <span th:text="|${page} / ${totalPages}|">1 / 1</span>
+                <a th:classappend="${nextDisabled} ? ' disabled' : ''"
+                   th:href="@{/menu(page=${nextPage}, keyword=${keyword})}">
+                    Next
+                </a>
+            </nav>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{common/landing-public :: footer}"></footer>
+
+<script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

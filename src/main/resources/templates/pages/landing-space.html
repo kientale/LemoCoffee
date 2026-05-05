@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Space | KeyCoffee</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" th:href="@{/vendor/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/page/landing.css(v=2)}">
+</head>
+<body class="landing-page landing-inner-page" th:attr="data-context=@{/}">
+
+<header th:replace="~{common/landing-public :: nav('space')}"></header>
+
+<main>
+    <section class="landing-sub-hero landing-space-hero" aria-labelledby="spacePageTitle">
+        <div class="container landing-sub-hero-inner">
+            <p class="landing-eyebrow">Space</p>
+            <h1 id="spacePageTitle">Warm tables for quick stops and longer talks.</h1>
+            <p>
+                A calm cafe corner for fresh cups, friendly service, and comfortable visits.
+            </p>
+        </div>
+    </section>
+
+    <section class="landing-section landing-space-section">
+        <div class="container landing-space-grid">
+            <div class="landing-space-image landing-space-image-large">
+                <img th:src="@{/img/tb-bg-tb.png}" alt="Cafe seating area with tables" loading="lazy">
+            </div>
+
+            <div class="landing-space-copy">
+                <p class="landing-kicker">Cafe Space</p>
+                <h2>Seats for the morning rush and quiet afternoon refills.</h2>
+                <p>
+                    Keep each table easy to follow, every cup easy to enjoy, and checkout ready when guests leave.
+                </p>
+                <a class="landing-solid-btn" th:href="@{/menu}">View Drinks</a>
+            </div>
+
+            <div class="landing-space-image">
+                <img th:src="@{/img/table-bg.png}" alt="Small table with a cup in sunlight" loading="lazy">
+            </div>
+        </div>
+    </section>
+
+    <section class="landing-section landing-space-gallery-section">
+        <div class="container">
+            <div class="landing-section-heading">
+                <p class="landing-kicker">Fresh Corners</p>
+                <h2>Cups for every seat in the room.</h2>
+            </div>
+
+            <div class="landing-space-gallery">
+                <img th:src="@{/img/drink/cafe14.png}" alt="Iced tea with mint on a bright table" loading="lazy">
+                <img th:src="@{/img/drink/cafe8.png}" alt="Colorful fruit drinks on a cafe table" loading="lazy">
+                <img th:src="@{/img/drink/cafe20.png}" alt="Warm tea cup with mint" loading="lazy">
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{common/landing-public :: footer}"></footer>
+
+<script th:src="@{/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>
